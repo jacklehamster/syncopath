@@ -1,0 +1,15 @@
+{
+  "component.tsx": {
+    "sha": "7b7d08043d3317017724edb151cc266d0eb11b9b"
+  },
+  "index.d.ts": {
+    "sha": "7980ec238c4dd00704399f7d8fe89cf26f194398"
+  },
+  "md5": "dc0db162ea58008641be3712c132b709",
+  "socket-client.ts": {
+    "sha": "808b01d7796b7d284a136f2b48cbce1b9d4c10d6"
+  },
+  "style.module.css": {
+    "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
+  }
+}

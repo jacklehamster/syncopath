@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>YouTube Room</title>
+    <style>
+      body {
+        background-color: lightgray;
+      }
+      .cursor {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        font-size: 20px;
+        pointer-events: none;
+      }
+      #video {
+        cursor: pointer;
+      }
+      #ytplayer {
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="video">
+        <iframe
+          title="YouTube video player"
+          id="ytplayer"
+          width="560"
+          height="315"
+          src="https://www.youtube.com/embed/u30MbFhLLvw?controls=0&enablejsapi=1&autoplay=1&mute=1&rel=0&disablekb=1&iv_load_policy=3"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        ></iframe>
+      </div>
+      <div class="playhead-container">
+        <span id="current-time">0:00</span>
+        <input
+          title="Seek"
+          type="range"
+          id="playhead"
+          class="playhead-bar"
+          min="0"
+          max="1"
+          value="0"
+          step="0.001"
+        />
+        <span id="duration">0:00</span>
+      </div>
+      <label for="mute">Mute</label>
+      <input type="checkbox" id="mute" />
+    </div>
+    <div id="client-list"></div>
+    <script type="module">
+      import {
+        trackCursor,
+        trackCursorObserver,
+        handleUsersChanged,
+        introduceName,
+        socketClient,
+        stringify,
+      } from "../dist/index.js";
+      window.socketClient = socketClient;
+
+      introduceName();
+
+      function getOrCreateClientBox(clientId, isSelf) {
+        if (document.querySelector(`#client-${clientId}`)) {
+          return document.querySelector(`#client-${clientId}`);
+        }
+        const clientBox = document.createElement("div");
+        clientBox.id = `client-${clientId}`;
+        clientBox.classList.add("client-box");
+        clientBox.style.backgroundColor = isSelf ? "lightgreen" : "lightblue";
+
+        if (isSelf) {
+          document.querySelector("#client-list").prepend(clientBox);
+        } else {
+          document.querySelector("#client-list").appendChild(clientBox);
+        }
+        return clientBox;
+      }
+
+      trackCursor();
+
+      //  Cursor
+      handleUsersChanged((clientId, isSelf, observers) => {
+        const clientBox = getOrCreateClientBox(clientId, isSelf);
+        //  cursor
+        const cursorDiv = clientBox.appendChild(document.createElement("div"));
+        cursorDiv.id = `cursor-${clientId}`;
+        cursorDiv.classList.add("cursor");
+
+        observers.add(
+          socketClient
+            .observe(`clients/${clientId}/emoji`)
+            .onChange((emoji) => (cursorDiv.textContent = emoji.value))
+        );
+
+        observers.add(
+          trackCursorObserver(clientId, (cursor) => {
+            if (!cursor) {
+              cursorDiv.style.display = "none";
+              return;
+            }
+            const [x, y] = cursor;
+            cursorDiv.style.display = "block";
+            cursorDiv.style.left = `${x - 10}px`;
+            cursorDiv.style.top = `${y - 20}px`;
+          })
+        );
+      });
+
+      document.querySelector("#video").addEventListener("click", () => {
+        const isPlaying = socketClient.state.videoStarted;
+        const videoStarted = !isPlaying ? socketClient.serverTime : 0;
+        socketClient.setData("videoStarted", videoStarted);
+      });
+
+      document.querySelector("#mute").addEventListener("change", (event) => {
+        socketClient.setData("muted", event.target.checked);
+      });
+
+      document.querySelector("#playhead").addEventListener("input", (event) => {
+        socketClient.setData("playhead", event.target.value);
+        const isPlaying = socketClient.state.videoStarted;
+        if (isPlaying) {
+          socketClient.setData("videoStarted", socketClient.serverTime);
+        }
+      });
+
+      socketClient.observe("playhead").onChange((playhead) => {
+        document.querySelector("#playhead").value = playhead.value;
+        const player = window.player;
+        if (player?.seekTo) {
+          player.seekTo(player.getDuration() * playhead.value, true);
+        }
+      });
+
+      socketClient.observe("videoStarted").onChange((videoStarted) => {
+        window.videoStarted = videoStarted.value;
+        catchUp();
+      });
+
+      socketClient.observe("muted").onChange((muted) => {
+        document.querySelector("#mute").checked = muted.value;
+        const player = window.player;
+        if (player?.mute) {
+          if (muted.value) {
+            player.mute();
+          } else {
+            player.unMute();
+          }
+        }
+      });
+
+      //      socketClient
+      //      .observe()
+      //    .onChange(() => console.log(stringify(socketClient.state)));
+    </script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+      let player;
+
+      function checkPlayState() {
+        const socketClient = window.socketClient;
+        if (player.getPlayerState) {
+          if (window.videoStarted && player.getPlayerState() !== 1) {
+            player.playVideo();
+            if (socketClient.state.muted) {
+              player.mute();
+            } else {
+              player.unMute();
+            }
+          } else if (!window.videoStarted && player.getPlayerState() === 1) {
+            player.pauseVideo();
+          }
+        }
+      }
+
+      function formatTime(time) {
+        const minutes = Math.floor(time / 60);
+        const seconds = Math.floor(time % 60);
+        return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+      }
+
+      function catchUp() {
+        const socketClient = window.socketClient;
+        checkPlayState();
+        if (player.getCurrentTime) {
+          const playHead = document.querySelector("#playhead");
+          const playHeadTimeMs = playHead.value * player.getDuration();
+          if (window.videoStarted) {
+            const timeSinceStart =
+              socketClient.serverTime - window.videoStarted;
+            const time = timeSinceStart / 1000 + playHeadTimeMs;
+            if (Math.abs(time - player.getCurrentTime()) > 0.1) {
+              player.seekTo(time, true);
+            }
+          }
+        }
+
+        if (player.getCurrentTime) {
+          document.querySelector("#current-time").textContent = formatTime(
+            player.getCurrentTime()
+          );
+          document.querySelector("#duration").textContent = formatTime(
+            player.getDuration()
+          );
+        }
+      }
+
+      function onPlayerStateChange(event) {
+        if (event.data == YT.PlayerState.ENDED) {
+          console.log("ENDED");
+        } else {
+          const bar = document.querySelector("#playhead");
+          if (!window.videoStarted) {
+            bar.value = player.getCurrentTime() / player.getDuration();
+          }
+          catchUp();
+        }
+      }
+
+      // Create a YouTube player instance.
+      function onYouTubeIframeAPIReady() {
+        player = new YT.Player("ytplayer", {
+          events: {
+            onReady: catchUp,
+            onStateChange: onPlayerStateChange,
+          },
+        });
+        window.player = player;
+      }
+    </script>
+  </body>
+</html>

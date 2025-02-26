@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chat Room</title>
+    <style>
+      body {
+        background-color: lightgray;
+      }
+      .users {
+        position: absolute;
+        right: 5px;
+        top: 5px;
+        z-index: 100;
+      }
+      .chat-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        padding: 10px;
+        width: 100%;
+        height: 100%;
+        background-color: white;
+        border: 1px solid black;
+        overflow: auto;
+      }
+      .chat-box {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: calc(100% - 30px);
+        margin: 10px;
+        padding: 5px;
+        background-color: silver;
+        border: 1px solid black;
+        height: 100px;
+      }
+      .chatting {
+        opacity: 0.5;
+        font-style: italic;
+      }
+      .ai-checkbox-group {
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+        z-index: 100;
+        display: none; /* Not yet ready */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="users"></div>
+      <div class="chat-container">
+        <div class="chat-log"></div>
+        <div class="chatting"></div>
+      </div>
+      <div class="chat-box" contenteditable="true"></div>
+      <div class="ai-checkbox-group">
+        <input id="ai-checkbox" type="checkbox" />
+        <label for="ai-checkbox">AI</label>
+      </div>
+    </div>
+
+    <script type="module">
+      import {
+        socketClient,
+        randomEmoji,
+        randomName,
+        introduceName,
+        displayUsers,
+      } from "../dist/index.js";
+
+      window.socketClient = socketClient;
+
+      const chatBox = document.querySelector(".chat-box");
+      chatBox.addEventListener("input", () => {
+        socketClient.setData(
+          "chatting/{self}",
+          chatBox.textContent.length > 0 ? true : undefined
+        );
+      });
+      chatBox.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          const message = e.target.textContent;
+          e.target.textContent = "";
+          socketClient.setData(
+            `chat`,
+            {
+              message,
+              clientId: socketClient.clientId,
+              emoji: socketClient.self.state.emoji,
+              name: socketClient.self.state.name,
+            },
+            {
+              push: true,
+            }
+          );
+          socketClient.setData("chatting/{self}", undefined);
+          e.preventDefault();
+        }
+      });
+
+      const clients = socketClient.access("clients");
+      socketClient.observe("chatting/{keys}").onChange((chattingClients) => {
+        const chatting = document.querySelector(".chatting");
+        const otherClientsTyping = chattingClients.value
+          .filter(
+            (clientId) =>
+              clientId !== socketClient.clientId && clients.state[clientId]
+          )
+          .map(
+            (clientId) =>
+              ` ${clients.state[clientId].emoji} ${clients.state[clientId].name}`
+          );
+        chatting.textContent =
+          otherClientsTyping.length > 0
+            ? `${otherClientsTyping.join(", ")} typing...`
+            : "";
+      });
+
+      socketClient.observe("chat").onElementsAdded((elems) => {
+        elems.forEach((elem) => {
+          const chatLog = document.querySelector(".chat-log");
+          const chatEntry = chatLog.appendChild(document.createElement("div"));
+          chatEntry.style.display = "flex";
+          chatEntry.style.gap = "10px";
+          chatEntry.style.flexDirection = "row";
+          const chatAuthor = chatEntry.appendChild(
+            document.createElement("div")
+          );
+          chatAuthor.textContent = `${elem.emoji} ${elem.name}`;
+          chatAuthor.style.fontWeight = "bold";
+          chatAuthor.style.backgroundColor =
+            elem.clientId === socketClient.clientId ? "yellow" : "";
+          const chatMessage = chatEntry.appendChild(
+            document.createElement("div")
+          );
+          chatMessage.textContent = `${elem.message}`;
+          chatLog.scrollTop = chatLog.scrollHeight;
+        });
+      });
+
+      introduceName();
+
+      displayUsers(document.querySelector(".users"));
+
+      document.querySelector(".chat-box").focus();
+    </script>
+  </body>
+</html>

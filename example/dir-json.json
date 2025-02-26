@@ -1,0 +1,18 @@
+{
+  "config.json": {
+    "sha": "98387d623bcf6077316ad093fd89f762c23f9a4f"
+  },
+  "iso-test/random-iso.json": {
+    "sha": "d05d34fb92c02b85a64a01f43775b5a71ce58912"
+  },
+  "md5": "6e9606c6a42cf768a020974857e12dd7",
+  "package.json": {
+    "sha": "f188cdbf939c04dd799f3a7c88a0a943c1a95f06"
+  },
+  "random-iso.json": {
+    "sha": "d05d34fb92c02b85a64a01f43775b5a71ce58912"
+  },
+  "tsconfig.json": {
+    "sha": "5d54bba5d6d02edc48c065729f8965af5541693d"
+  }
+}

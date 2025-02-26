@@ -1,0 +1,29 @@
+{
+  "name": "example",
+  "module": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun run build && bun run index.ts --watch",
+    "start:prod": "bun run build && NODE_ENV=production bun run index.ts --watch",
+    "build": "bun i && bun run build-icon && bun run bundler/bundler.ts",
+    "build-icon": "icon-gen -i ../icon.png -o ."
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "bun-lightningcss": "^0.2.0",
+    "bun-types": "^1.2.2",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "icon-gen": "^4.0.0",
+    "png-to-ico": "^2.1.8",
+    "serve-static-bun": "^0.5.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0",
+    "napl": "link:napl"
+  },
+  "dependencies": {
+    "aseprite-sheet": "^1.0.5",
+    "json-stringify-pretty-compact": "^4.0.0"
+  }
+}

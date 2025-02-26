@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>React Room</title>
+    <style>
+      body {
+        background-color: lightgray;
+      }
+      canvas {
+        width: 100%;
+        height: 100%;
+        border: 2px solid black;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <script type="module">
+      import { socketClient } from "../dist/index.js";
+
+      const keys = {};
+
+      socketClient.observe("clients/{self}").onChange(() => {
+        const randomColor = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
+        socketClient.self.setData("color", randomColor);
+        socketClient.self.setData("x", Math.random() * 200);
+        socketClient.self.setData("y", Math.random() * 100);
+        socketClient.self.setData("moveStart", 0);
+        socketClient.self.setData("dx", 0);
+        socketClient.self.setData("dy", 0);
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (!keys[event.key]) {
+          keys[event.key] = true;
+          updateMove();
+        }
+      });
+      document.addEventListener("keyup", (event) => {
+        if (keys[event.key]) {
+          keys[event.key] = false;
+          updateMove();
+        }
+      });
+
+      function updateMove() {
+        const dx =
+          (keys["ArrowRight"] || keys.d ? 1 : 0) +
+          (keys["ArrowLeft"] || keys.a ? -1 : 0);
+        const dy =
+          (keys["ArrowDown"] || keys.s ? 1 : 0) +
+          (keys["ArrowUp"] || keys.w ? -1 : 0);
+        const x = calcX(socketClient.self.state);
+        const y = calcY(socketClient.self.state);
+        socketClient.self.setData("dx", dx);
+        socketClient.self.setData("dy", dy);
+        socketClient.self.setData("x", x);
+        socketClient.self.setData("y", y);
+        if (dx || dy) {
+          socketClient.self.setData("moveStart", socketClient.serverTime);
+        } else {
+          socketClient.self.setData("moveStart", 0);
+        }
+      }
+
+      const speed = 0.1;
+      function calcX(client) {
+        const moveStart = client.moveStart;
+        const dx = client.dx * speed;
+        const x = client.x;
+        return x + dx * (moveStart ? socketClient.serverTime - moveStart : 0);
+      }
+
+      function calcY(client) {
+        const moveStart = client.moveStart;
+        const dy = client.dy * speed;
+        const y = client.y;
+        return y + dy * (moveStart ? socketClient.serverTime - moveStart : 0);
+      }
+
+      const localPlayers = new Map();
+      let animationFrame;
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+      const loop = () => {
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        Object.values(socketClient.state.clients ?? {}).forEach((client) => {
+          if (client.color) {
+            const x = calcX(client) ?? 0;
+            const y = calcY(client) ?? 0;
+            if (!localPlayers.has(client)) {
+              localPlayers.set(client, { x, y });
+            }
+            const localPlayer = localPlayers.get(client);
+            const mul = 0.4;
+            localPlayer.x += (x - localPlayer.x) * mul;
+            localPlayer.y += (y - localPlayer.y) * mul;
+            ctx.fillStyle = client.color;
+            ctx.fillRect(localPlayer.x, localPlayer.y, 20, 20);
+          }
+        });
+        animationFrame = requestAnimationFrame(loop);
+      };
+      loop();
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          cancelAnimationFrame(animationFrame);
+        } else {
+          loop();
+        }
+      });
+    </script>
+  </body>
+</html>

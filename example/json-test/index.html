@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JSON Test</title>
+    <style>
+      body,
+      html {
+        background-color: lightgray;
+        height: calc(100% - 10px);
+      }
+      .container {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <textarea
+        title="json"
+        id="json-container"
+        style="width: 100%; height: 100%"
+      ></textarea>
+      <div
+        id="error"
+        style="
+          display: none;
+          position: absolute;
+          color: red;
+          bottom: 5px;
+          right: 5px;
+        "
+      >
+        Invalid json
+      </div>
+    </div>
+
+    <script type="module">
+      import { socketClient } from "../dist/index.js";
+
+      window.socketClient = socketClient;
+
+      const jsonContainer = document.getElementById("json-container");
+      jsonContainer.addEventListener("input", (event) => {
+        const json = event.target.value;
+        try {
+          socketClient.setData("json", JSON.parse(json));
+          document.querySelector("#error").style.display = "none";
+        } catch (error) {
+          document.querySelector("#error").style.display = "block";
+        }
+      });
+      socketClient.observe("json").onChange((data) => {
+        let currentJson = undefined;
+        try {
+          currentJson = JSON.stringify(JSON.parse(jsonContainer.value));
+        } catch (e) {}
+        try {
+          if (JSON.stringify(data.value) !== currentJson) {
+            jsonContainer.value = JSON.stringify(data.value, null, 2);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      });
+    </script>
+  </body>
+</html>

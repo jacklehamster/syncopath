@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Split Page</title>
+    <style>
+      body,
+      html {
+        height: 100%;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .frame {
+        height: 100%;
+        width: 100%;
+        border: 0;
+      }
+      .frame.split {
+        width: 50%;
+      }
+      .tabs {
+        display: flex;
+        justify-content: center;
+        flex: 0 0 auto; /* Tabs take only as much space as they need */
+      }
+      .container {
+        flex: 1 1 auto; /* Content takes the remaining space */
+        display: flex;
+      }
+      .content {
+        display: none;
+        flex: 1;
+        flex-direction: row; /*column;*/
+        gap: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const configJson = await fetch("config.json").then((res) => res.json());
+
+        const shouldSplit =
+          new URLSearchParams(location.search).get("split") ?? configJson.split;
+        const initialTab =
+          new URLSearchParams(location.search).get("tab") ?? configJson.tab;
+        const showTab =
+          new URLSearchParams(location.search).get("show-tab") ??
+          configJson["show-tab"];
+        const room =
+          new URLSearchParams(location.search).get("room") ?? configJson.room;
+
+        const tabsContainer = document.querySelector(".tabs");
+        const container = document.querySelector(".container");
+        const dir = await fetch("dir.json").then((res) => res.json());
+        const regex = /(.*)\/index.html/;
+        const sites = Object.keys(dir)
+          .map((file) => {
+            const [, subdir] = file.match(regex) ?? [];
+            return subdir;
+          })
+          .filter((s) => !!s);
+        sites.forEach((site) => {
+          const button = document.createElement("button");
+          button.id = `${site}-button`;
+          button.textContent = site;
+          button.addEventListener("click", () => {
+            if (!document.querySelector(`#${site}-content`)) {
+              const frameRoom = room ?? site;
+              const div = container.appendChild(document.createElement("div"));
+              div.id = `${site}-content`;
+              div.classList.add("content");
+              const topF = div.appendChild(document.createElement("iframe"));
+              topF.title = "top";
+              topF.classList.add("frame");
+              topF.setAttribute("src", `${site}?top&room=${frameRoom}`);
+              topF.setAttribute("allow", "autoplay");
+              if (shouldSplit) {
+                const bottomF = div.appendChild(
+                  document.createElement("iframe")
+                );
+                bottomF.title = "bottom";
+                bottomF.classList.add("frame");
+                bottomF.setAttribute("src", `${site}?bottom&room=${frameRoom}`);
+                bottomF.setAttribute("allow", "autoplay");
+
+                topF.classList.add("split");
+                bottomF.classList.add("split");
+
+                topF.addEventListener("load", () => {
+                  topF.contentWindow.addEventListener("focus", () => {
+                    topF.style.outline = "2px solid yellow";
+                  });
+                  topF.contentWindow.addEventListener("blur", () => {
+                    topF.style.outline = "none";
+                  });
+                });
+                bottomF.addEventListener("load", () => {
+                  bottomF.contentWindow.addEventListener("focus", () => {
+                    bottomF.style.outline = "2px solid yellow";
+                  });
+                  bottomF.contentWindow.addEventListener("blur", () => {
+                    bottomF.style.outline = "none";
+                  });
+                });
+              }
+            }
+
+            const contentDivs = document.querySelectorAll(".content");
+            contentDivs.forEach((contentDiv) => {
+              contentDiv.style.display = "none";
+            });
+            const contentDiv = document.getElementById(`${site}-content`);
+            contentDiv.style.display = "flex";
+          });
+          tabsContainer.appendChild(button);
+        });
+        if (initialTab) {
+          const button = document.querySelector(`#${initialTab}-button`);
+          if (button) {
+            button.click();
+          }
+          if (!showTab) {
+            tabsContainer.style.display = "none";
+          }
+        }
+      });
+    </script>
+    <!-- Creating tab -->
+    <div class="tabs"></div>
+    <div class="container"></div>
+  </body>
+</html>

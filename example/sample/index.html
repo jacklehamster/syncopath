@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Data Sync</title>
+    <style>
+      html,
+      body {
+        background-color: lightgray;
+        flex-direction: column;
+        height: 100%;
+        display: flex;
+      }
+      .container {
+        display: flex;
+        flex-direction: row;
+        flex: 1;
+        flex-grow: 1;
+      }
+      #data-area {
+        resize: both;
+        overflow: auto;
+      }
+      #state-div {
+        white-space: pre;
+        padding: 5px;
+        border: 1px;
+        margin: 5px;
+        font-family: monospace;
+        background-color: lightyellow;
+        overflow: auto;
+        font-size: 9px;
+        width: auto;
+      }
+      #client-list {
+        display: flex;
+        flex-direction: row;
+      }
+      .client-box {
+        border: 1px solid black;
+        margin: 5px;
+        padding: 5px;
+        height: 100px;
+        width: 150px;
+      }
+      .cursor {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        font-size: 20px;
+        pointer-events: none;
+      }
+      .state-container {
+        width: 100%;
+        height: 100%;
+      }
+      #state-div {
+        height: 100%;
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div>
+        <h1 id="h1">WebSocket Test</h1>
+        <script>
+          document.querySelector("#h1").textContent +=
+            ` - ${location.search.slice(1)}`;
+        </script>
+        <label for="data-area">Common Data:</label>
+        <input type="checkbox" id="passive" />
+        <label
+          title="
+          Passive updates require response from server before being confirmed. Active updates are immediate.
+        "
+          for="passive"
+          >Passive update</label
+        >
+        <br />
+        <textarea id="data-area" rows="4" cols="50"></textarea>
+      </div>
+      <div class="state-container">
+        <label for="state-div">State:</label>
+        <div id="state-div" contenteditable="true"></div>
+      </div>
+    </div>
+    <div id="client-list"></div>
+    <script type="module">
+      import {
+        randomName,
+        randomEmoji,
+        stringify,
+        socketClient,
+        introduceName,
+        trackCursor,
+        handleUsersChanged,
+        trackCursorObserver,
+      } from "../dist/index.js";
+
+      window.socketClient = socketClient;
+
+      //  data
+      const dataHook = socketClient.access("data");
+      const dataArea = document.querySelector("#data-area");
+      dataArea.addEventListener("input", (event) => {
+        dataHook.setData(undefined, event.target.value || undefined, {
+          passive: document.querySelector("#passive").checked,
+        });
+      });
+      dataHook.observe(undefined).onChange((observation) => {
+        dataArea.value = observation.value ?? "";
+      });
+
+      //  cursor
+      trackCursor({ exclude: ["state-div"] });
+
+      //  update state
+      document
+        .querySelector("#state-div")
+        .addEventListener("mouseout", ({ currentTarget }) => {
+          try {
+            const state = JSON.parse(currentTarget.textContent);
+            for (let k in state) {
+              if (k !== "clients") {
+                if (stringify(state[k]) !== stringify(socketClient.state[k])) {
+                  socketClient.setData(k, state[k], {
+                    passive: true,
+                  });
+                }
+              }
+            }
+          } catch (e) {}
+        });
+
+      introduceName();
+
+      function getOrCreateClientBox(clientId, isSelf) {
+        if (document.querySelector(`#client-${clientId}`)) {
+          return document.querySelector(`#client-${clientId}`);
+        }
+        const clientBox = document.createElement("div");
+        clientBox.id = `client-${clientId}`;
+        clientBox.classList.add("client-box");
+        clientBox.style.backgroundColor = isSelf ? "lightgreen" : "lightblue";
+
+        if (isSelf) {
+          document.querySelector("#client-list").prepend(clientBox);
+        } else {
+          document.querySelector("#client-list").appendChild(clientBox);
+        }
+        return clientBox;
+      }
+
+      handleUsersChanged(
+        (clientId, isSelf, observers) => {
+          // new client
+          const clientBox = getOrCreateClientBox(clientId, isSelf);
+
+          //  emoji / name observer
+          {
+            //  name and emoji
+            const emojiDiv = clientBox.appendChild(
+              document.createElement("span")
+            );
+            emojiDiv.style.marginRight = "5px";
+            if (isSelf) {
+              emojiDiv.style.cursor = "pointer";
+              emojiDiv.addEventListener("click", () => {
+                socketClient.setData(
+                  `clients/${clientId}/emoji`,
+                  randomEmoji(true),
+                  {
+                    passive: true,
+                  }
+                );
+              });
+            }
+
+            const nameLabel = clientBox.appendChild(
+              document.createElement("label")
+            );
+            nameLabel.textContent = "Name:";
+            nameLabel.htmlFor = `name-${clientId}`;
+            const nameInput = clientBox.appendChild(
+              document.createElement("input")
+            );
+            nameInput.id = `name-${clientId}`;
+            nameInput.style.width = "calc(100% - 10px)";
+            nameInput.disabled = !isSelf;
+            nameInput.addEventListener("input", (event) => {
+              socketClient.setData(
+                `clients/${clientId}/name`,
+                event.target.value
+              );
+            });
+            observers.add(
+              socketClient
+                .observe(
+                  `clients/${clientId}/emoji`,
+                  `clients/${clientId}/name`
+                )
+                .onChange((emoji, name) => {
+                  emojiDiv.textContent = emoji.value;
+                  nameInput.value = name.value;
+                })
+            );
+          }
+        },
+        (clientId) => {
+          const client = document.querySelector(`#client-${clientId}`);
+          client.style.transition = "opacity 0.3s";
+          client.style.opacity = 0;
+          setTimeout(() => {
+            client.remove();
+          }, 300);
+        }
+      );
+
+      //  Cursor
+      handleUsersChanged((clientId, isSelf, observers) => {
+        const clientBox = getOrCreateClientBox(clientId, isSelf);
+        //  cursor
+        const cursorDiv = clientBox.appendChild(document.createElement("div"));
+        cursorDiv.id = `cursor-${clientId}`;
+        cursorDiv.classList.add("cursor");
+
+        observers.add(
+          socketClient
+            .observe(`clients/${clientId}/emoji`)
+            .onChange((emoji) => (cursorDiv.textContent = emoji.value))
+        );
+
+        observers.add(
+          trackCursorObserver(clientId, (cursor) => {
+            if (!cursor) {
+              cursorDiv.style.display = "none";
+              return;
+            }
+            const [x, y] = cursor;
+            cursorDiv.style.display = "block";
+            cursorDiv.style.left = `${x - 10}px`;
+            cursorDiv.style.top = `${y - 20}px`;
+          })
+        );
+      });
+
+      socketClient
+        .observe()
+        .onChange(
+          () =>
+            (document.querySelector("#state-div").textContent = stringify(
+              socketClient.state
+            ))
+        );
+    </script>
+  </body>
+</html>

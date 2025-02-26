@@ -1,0 +1,1410 @@
+{
+  "/bundler/dir.json": {
+    "bundler.ts": {
+      "sha": "3313843ab8419c3273bfb987f31aba3afdfb1be3"
+    },
+    "md5": "10471cb9fc41dc7d543432c9c9b00ca7"
+  },
+  "/example/bundler/dir.json": {
+    "bundler.ts": {
+      "sha": "a8f7b2aa31c69081e16f711724e1214506f46d9d"
+    },
+    "md5": "8e993d7f3f5b568419c135c29211cdc9"
+  },
+  "/example/chatroom/dir.json": {
+    "index.html": {
+      "sha": "ecc7543e13eb7e9cb22115d8e5593700e285e6c0"
+    },
+    "md5": "ecdb0babf67b9aba88eb8e650cd96be2"
+  },
+  "/example/config.json": {
+    "websocketHost": "api.dobuki.net",
+    "tab": "chatroom"
+  },
+  "/example/dir-json.json": {
+    "config.json": {
+      "sha": "98387d623bcf6077316ad093fd89f762c23f9a4f"
+    },
+    "iso-test/random-iso.json": {
+      "sha": "d05d34fb92c02b85a64a01f43775b5a71ce58912"
+    },
+    "md5": "6e9606c6a42cf768a020974857e12dd7",
+    "package.json": {
+      "sha": "f188cdbf939c04dd799f3a7c88a0a943c1a95f06"
+    },
+    "random-iso.json": {
+      "sha": "d05d34fb92c02b85a64a01f43775b5a71ce58912"
+    },
+    "tsconfig.json": {
+      "sha": "5d54bba5d6d02edc48c065729f8965af5541693d"
+    }
+  },
+  "/example/dir.json": {
+    "README.md": {
+      "sha": "2509c6de3b86d351a8deba9af4c56b19847cb2a8"
+    },
+    "app.icns": {
+      "sha": "8c414c12983adc8e19dd67d522fe3f6c894831a8"
+    },
+    "app.ico": {
+      "sha": "c58c010b4a3906da7c4ff220162378a7008e3092"
+    },
+    "bun.lockb": {
+      "sha": "44fa79ebcee30d4ceb5d724d960ba45703102bfb"
+    },
+    "bundler/bundler.ts": {
+      "sha": "a8f7b2aa31c69081e16f711724e1214506f46d9d"
+    },
+    "chatroom/index.html": {
+      "sha": "ecc7543e13eb7e9cb22115d8e5593700e285e6c0"
+    },
+    "config.json": {
+      "sha": "98387d623bcf6077316ad093fd89f762c23f9a4f"
+    },
+    "dist/index.js": {
+      "sha": "cf7230b82e27e6dda703524832e6dc40e982ae62"
+    },
+    "dist/index.js.map": {
+      "sha": "0481b6526947ee473ada2ddb0a1c45a98fbcd5db"
+    },
+    "dist/styles-da87zv4s.css": {
+      "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
+    },
+    "favicon-120.png": {
+      "sha": "69b3e5c9a01fe3ed4195b5c971674d80fc0f4318"
+    },
+    "favicon-128.png": {
+      "sha": "39664cbca2a68c306730c5092b7ce34970d0fe07"
+    },
+    "favicon-144.png": {
+      "sha": "0ef0e9f14eb28c0870d4535808e222d8327ac514"
+    },
+    "favicon-152.png": {
+      "sha": "f8f60c82c382966252c7b2f207cdb80b62c102b3"
+    },
+    "favicon-195.png": {
+      "sha": "0bb68d0ab504b9a36e020ff619e86b2f97c1dbcd"
+    },
+    "favicon-228.png": {
+      "sha": "5b41a3758f28cd5ece1aa1fb7ada351f49d5b023"
+    },
+    "favicon-32.png": {
+      "sha": "3df095fc7fb5157149b80ec1eba97fd9d78c8743"
+    },
+    "favicon-57.png": {
+      "sha": "63b2c63b594029095f826df603e88a75ac8785a7"
+    },
+    "favicon-72.png": {
+      "sha": "b132fef29fa67c8653bc8c95fae183005685e99e"
+    },
+    "favicon-96.png": {
+      "sha": "fbdfed1ddbb93f3b45bb49500f26db46f16e41de"
+    },
+    "favicon.ico": {
+      "sha": "26617507b9baf000bd97c82ce45d831811b1e8a7"
+    },
+    "game-room/index.html": {
+      "sha": "a08fc554cd2f961f5ba12d9f7bf80486fd3fb442"
+    },
+    "image-test/index.html": {
+      "sha": "719850ced84f9531ecfc6692a1dc03422f148393"
+    },
+    "index.html": {
+      "sha": "b8a6f588c21e65bf7e82dc55308763c16dcfde89"
+    },
+    "index.ts": {
+      "sha": "e48bef045ccb9707654425adba34ac32aaacd87c"
+    },
+    "iso-test/index.html": {
+      "sha": "0edfeaa6d0891cccd8058b2d1e336ebd53d4d903"
+    },
+    "iso-test/random-iso.json": {
+      "sha": "d05d34fb92c02b85a64a01f43775b5a71ce58912"
+    },
+    "iso-test/random-iso.png": {
+      "sha": "1554c267f94aa89dcc9efd969f0a369450a626a2"
+    },
+    "json-test/index.html": {
+      "sha": "9b3d48916b0d0404e894b2d8e29a54f067259495"
+    },
+    "md5": "5aa361295c6f81a91aa5de563a6831da",
+    "mobile/index.html": {
+      "sha": "da7fc32018f9e63c66e22c593062c3cb7604695a"
+    },
+    "package.json": {
+      "sha": "f188cdbf939c04dd799f3a7c88a0a943c1a95f06"
+    },
+    "random-iso.json": {
+      "sha": "d05d34fb92c02b85a64a01f43775b5a71ce58912"
+    },
+    "random-iso.png": {
+      "sha": "1554c267f94aa89dcc9efd969f0a369450a626a2"
+    },
+    "react-test/index.html": {
+      "sha": "b7b986c76fc8f78204e95498aef051618845d170"
+    },
+    "sample/index.html": {
+      "sha": "082ad0d94e11214521e722e1504a3051ee9a01b1"
+    },
+    "src/index.ts": {
+      "sha": "2691be91a0ab824497b1a6240990368254abd233"
+    },
+    "src/iso-test/iso-utils.ts": {
+      "sha": "7c965b9f650465ae310cacd812584611a28e9a7a"
+    },
+    "src/react/component.tsx": {
+      "sha": "7b7d08043d3317017724edb151cc266d0eb11b9b"
+    },
+    "src/react/index.d.ts": {
+      "sha": "7980ec238c4dd00704399f7d8fe89cf26f194398"
+    },
+    "src/react/socket-client.ts": {
+      "sha": "808b01d7796b7d284a136f2b48cbce1b9d4c10d6"
+    },
+    "src/react/style.module.css": {
+      "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
+    },
+    "tsconfig.json": {
+      "sha": "5d54bba5d6d02edc48c065729f8965af5541693d"
+    },
+    "youtube-test/index.html": {
+      "sha": "e085fb732f23ed3fbefde35ba679ac2fb1408a54"
+    }
+  },
+  "/example/dist/dir.json": {
+    "index.js": {
+      "sha": "cf7230b82e27e6dda703524832e6dc40e982ae62"
+    },
+    "index.js.map": {
+      "sha": "0481b6526947ee473ada2ddb0a1c45a98fbcd5db"
+    },
+    "md5": "377e3b7ba91d2fe766e553bdbf2c9b47",
+    "styles-da87zv4s.css": {
+      "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
+    }
+  },
+  "/example/game-room/dir.json": {
+    "index.html": {
+      "sha": "a08fc554cd2f961f5ba12d9f7bf80486fd3fb442"
+    },
+    "md5": "e26ff41dcadc209109c6625036e97c50"
+  },
+  "/example/image-test/dir.json": {
+    "index.html": {
+      "sha": "719850ced84f9531ecfc6692a1dc03422f148393"
+    },
+    "md5": "abd3d1c541c0e630f090682871f2b5dd"
+  },
+  "/example/iso-test/dir-json.json": {
+    "md5": "3aff6cb73787b9d676de08c97a43afee",
+    "random-iso.json": {
+      "sha": "d05d34fb92c02b85a64a01f43775b5a71ce58912"
+    }
+  },
+  "/example/iso-test/dir.json": {
+    "index.html": {
+      "sha": "0edfeaa6d0891cccd8058b2d1e336ebd53d4d903"
+    },
+    "md5": "c90339e269c7ff665927398b330a2794",
+    "random-iso.json": {
+      "sha": "d05d34fb92c02b85a64a01f43775b5a71ce58912"
+    },
+    "random-iso.png": {
+      "sha": "1554c267f94aa89dcc9efd969f0a369450a626a2"
+    }
+  },
+  "/example/iso-test/random-iso.json": {
+    "frames": {
+      "rando 0.aseprite": {
+        "frame": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 1.aseprite": {
+        "frame": {
+          "x": 512,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 2.aseprite": {
+        "frame": {
+          "x": 1024,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 3.aseprite": {
+        "frame": {
+          "x": 1536,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 4.aseprite": {
+        "frame": {
+          "x": 2048,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 5.aseprite": {
+        "frame": {
+          "x": 2560,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 6.aseprite": {
+        "frame": {
+          "x": 3072,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 7.aseprite": {
+        "frame": {
+          "x": 3584,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 8.aseprite": {
+        "frame": {
+          "x": 4096,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 9.aseprite": {
+        "frame": {
+          "x": 4608,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 10.aseprite": {
+        "frame": {
+          "x": 5120,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 11.aseprite": {
+        "frame": {
+          "x": 5632,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 12.aseprite": {
+        "frame": {
+          "x": 6144,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 13.aseprite": {
+        "frame": {
+          "x": 6656,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 14.aseprite": {
+        "frame": {
+          "x": 7168,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 15.aseprite": {
+        "frame": {
+          "x": 7680,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 16.aseprite": {
+        "frame": {
+          "x": 8192,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 17.aseprite": {
+        "frame": {
+          "x": 8704,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      }
+    },
+    "meta": {
+      "app": "https://www.aseprite.org/",
+      "version": "1.3.11-arm64",
+      "image": "random-iso.png",
+      "format": "RGBA8888",
+      "size": {
+        "w": 9216,
+        "h": 512
+      },
+      "scale": "1",
+      "frameTags": [
+        {
+          "name": "Tongue",
+          "from": 14,
+          "to": 17,
+          "direction": "pingpong",
+          "color": "#fe5b59ff"
+        }
+      ],
+      "layers": [
+        {
+          "name": "Layer 1",
+          "opacity": 255,
+          "blendMode": "normal"
+        },
+        {
+          "name": "Layer 2",
+          "opacity": 255,
+          "blendMode": "normal"
+        },
+        {
+          "name": "Layer 3",
+          "opacity": 255,
+          "blendMode": "normal"
+        }
+      ],
+      "slices": []
+    }
+  },
+  "/example/json-test/dir.json": {
+    "index.html": {
+      "sha": "9b3d48916b0d0404e894b2d8e29a54f067259495"
+    },
+    "md5": "1292b2af9bf116c21c205f478cf24d1b"
+  },
+  "/example/mobile/dir.json": {
+    "index.html": {
+      "sha": "da7fc32018f9e63c66e22c593062c3cb7604695a"
+    },
+    "md5": "2a12f010a851cf824f15f15ac9e6fae6"
+  },
+  "/example/package.json": {
+    "name": "example",
+    "module": "src/index.ts",
+    "type": "module",
+    "scripts": {
+      "start": "bun run build && bun run index.ts --watch",
+      "start:prod": "bun run build && NODE_ENV=production bun run index.ts --watch",
+      "build": "bun i && bun run build-icon && bun run bundler/bundler.ts",
+      "build-icon": "icon-gen -i ../icon.png -o ."
+    },
+    "devDependencies": {
+      "@types/express": "^5.0.0",
+      "bun-lightningcss": "^0.2.0",
+      "bun-types": "^1.2.2",
+      "dotenv": "^16.4.7",
+      "express": "^4.21.2",
+      "icon-gen": "^4.0.0",
+      "png-to-ico": "^2.1.8",
+      "serve-static-bun": "^0.5.3"
+    },
+    "peerDependencies": {
+      "typescript": "^5.0.0",
+      "napl": "link:napl"
+    },
+    "dependencies": {
+      "aseprite-sheet": "^1.0.5",
+      "json-stringify-pretty-compact": "^4.0.0"
+    }
+  },
+  "/example/random-iso.json": {
+    "frames": {
+      "rando 0.aseprite": {
+        "frame": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 1.aseprite": {
+        "frame": {
+          "x": 512,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 2.aseprite": {
+        "frame": {
+          "x": 1024,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 3.aseprite": {
+        "frame": {
+          "x": 1536,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 4.aseprite": {
+        "frame": {
+          "x": 2048,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 5.aseprite": {
+        "frame": {
+          "x": 2560,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 6.aseprite": {
+        "frame": {
+          "x": 3072,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 7.aseprite": {
+        "frame": {
+          "x": 3584,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 8.aseprite": {
+        "frame": {
+          "x": 4096,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 9.aseprite": {
+        "frame": {
+          "x": 4608,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 10.aseprite": {
+        "frame": {
+          "x": 5120,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 11.aseprite": {
+        "frame": {
+          "x": 5632,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 12.aseprite": {
+        "frame": {
+          "x": 6144,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 13.aseprite": {
+        "frame": {
+          "x": 6656,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 14.aseprite": {
+        "frame": {
+          "x": 7168,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 15.aseprite": {
+        "frame": {
+          "x": 7680,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 16.aseprite": {
+        "frame": {
+          "x": 8192,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      },
+      "rando 17.aseprite": {
+        "frame": {
+          "x": 8704,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "rotated": false,
+        "trimmed": false,
+        "spriteSourceSize": {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        },
+        "sourceSize": {
+          "w": 512,
+          "h": 512
+        },
+        "duration": 100
+      }
+    },
+    "meta": {
+      "app": "https://www.aseprite.org/",
+      "version": "1.3.11-arm64",
+      "image": "random-iso.png",
+      "format": "RGBA8888",
+      "size": {
+        "w": 9216,
+        "h": 512
+      },
+      "scale": "1",
+      "frameTags": [
+        {
+          "name": "Tongue",
+          "from": 14,
+          "to": 17,
+          "direction": "pingpong",
+          "color": "#fe5b59ff"
+        }
+      ],
+      "layers": [
+        {
+          "name": "Layer 1",
+          "opacity": 255,
+          "blendMode": "normal"
+        },
+        {
+          "name": "Layer 2",
+          "opacity": 255,
+          "blendMode": "normal"
+        },
+        {
+          "name": "Layer 3",
+          "opacity": 255,
+          "blendMode": "normal"
+        }
+      ],
+      "slices": []
+    }
+  },
+  "/example/react-test/dir.json": {
+    "index.html": {
+      "sha": "b7b986c76fc8f78204e95498aef051618845d170"
+    },
+    "md5": "46d4361a12893b35ffd7b2543e4c6eda"
+  },
+  "/example/sample/dir.json": {
+    "index.html": {
+      "sha": "082ad0d94e11214521e722e1504a3051ee9a01b1"
+    },
+    "md5": "05177c79c5295a531c500ca16d4d9298"
+  },
+  "/example/src/dir.json": {
+    "index.ts": {
+      "sha": "2691be91a0ab824497b1a6240990368254abd233"
+    },
+    "iso-test/iso-utils.ts": {
+      "sha": "7c965b9f650465ae310cacd812584611a28e9a7a"
+    },
+    "md5": "9bfa45dc953acc0ea468971de62cb4dd",
+    "react/component.tsx": {
+      "sha": "7b7d08043d3317017724edb151cc266d0eb11b9b"
+    },
+    "react/index.d.ts": {
+      "sha": "7980ec238c4dd00704399f7d8fe89cf26f194398"
+    },
+    "react/socket-client.ts": {
+      "sha": "808b01d7796b7d284a136f2b48cbce1b9d4c10d6"
+    },
+    "react/style.module.css": {
+      "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
+    }
+  },
+  "/example/src/iso-test/dir.json": {
+    "iso-utils.ts": {
+      "sha": "7c965b9f650465ae310cacd812584611a28e9a7a"
+    },
+    "md5": "87417d18e2f3a9af819fde230bf71263"
+  },
+  "/example/src/react/dir.json": {
+    "component.tsx": {
+      "sha": "7b7d08043d3317017724edb151cc266d0eb11b9b"
+    },
+    "index.d.ts": {
+      "sha": "7980ec238c4dd00704399f7d8fe89cf26f194398"
+    },
+    "md5": "dc0db162ea58008641be3712c132b709",
+    "socket-client.ts": {
+      "sha": "808b01d7796b7d284a136f2b48cbce1b9d4c10d6"
+    },
+    "style.module.css": {
+      "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
+    }
+  },
+  "/example/tsconfig.json": {
+    "compilerOptions": {
+      "outDir": "dist",
+      "rootDir": "",
+      "lib": [
+        "ESNext"
+      ],
+      "module": "esnext",
+      "target": "esnext",
+      "moduleResolution": "bundler",
+      "esModuleInterop": true,
+      "moduleDetection": "force",
+      "allowImportingTsExtensions": true,
+      "noEmit": true,
+      "composite": true,
+      "strict": true,
+      "downlevelIteration": true,
+      "skipLibCheck": true,
+      "jsx": "preserve",
+      "allowSyntheticDefaultImports": true,
+      "forceConsistentCasingInFileNames": true,
+      "allowJs": true,
+      "types": [
+        "bun-types"
+      ]
+    },
+    "include": [
+      "**/*.ts",
+      "**/*.tsx"
+    ]
+  },
+  "/example/youtube-test/dir.json": {
+    "index.html": {
+      "sha": "e085fb732f23ed3fbefde35ba679ac2fb1408a54"
+    },
+    "md5": "5f452bfaccb528217cbc237b288cd513"
+  },
+  "/package.json": {
+    "name": "napl",
+    "module": "src/index.ts",
+    "type": "module",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/jacklehamster/NAPL.git"
+    },
+    "homepage": "https://jacklehamster.github.io/NAPL/",
+    "devDependencies": {
+      "@dobuki/dev-dependencies": "latest",
+      "@types/jest": "^29.5.14",
+      "@types/ws": "^8.5.14",
+      "fetch-blob": "^4.0.0",
+      "jest": "^29.7.0",
+      "ts-jest": "^29.2.5"
+    },
+    "peerDependencies": {
+      "typescript": "latest"
+    },
+    "license": "MIT",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "engines": {
+      "node": ">=14.0.0"
+    },
+    "scripts": {
+      "test": "bun test",
+      "build": "bun i && rm -rf *.tsbuildinfo && rm -rf dist/*.* && bun run bundler/bundler.ts && bun run test && bun run build:declaration && bun link",
+      "build:declaration": "tsc --emitDeclarationOnly --project tsconfig.types.json",
+      "build:example": "cd example && bun i && bun run build && cd ..",
+      "example": "cd example && bun start && cd ..",
+      "example:prod": "cd example && bun start:prod && cd ..",
+      "fix-package-name": "npm explore package-name-fixer -- bun start \"$(pwd)\"",
+      "auto-publish": "npm explore @dobuki/auto-publish -- bun run auto-publish \"$(pwd)\""
+    },
+    "publishConfig": {
+      "access": "public"
+    },
+    "files": [
+      "dist"
+    ],
+    "version": "1.0.15",
+    "author": {
+      "name": "Jack Le Hamster",
+      "email": "jacklehamster@gmail.com"
+    },
+    "description": "Not Another Programming Language",
+    "dependencies": {
+      "@dobuki/data-blob": "^1.0.12"
+    }
+  },
+  "/src/client/dir.json": {
+    "ClientData.ts": {
+      "sha": "ed9612e857cefc3f0ca7106d76bdd1efe86478bf"
+    },
+    "IObservable.ts": {
+      "sha": "8dce059249b75c2ddc823fa73e3bc208ca0a8dc8"
+    },
+    "ISharedData.ts": {
+      "sha": "260a2cc82b50c0a273da31a6dc2157a351d09947"
+    },
+    "Observer.ts": {
+      "sha": "2eec4037721a07fb794d1b6bb0ce06c65c64d00b"
+    },
+    "ObserverManager.ts": {
+      "sha": "ce4e5508db7f44ef0a7b629c6d4306f77fb7cfc8"
+    },
+    "SocketClient.ts": {
+      "sha": "4cbeef010ff5002e896f2259f972720bb4c85ff9"
+    },
+    "SubData.ts": {
+      "sha": "d05470c02fdff3e2bf83125d7e353a466762f405"
+    },
+    "md5": "d14a893cccf96c5c37c8c4e5e34d1c5c"
+  },
+  "/src/data/dir.json": {
+    "data-update.test.ts": {
+      "sha": "b143a1364dca0e14f94bdf8f0911c5773cdfa4e8"
+    },
+    "data-update.ts": {
+      "sha": "5d68ced164ad3d9bdb391e415d5b15041b6c2ff7"
+    },
+    "md5": "75d571f6d9064552e3f23d8a5938acfe"
+  },
+  "/src/dir.json": {
+    "client/ClientData.ts": {
+      "sha": "ed9612e857cefc3f0ca7106d76bdd1efe86478bf"
+    },
+    "client/IObservable.ts": {
+      "sha": "8dce059249b75c2ddc823fa73e3bc208ca0a8dc8"
+    },
+    "client/ISharedData.ts": {
+      "sha": "260a2cc82b50c0a273da31a6dc2157a351d09947"
+    },
+    "client/Observer.ts": {
+      "sha": "2eec4037721a07fb794d1b6bb0ce06c65c64d00b"
+    },
+    "client/ObserverManager.ts": {
+      "sha": "ce4e5508db7f44ef0a7b629c6d4306f77fb7cfc8"
+    },
+    "client/SocketClient.ts": {
+      "sha": "4cbeef010ff5002e896f2259f972720bb4c85ff9"
+    },
+    "client/SubData.ts": {
+      "sha": "d05470c02fdff3e2bf83125d7e353a466762f405"
+    },
+    "data/data-update.test.ts": {
+      "sha": "b143a1364dca0e14f94bdf8f0911c5773cdfa4e8"
+    },
+    "data/data-update.ts": {
+      "sha": "5d68ced164ad3d9bdb391e415d5b15041b6c2ff7"
+    },
+    "index.ts": {
+      "sha": "267d6ea1ddf2bf9961149ae3e3f57f2670a31db3"
+    },
+    "md5": "f0c4bb7ac867e6abcaeeef1187dcda0e",
+    "server/SocketEventHandler.ts": {
+      "sha": "aecf58955629f4178e2d85904d0c1121a1fc23dc"
+    },
+    "server/SocketPayload.ts": {
+      "sha": "5c34076961b7c5986bb46fc559745b4c09c576c6"
+    },
+    "server/SyncRoom.ts": {
+      "sha": "9dc21abdf45772fa5f1839d68be58b83046906e0"
+    },
+    "server/SyncSocket.ts": {
+      "sha": "659bec0bf88be00a6085ba15226798dc1aec50d1"
+    },
+    "types/ClientState.ts": {
+      "sha": "a2f5e522070f9459ef7a6da91310746128b11d31"
+    },
+    "types/DataObject.ts": {
+      "sha": "ba747a6f38117b0f2cf5791957d0e208ba019bb4"
+    },
+    "types/ServerState.ts": {
+      "sha": "f0f8a9a1161e06759c5c505b9c9621214f47bd4f"
+    },
+    "types/Update.ts": {
+      "sha": "3512580b858d740bb12f6fe3510e222cee475897"
+    }
+  },
+  "/src/server/dir.json": {
+    "SocketEventHandler.ts": {
+      "sha": "aecf58955629f4178e2d85904d0c1121a1fc23dc"
+    },
+    "SocketPayload.ts": {
+      "sha": "5c34076961b7c5986bb46fc559745b4c09c576c6"
+    },
+    "SyncRoom.ts": {
+      "sha": "9dc21abdf45772fa5f1839d68be58b83046906e0"
+    },
+    "SyncSocket.ts": {
+      "sha": "659bec0bf88be00a6085ba15226798dc1aec50d1"
+    },
+    "md5": "a37b0dc7bf40a140249389d8ca5ffcf8"
+  },
+  "/src/types/dir.json": {
+    "ClientState.ts": {
+      "sha": "a2f5e522070f9459ef7a6da91310746128b11d31"
+    },
+    "DataObject.ts": {
+      "sha": "ba747a6f38117b0f2cf5791957d0e208ba019bb4"
+    },
+    "ServerState.ts": {
+      "sha": "f0f8a9a1161e06759c5c505b9c9621214f47bd4f"
+    },
+    "Update.ts": {
+      "sha": "3512580b858d740bb12f6fe3510e222cee475897"
+    },
+    "md5": "8607cb2a6b42304ccd594b84dcc36fda"
+  },
+  "/tsconfig.json": {
+    "compilerOptions": {
+      "outDir": "./dist",
+      "rootDir": "src",
+      "baseUrl": "./",
+      "paths": {
+        "@/*": [
+          "src/*"
+        ]
+      },
+      "lib": [
+        "ESNext"
+      ],
+      "module": "esnext",
+      "target": "esnext",
+      "moduleResolution": "bundler",
+      "moduleDetection": "force",
+      "allowImportingTsExtensions": true,
+      "noEmit": true,
+      "composite": true,
+      "strict": true,
+      "downlevelIteration": true,
+      "skipLibCheck": true,
+      "jsx": "react-jsx",
+      "allowSyntheticDefaultImports": true,
+      "forceConsistentCasingInFileNames": true,
+      "allowJs": true,
+      "types": [
+        "bun-types"
+      ]
+    },
+    "include": [
+      "src/**/*.ts",
+      "src/**/*.tsx"
+    ],
+    "exclude": [
+      "src/**/*.test.ts",
+      "src/**/*.test.tsx"
+    ]
+  },
+  "/tsconfig.types.json": {
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+      "outDir": "./dist",
+      "declarationDir": "./dist",
+      "noEmit": false,
+      "emitDeclarationOnly": true,
+      "declaration": true
+    }
+  }
+}

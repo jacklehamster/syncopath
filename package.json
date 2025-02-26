@@ -1,0 +1,52 @@
+{
+  "name": "napl",
+  "module": "src/index.ts",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jacklehamster/NAPL.git"
+  },
+  "homepage": "https://jacklehamster.github.io/NAPL/",
+  "devDependencies": {
+    "@dobuki/dev-dependencies": "latest",
+    "@types/jest": "^29.5.14",
+    "@types/ws": "^8.5.14",
+    "fetch-blob": "^4.0.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5"
+  },
+  "peerDependencies": {
+    "typescript": "latest"
+  },
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "scripts": {
+    "test": "bun test",
+    "build": "bun i && rm -rf *.tsbuildinfo && rm -rf dist/*.* && bun run bundler/bundler.ts && bun run test && bun run build:declaration && bun link",
+    "build:declaration": "tsc --emitDeclarationOnly --project tsconfig.types.json",
+    "build:example": "cd example && bun i && bun run build && cd ..",
+    "example": "cd example && bun start && cd ..",
+    "example:prod": "cd example && bun start:prod && cd ..",
+    "fix-package-name": "npm explore package-name-fixer -- bun start \"$(pwd)\"",
+    "auto-publish": "npm explore @dobuki/auto-publish -- bun run auto-publish \"$(pwd)\""
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "version": "1.0.15",
+  "author": {
+    "name": "Jack Le Hamster",
+    "email": "jacklehamster@gmail.com"
+  },
+  "description": "Not Another Programming Language",
+  "dependencies": {
+    "@dobuki/data-blob": "^1.0.12"
+  }
+}

@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mobile Room</title>
+    <style>
+      body {
+        background-color: lightgray;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <h1>Mobile Room</h1>
+      <p>Shake your device to see the acceleration in the console.</p>
+      <div id="status"></div>
+      <img
+        id="qrcode"
+        src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data="
+        alt="QR code"
+      />
+      <div id="client-box"></div>
+      <script>
+        const qrCode = document.getElementById("qrcode");
+        const url = new URL(location.href);
+        qrCode.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+      </script>
+    </div>
+    <script type="module">
+      import { socketClient, handleUsersChanged } from "../dist/index.js";
+
+      const clientBox = document.getElementById("client-box");
+      handleUsersChanged(
+        (clientId, isSelf, observers) => {
+          const clientDiv = clientBox.appendChild(
+            document.createElement("div")
+          );
+          clientDiv.style.border = "1px solid black";
+          clientDiv.style.padding = "10px";
+          clientDiv.id = `client-${clientId}`;
+          const RANGE = 360;
+          const xValue = document.createElement("span");
+          const yValue = document.createElement("span");
+          const zValue = document.createElement("span");
+          const xKnob = document.createElement("input");
+          xKnob.type = "range";
+          xKnob.min = 0;
+          xKnob.max = RANGE;
+          xKnob.step = 0.01;
+          xKnob.value = 0;
+          const yKnob = document.createElement("input");
+          yKnob.type = "range";
+          yKnob.min = 0;
+          yKnob.max = RANGE;
+          yKnob.step = 0.01;
+          yKnob.value = 0;
+          const zKnob = document.createElement("input");
+          zKnob.type = "range";
+          zKnob.min = 0;
+          zKnob.max = RANGE;
+          zKnob.step = 0.01;
+          zKnob.value = 0;
+          const xGroup = clientDiv.appendChild(document.createElement("div"));
+          const yGroup = clientDiv.appendChild(document.createElement("div"));
+          const zGroup = clientDiv.appendChild(document.createElement("div"));
+          xGroup.appendChild(xKnob);
+          xGroup.appendChild(xValue);
+          yGroup.appendChild(yKnob);
+          yGroup.appendChild(yValue);
+          zGroup.appendChild(zKnob);
+          zGroup.appendChild(zValue);
+
+          const tapBox = clientDiv.appendChild(document.createElement("div"));
+          tapBox.style.border = "1px solid black";
+          tapBox.style.width = "100px";
+          tapBox.style.height = "20px";
+
+          observers.add(
+            socketClient.observe(`clients/${clientId}/tap`).onChange((tap) => {
+              if (tap.value) {
+                tapBox.style.backgroundColor = "red";
+              } else {
+                tapBox.style.backgroundColor = "white";
+              }
+            })
+          );
+
+          observers.add(
+            socketClient
+              .observe(`clients/${clientId}/acceleration`)
+              .onChange((acceleration) => {
+                if (acceleration.value) {
+                  const { x, y, z } = acceleration.value;
+                  const xVal = ((x ?? 0) + RANGE) % RANGE;
+                  const yVal = ((y ?? 0) + RANGE) % RANGE;
+                  const zVal = ((z ?? 0) + RANGE) % RANGE;
+                  xKnob.value = xVal;
+                  yKnob.value = yVal;
+                  zKnob.value = zVal;
+                  xValue.textContent = `x: ${xVal.toFixed(2) ?? 0}`;
+                  yValue.textContent = `y: ${yVal.toFixed(2) ?? 0}`;
+                  zValue.textContent = `z: ${zVal.toFixed(2) ?? 0}`;
+                }
+              })
+          );
+        },
+        (clientId) => {
+          const client = document.getElementById(`client-${clientId}`);
+          if (client) {
+            client.style.transition = "opacity 0.3s";
+            client.style.opacity = 0;
+            setTimeout(() => {
+              client.remove();
+            }, 300);
+          }
+        }
+      );
+
+      window.addEventListener("deviceorientation", (event) => {
+        const acceleration = {
+          x: event.alpha,
+          y: event.beta,
+          z: event.gamma,
+        };
+        socketClient.self.setData("acceleration", acceleration);
+      });
+      //  detect tap
+      window.addEventListener("touchstart", (event) => {
+        if (!socketClient.self.tap) {
+          socketClient.self.setData("tap", socketClient.serverTime);
+        }
+      });
+      window.addEventListener("touchend", (event) => {
+        if (socketClient.self.tap) {
+          socketClient.self.setData("tap", 0);
+        }
+      });
+    </script>
+  </body>
+</html>
