@@ -1,4 +1,4 @@
-import { SocketClient } from "syncopath";
+import { SocketClient } from "@dobuki/syncopath";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface SocketClientProps {

@@ -20,7 +20,7 @@
   },
   "peerDependencies": {
     "typescript": "^5.0.0",
-    "syncopath": "link:syncopath"
+    "@dobuki/syncopath": "link:@dobuki/syncopath"
   },
   "dependencies": {
     "aseprite-sheet": "^1.0.5",

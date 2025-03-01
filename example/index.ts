@@ -2,7 +2,7 @@ import { createServer } from "https";
 import express from "express";
 import { WebSocketServer } from "ws";
 import path from "path";
-import { attachSyncSocket } from "syncopath";
+import { attachSyncSocket } from "@dobuki/syncopath";
 import dotenv from 'dotenv';
 dotenv.config();
 
