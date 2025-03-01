@@ -1,12 +1,11 @@
 {
-  "name": "napl",
+  "name": "syncopath",
   "module": "src/index.ts",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jacklehamster/NAPL.git"
+    "url": "https://github.com/jacklehamster/syncopath.git"
   },
-  "homepage": "https://jacklehamster.github.io/NAPL/",
   "devDependencies": {
     "@dobuki/dev-dependencies": "latest",
     "@types/jest": "^29.5.14",
@@ -40,13 +39,14 @@
   "files": [
     "dist"
   ],
-  "version": "1.0.15",
+  "version": "1.0.0",
   "author": {
-    "name": "Jack Le Hamster",
+    "name": "Vincent Le Quang",
     "email": "jacklehamster@gmail.com"
   },
-  "description": "Not Another Programming Language",
+  "description": "Synchronize data across clients using WebSocket",
   "dependencies": {
     "@dobuki/data-blob": "^1.0.12"
-  }
+  },
+  "keywords": []
 }
