@@ -1,5 +1,6 @@
 {
   "name": "syncopath",
+  "version": "1.0.0",
   "module": "src/index.ts",
   "type": "module",
   "repository": {
@@ -39,7 +40,6 @@
   "files": [
     "dist"
   ],
-  "version": "1.0.0",
   "author": {
     "name": "Vincent Le Quang",
     "email": "jacklehamster@gmail.com"
