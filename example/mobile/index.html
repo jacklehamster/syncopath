@@ -21,6 +21,7 @@
         alt="QR code"
       />
       <div id="client-box"></div>
+      <div id="state-div" style="white-space: pre"></div>
       <script>
         const qrCode = document.getElementById("qrcode");
         const url = new URL(location.href);
@@ -28,7 +29,11 @@
       </script>
     </div>
     <script type="module">
-      import { socketClient, handleUsersChanged } from "../dist/index.js";
+      import {
+        socketClient,
+        handleUsersChanged,
+        stringify,
+      } from "../dist/index.js";
 
       const clientBox = document.getElementById("client-box");
       handleUsersChanged(
@@ -78,6 +83,7 @@
 
           observers.add(
             socketClient.observe(`clients/${clientId}/tap`).onChange((tap) => {
+              console.log(tap);
               if (tap.value) {
                 tapBox.style.backgroundColor = "red";
               } else {
@@ -127,15 +133,23 @@
       });
       //  detect tap
       window.addEventListener("touchstart", (event) => {
-        if (!socketClient.self.tap) {
+        if (!socketClient.self.state.tap) {
           socketClient.self.setData("tap", socketClient.serverTime);
         }
       });
       window.addEventListener("touchend", (event) => {
-        if (socketClient.self.tap) {
+        if (socketClient.self.state.tap) {
           socketClient.self.setData("tap", 0);
         }
       });
+      socketClient
+        .observe()
+        .onChange(
+          () =>
+            (document.querySelector("#state-div").textContent = stringify(
+              socketClient.state
+            ))
+        );
     </script>
   </body>
 </html>

@@ -23682,7 +23682,7 @@ var require_jsx_dev_runtime = __commonJS((exports, module) => {
   }
 });
 
-// ../../NAPL/src/data/data-update.ts
+// ../src/data/data-update.ts
 var SELF = "{self}";
 var KEYS = "{keys}";
 var VALUES = "{values}";
@@ -23759,7 +23759,7 @@ function markCommonUpdateConfirmed(update, now) {
   }
 }
 
-// ../../NAPL/node_modules/@dobuki/data-blob/dist/index.js
+// ../node_modules/@dobuki/data-blob/dist/index.js
 class A {
   data = [];
   #n = new TextEncoder;
@@ -23856,7 +23856,7 @@ async function N(n, h, c = () => globalThis.crypto.randomUUID()) {
   return n;
 }
 
-// ../../NAPL/src/server/SocketEventHandler.ts
+// ../src/server/SocketEventHandler.ts
 function addMessageReceiver(socket, payloadReceived) {
   socket.on("message", async (message) => {
     if (message instanceof Buffer) {
@@ -23869,7 +23869,7 @@ function addMessageReceiver(socket, payloadReceived) {
   });
 }
 
-// ../../NAPL/src/server/SyncRoom.ts
+// ../src/server/SyncRoom.ts
 class SyncRoom {
   room;
   #sockets = new Map;
@@ -23997,7 +23997,7 @@ class SyncRoom {
   }
 }
 
-// ../../NAPL/src/server/SyncSocket.ts
+// ../src/server/SyncSocket.ts
 class SyncSocket {
   #rooms = {};
   constructor(server) {
@@ -24036,7 +24036,7 @@ class SyncSocket {
     return this.#rooms[roomName];
   }
 }
-// ../../NAPL/src/client/ClientData.ts
+// ../src/client/ClientData.ts
 class ClientData {
   socketClient;
   id = "";
@@ -24058,7 +24058,7 @@ class ClientData {
   }
 }
 
-// ../../NAPL/src/client/SubData.ts
+// ../src/client/SubData.ts
 class SubData {
   path;
   socketClient;
@@ -24083,7 +24083,7 @@ class SubData {
   }
 }
 
-// ../../NAPL/src/client/Observer.ts
+// ../src/client/Observer.ts
 class Observer {
   socketClient;
   paths;
@@ -24183,7 +24183,7 @@ class Observer {
   }
 }
 
-// ../../NAPL/src/client/ObserverManager.ts
+// ../src/client/ObserverManager.ts
 class ObserverManager {
   socketClient;
   #observers = new Set;
@@ -24209,7 +24209,7 @@ class ObserverManager {
   }
 }
 
-// ../../NAPL/src/client/SocketClient.ts
+// ../src/client/SocketClient.ts
 var LOCAL_TAG = "$-local";
 
 class SocketClient {
@@ -25092,4 +25092,4 @@ export {
   SocketClient
 };
 
-//# debugId=6623ABC90FF1A62764756E2164756E21
+//# debugId=99B2772A5834983E64756E2164756E21

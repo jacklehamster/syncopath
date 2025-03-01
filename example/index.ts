@@ -2,7 +2,7 @@ import { createServer } from "https";
 import express from "express";
 import { WebSocketServer } from "ws";
 import path from "path";
-import { attachSyncSocket } from "napl";
+import { attachSyncSocket } from "syncopath";
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -23,7 +23,7 @@ app.get("/config.json", (_req, res) => {
   res.json({
     "split": true,
     "show-tab": true,
-    "websocketHost": "wss://api.dobuki.net",
+    // "websocketHost": "wss://api.dobuki.net",
   });
 });
 
