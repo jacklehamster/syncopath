@@ -9,7 +9,7 @@
     "sha": "c58c010b4a3906da7c4ff220162378a7008e3092"
   },
   "bun.lockb": {
-    "sha": "44fa79ebcee30d4ceb5d724d960ba45703102bfb"
+    "sha": "d8bf2db0ef82b403441b0930d284271664382543"
   },
   "bundler/bundler.ts": {
     "sha": "a8f7b2aa31c69081e16f711724e1214506f46d9d"
@@ -21,10 +21,10 @@
     "sha": "98387d623bcf6077316ad093fd89f762c23f9a4f"
   },
   "dist/index.js": {
-    "sha": "cf7230b82e27e6dda703524832e6dc40e982ae62"
+    "sha": "04f89f731400ad66de308133ee60717bf170f807"
   },
   "dist/index.js.map": {
-    "sha": "0481b6526947ee473ada2ddb0a1c45a98fbcd5db"
+    "sha": "906323742ca02e049547ac328ace2be6a4f92058"
   },
   "dist/styles-da87zv4s.css": {
     "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
@@ -72,7 +72,7 @@
     "sha": "b8a6f588c21e65bf7e82dc55308763c16dcfde89"
   },
   "index.ts": {
-    "sha": "e48bef045ccb9707654425adba34ac32aaacd87c"
+    "sha": "d1d87964dddf13bf7f126bf5605554b003d8f353"
   },
   "iso-test/index.html": {
     "sha": "0edfeaa6d0891cccd8058b2d1e336ebd53d4d903"
@@ -86,12 +86,12 @@
   "json-test/index.html": {
     "sha": "9b3d48916b0d0404e894b2d8e29a54f067259495"
   },
-  "md5": "5aa361295c6f81a91aa5de563a6831da",
+  "md5": "9bead95d8768821cbae86594897df246",
   "mobile/index.html": {
-    "sha": "da7fc32018f9e63c66e22c593062c3cb7604695a"
+    "sha": "0bdd4db68ab2f6f719fea937cd9d4a31658f890b"
   },
   "package.json": {
-    "sha": "f188cdbf939c04dd799f3a7c88a0a943c1a95f06"
+    "sha": "b02076a4e075ac42bb3c2d8188662e83573eaa53"
   },
   "random-iso.json": {
     "sha": "d05d34fb92c02b85a64a01f43775b5a71ce58912"
@@ -106,19 +106,19 @@
     "sha": "082ad0d94e11214521e722e1504a3051ee9a01b1"
   },
   "src/index.ts": {
-    "sha": "2691be91a0ab824497b1a6240990368254abd233"
+    "sha": "d1159d5cda2890245af330da6d91e42ed1fe4ae5"
   },
   "src/iso-test/iso-utils.ts": {
     "sha": "7c965b9f650465ae310cacd812584611a28e9a7a"
   },
   "src/react/component.tsx": {
-    "sha": "7b7d08043d3317017724edb151cc266d0eb11b9b"
+    "sha": "8b6ea4af4538d0b028152362a99c84d6439c15bd"
   },
   "src/react/index.d.ts": {
     "sha": "7980ec238c4dd00704399f7d8fe89cf26f194398"
   },
   "src/react/socket-client.ts": {
-    "sha": "808b01d7796b7d284a136f2b48cbce1b9d4c10d6"
+    "sha": "4aaa1736565b6781a650b9f6a6085ab569f659f4"
   },
   "src/react/style.module.css": {
     "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
