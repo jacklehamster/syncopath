@@ -4,9 +4,8 @@
 
 export { commitUpdates, SocketClient } from "@dobuki/syncopath";
 import stringify from "json-stringify-pretty-compact";
-import { SocketClient } from "@dobuki/syncopath";
+import { SocketClient, Observer } from "@dobuki/syncopath";
 import { SpriteSheet, loadSpriteSheet } from "aseprite-sheet";
-import { Observer } from "../../dist/client/Observer";
 import { hookupDiv } from "./react/component";
 
 let name: string;
