@@ -21,10 +21,10 @@
     "sha": "98387d623bcf6077316ad093fd89f762c23f9a4f"
   },
   "dist/index.js": {
-    "sha": "04f89f731400ad66de308133ee60717bf170f807"
+    "sha": "460e2b7534658c460d7cbab88c27e3306c060961"
   },
   "dist/index.js.map": {
-    "sha": "906323742ca02e049547ac328ace2be6a4f92058"
+    "sha": "bd96794e397511e6e4cec540a502537910a008fe"
   },
   "dist/styles-da87zv4s.css": {
     "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
@@ -86,12 +86,15 @@
   "json-test/index.html": {
     "sha": "9b3d48916b0d0404e894b2d8e29a54f067259495"
   },
-  "md5": "9bead95d8768821cbae86594897df246",
+  "md5": "4362e3fb4e134b05c3d09537245364da",
   "mobile/index.html": {
     "sha": "0bdd4db68ab2f6f719fea937cd9d4a31658f890b"
   },
   "package.json": {
     "sha": "b02076a4e075ac42bb3c2d8188662e83573eaa53"
+  },
+  "peer-test/index.html": {
+    "sha": "b9bf575a6fd18ee1779c9908992e3af324bd5ca6"
   },
   "random-iso.json": {
     "sha": "d05d34fb92c02b85a64a01f43775b5a71ce58912"
