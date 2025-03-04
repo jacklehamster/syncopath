@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mobile Room</title>
+    <style>
+      body {
+        background-color: lightgray;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <h1>Peer Room</h1>
+      <p>Shake your device to see the acceleration in the console.</p>
+      <div id="status"></div>
+      <img
+        id="qrcode"
+        src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data="
+        alt="QR code"
+      />
+      <div id="client-box"></div>
+      <div id="state-div" style="white-space: pre"></div>
+      <script>
+        const qrCode = document.getElementById("qrcode");
+        const url = new URL(location.href);
+        qrCode.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+      </script>
+    </div>
+    <script type="module">
+      import {
+        socketClient,
+        handleUsersChanged,
+        stringify,
+      } from "../dist/index.js";
+
+      const clientBox = document.getElementById("client-box");
+      handleUsersChanged(
+        (clientId, isSelf, observers) => {
+          const clientDiv = clientBox.appendChild(
+            document.createElement("div")
+          );
+          clientDiv.style.border = "1px solid black";
+          clientDiv.style.padding = "10px";
+          clientDiv.id = `client-${clientId}`;
+          clientDiv.textContent = `Client: ${clientId}`;
+        },
+        (clientId) => {
+          const client = document.getElementById(`client-${clientId}`);
+          if (client) {
+            client.style.transition = "opacity 0.3s";
+            client.style.opacity = 0;
+            setTimeout(() => {
+              client.remove();
+            }, 300);
+          }
+        }
+      );
+
+      socketClient
+        .observe()
+        .onChange(
+          () =>
+            (document.querySelector("#state-div").textContent = stringify(
+              socketClient.state
+            ))
+        );
+    </script>
+  </body>
+</html>

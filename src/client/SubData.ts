@@ -4,11 +4,15 @@ import { SocketClient } from "./SocketClient";
 import { getLeafObject } from "@/data/data-update";
 import { Observer } from "./Observer";
 import { IObservable } from "./IObservable";
+import { ObserverManager } from "./ObserverManager";
 
 export class SubData implements ISharedData, IObservable {
   readonly #parts: (string | number)[] = [];
+  readonly #observerManager;
+
   constructor(readonly path: Update["path"], readonly socketClient: SocketClient) {
     this.#parts = path.split("/");
+    this.#observerManager = new ObserverManager(socketClient);
   }
 
   #getAbsolutePath(path: Update["path"]): string {
@@ -17,7 +21,7 @@ export class SubData implements ISharedData, IObservable {
 
   observe(...paths: Update["path"][]): Observer {
     const updatedPaths = paths.map(path => this.#getAbsolutePath(path));
-    return this.socketClient.observe(...updatedPaths);
+    return this.#observerManager.observe(...updatedPaths);
   }
 
   async setData(path: Update["path"], value: any, options?: SetDataOptions): Promise<void> {
@@ -26,5 +30,9 @@ export class SubData implements ISharedData, IObservable {
 
   get state(): Record<string, any> {
     return getLeafObject(this.socketClient.state, this.#parts, 0, false) ?? {};
+  }
+
+  close() {
+    this.#observerManager.close();
   }
 }

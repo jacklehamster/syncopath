@@ -19,6 +19,7 @@ export class SocketClient implements ISharedData, IObservable {
   state: Record<string, any> = {
     [LOCAL_TAG]: {},
   };
+  readonly #children: ISharedData[]
   #socket: WebSocket | undefined;
   #connectionPromise: Promise<void> | undefined;
   readonly #connectionUrl: string;
@@ -37,6 +38,7 @@ export class SocketClient implements ISharedData, IObservable {
         this.#connect();
       }
     });
+    this.#children = [this.#selfData];
   }
 
   #fixPath(path: Update["path"]) {
@@ -212,6 +214,9 @@ export class SocketClient implements ISharedData, IObservable {
     commitUpdates(this.state, this.#incomingUpdates);
     this.#incomingUpdates.length = 0;
     this.#observerManager.triggerObservers();
+    this.#children.forEach(child => {
+
+    });
   }
 
   removeObserver(observer: Observer) {

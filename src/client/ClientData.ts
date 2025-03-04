@@ -2,11 +2,14 @@ import { Update } from "@/types/Update";
 import { ISharedData, SetDataOptions } from "./ISharedData";
 import { SocketClient } from "./SocketClient";
 import { Observer } from "./Observer";
-import { IObservable } from "./IObservable";
+import { ObserverManager } from "./ObserverManager";
 
-export class ClientData implements ISharedData, IObservable {
+export class ClientData implements ISharedData {
   id: string = "";
+  readonly #observerManager;
+
   constructor(readonly socketClient: SocketClient) {
+    this.#observerManager = new ObserverManager(socketClient);
   }
 
   #getAbsolutePath(path: Update["path"]): string {
@@ -15,7 +18,7 @@ export class ClientData implements ISharedData, IObservable {
 
   observe(...paths: Update["path"][]): Observer {
     const updatedPaths = paths.map(path => this.#getAbsolutePath(path));
-    return this.socketClient.observe(...updatedPaths);
+    return this.#observerManager.observe(...updatedPaths);
   }
 
   async setData(path: Update["path"], value: any, options?: SetDataOptions): Promise<void> {

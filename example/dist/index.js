@@ -24036,65 +24036,20 @@ class SyncSocket {
     return this.#rooms[roomName];
   }
 }
-// ../src/client/ClientData.ts
-class ClientData {
-  socketClient;
-  id = "";
-  constructor(socketClient) {
-    this.socketClient = socketClient;
-  }
-  #getAbsolutePath(path) {
-    return path ? `clients/{self}/${path}` : "clients/{self}";
-  }
-  observe(...paths) {
-    const updatedPaths = paths.map((path) => this.#getAbsolutePath(path));
-    return this.socketClient.observe(...updatedPaths);
-  }
-  async setData(path, value, options) {
-    return this.socketClient.setData(this.#getAbsolutePath(path), value, options);
-  }
-  get state() {
-    return this.socketClient.state.clients?.[this.id] ?? {};
-  }
-}
-
-// ../src/client/SubData.ts
-class SubData {
-  path;
-  socketClient;
-  #parts = [];
-  constructor(path, socketClient) {
-    this.path = path;
-    this.socketClient = socketClient;
-    this.#parts = path.split("/");
-  }
-  #getAbsolutePath(path) {
-    return path ? `${this.path}/${path}` : this.path;
-  }
-  observe(...paths) {
-    const updatedPaths = paths.map((path) => this.#getAbsolutePath(path));
-    return this.socketClient.observe(...updatedPaths);
-  }
-  async setData(path, value, options) {
-    return this.socketClient.setData(this.#getAbsolutePath(path), value, options);
-  }
-  get state() {
-    return getLeafObject(this.socketClient.state, this.#parts, 0, false) ?? {};
-  }
-}
-
 // ../src/client/Observer.ts
 class Observer {
   socketClient;
   paths;
+  observerManagger;
   #partsArrays;
   #observations;
   #changeCallbacks = new Set;
   #addedElementsCallback = new Set;
   #deletedElementsCallback = new Set;
-  constructor(socketClient, paths) {
+  constructor(socketClient, paths, observerManagger) {
     this.socketClient = socketClient;
     this.paths = paths;
+    this.observerManagger = observerManagger;
     this.#partsArrays = paths.map((p) => p === undefined ? [] : p.split("/"));
     this.#observations = paths.map(() => {
       const observation = {
@@ -24178,8 +24133,7 @@ class Observer {
     }
   }
   close() {
-    console.log("Closed observer " + this.#partsArrays.join("/"));
-    this.socketClient.removeObserver(this);
+    this.observerManagger.removeObserver(this);
   }
 }
 
@@ -24191,7 +24145,7 @@ class ObserverManager {
     this.socketClient = socketClient;
   }
   observe(...paths) {
-    const observer = new Observer(this.socketClient, paths);
+    const observer = new Observer(this.socketClient, paths, this);
     this.#observers.add(observer);
     this.#updateState();
     return observer;
@@ -24207,6 +24161,86 @@ class ObserverManager {
     this.socketClient.localState.observers = Array.from(new Set(Array.from(this.#observers).map((o) => o.paths).flat()));
     this.socketClient.localState.observers.sort();
   }
+  close() {
+    this.#observers.forEach((o) => o.close());
+  }
+}
+
+// ../src/client/ClientData.ts
+class ClientData {
+  socketClient;
+  id = "";
+  #observerManager;
+  constructor(socketClient) {
+    this.socketClient = socketClient;
+    this.#observerManager = new ObserverManager(socketClient);
+  }
+  #getAbsolutePath(path) {
+    return path ? `clients/{self}/${path}` : "clients/{self}";
+  }
+  observe(...paths) {
+    const updatedPaths = paths.map((path) => this.#getAbsolutePath(path));
+    return this.#observerManager.observe(...updatedPaths);
+  }
+  async setData(path, value, options) {
+    return this.socketClient.setData(this.#getAbsolutePath(path), value, options);
+  }
+  get state() {
+    return this.socketClient.state.clients?.[this.id] ?? {};
+  }
+}
+
+// ../src/client/SubData.ts
+class SubData {
+  path;
+  socketClient;
+  #parts = [];
+  #observerManager;
+  constructor(path, socketClient) {
+    this.path = path;
+    this.socketClient = socketClient;
+    this.#parts = path.split("/");
+    this.#observerManager = new ObserverManager(socketClient);
+  }
+  #getAbsolutePath(path) {
+    return path ? `${this.path}/${path}` : this.path;
+  }
+  observe(...paths) {
+    const updatedPaths = paths.map((path) => this.#getAbsolutePath(path));
+    return this.#observerManager.observe(...updatedPaths);
+  }
+  async setData(path, value, options) {
+    return this.socketClient.setData(this.#getAbsolutePath(path), value, options);
+  }
+  get state() {
+    return getLeafObject(this.socketClient.state, this.#parts, 0, false) ?? {};
+  }
+  close() {
+    this.#observerManager.close();
+  }
+}
+
+// ../src/client/PeerConnection.ts
+class PeerConnection {
+  socketClient;
+  peerConnection = new RTCPeerConnection;
+  dataChannel = this.peerConnection.createDataChannel("dataChannel");
+  constructor(socketClient) {
+    this.socketClient = socketClient;
+    this.peerConnection.onicecandidate = (event) => {
+      if (event.candidate) {
+        this.sendSignal({ candidate: event.candidate });
+      }
+    };
+  }
+  sendSignal(signal) {
+    this.socketClient.self.setData("signal", signal);
+  }
+  async startConnection() {
+    const offer = await this.peerConnection.createOffer();
+    await this.peerConnection.setLocalDescription(offer);
+    this.sendSignal({ offer });
+  }
 }
 
 // ../src/client/SocketClient.ts
@@ -24216,6 +24250,7 @@ class SocketClient {
   state = {
     [LOCAL_TAG]: {}
   };
+  #children;
   #socket;
   #connectionPromise;
   #connectionUrl;
@@ -24224,6 +24259,7 @@ class SocketClient {
   #selfData = new ClientData(this);
   #observerManager = new ObserverManager(this);
   #serverTimeOffset = 0;
+  #peerConnection = new PeerConnection(this);
   constructor(host, room) {
     const prefix = host.startsWith("ws://") || host.startsWith("wss://") ? "" : globalThis.location.protocol === "https:" ? "wss://" : "ws://";
     this.#connectionUrl = `${prefix}${host}${room ? `?room=${room}` : ""}`;
@@ -24233,6 +24269,7 @@ class SocketClient {
         this.#connect();
       }
     });
+    this.#children = [this.#selfData];
   }
   #fixPath(path) {
     const split = path.split("/");
@@ -24289,6 +24326,9 @@ class SocketClient {
     }
     return this.#connectionPromise;
   }
+  #onConnected() {
+    this.#peerConnection.startConnection();
+  }
   async#connect() {
     const socket = this.#socket = new WebSocket(this.#connectionUrl);
     return this.#connectionPromise = new Promise((resolve, reject) => {
@@ -24308,6 +24348,7 @@ class SocketClient {
           this.#selfData.id = payload.myClientId;
           this.#connectionPromise = undefined;
           this.localState.id = payload.myClientId;
+          this.#onConnected();
           resolve();
         }
         if (payload?.state) {
@@ -24381,6 +24422,8 @@ class SocketClient {
     commitUpdates(this.state, this.#incomingUpdates);
     this.#incomingUpdates.length = 0;
     this.#observerManager.triggerObservers();
+    this.#children.forEach((child) => {
+    });
   }
   removeObserver(observer) {
     this.#observerManager.removeObserver(observer);
@@ -25092,4 +25135,4 @@ export {
   SocketClient
 };
 
-//# debugId=99B2772A5834983E64756E2164756E21
+//# debugId=B966F8D904780DE464756E2164756E21

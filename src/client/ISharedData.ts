@@ -1,5 +1,5 @@
 import { Update } from "@/types/Update";
-import { Observer } from "./Observer";
+import { ObserverManager } from "./ObserverManager";
 
 export interface SetDataOptions {
   passive?: boolean;

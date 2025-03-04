@@ -1,6 +1,7 @@
 import { getLeafObject } from "@/data/data-update";
 import { Update } from "@/types/Update";
 import { SocketClient } from "./SocketClient";
+import { ObserverManager } from "./ObserverManager";
 
 interface Observation {
   previous: any;
@@ -15,7 +16,8 @@ export class Observer {
   readonly #deletedElementsCallback: Set<(...keys: (any[] | undefined)[]) => void> = new Set();
   constructor(
     readonly socketClient: SocketClient,
-    readonly paths: Update["path"][]) {
+    readonly paths: Update["path"][],
+    readonly observerManagger: ObserverManager) {
     this.#partsArrays = paths.map(p => p === undefined ? [] : p.split("/"));
     this.#observations = paths.map(() => {
       const observation = {
@@ -109,7 +111,6 @@ export class Observer {
   }
 
   close(): void {
-    console.log("Closed observer " + this.#partsArrays.join("/"));
-    this.socketClient.removeObserver(this);
+    this.observerManagger.removeObserver(this);
   }
 }
