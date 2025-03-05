@@ -21,10 +21,10 @@
     "sha": "98387d623bcf6077316ad093fd89f762c23f9a4f"
   },
   "dist/index.js": {
-    "sha": "460e2b7534658c460d7cbab88c27e3306c060961"
+    "sha": "8b8fa99b5b9fcb18f1f852bee9279b1f8c4aabaa"
   },
   "dist/index.js.map": {
-    "sha": "bd96794e397511e6e4cec540a502537910a008fe"
+    "sha": "b61523b79129f66b4f16c6ff32e6aeb5d84dcbf1"
   },
   "dist/styles-da87zv4s.css": {
     "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
@@ -66,7 +66,7 @@
     "sha": "a08fc554cd2f961f5ba12d9f7bf80486fd3fb442"
   },
   "image-test/index.html": {
-    "sha": "719850ced84f9531ecfc6692a1dc03422f148393"
+    "sha": "a24f52a899f55f74b31e9d917f0472bfb8b5211c"
   },
   "index.html": {
     "sha": "b8a6f588c21e65bf7e82dc55308763c16dcfde89"
@@ -86,7 +86,7 @@
   "json-test/index.html": {
     "sha": "9b3d48916b0d0404e894b2d8e29a54f067259495"
   },
-  "md5": "4362e3fb4e134b05c3d09537245364da",
+  "md5": "d0cd5e08ea3fb5f66e77dcc2e6a51905",
   "mobile/index.html": {
     "sha": "0bdd4db68ab2f6f719fea937cd9d4a31658f890b"
   },
@@ -94,7 +94,7 @@
     "sha": "b02076a4e075ac42bb3c2d8188662e83573eaa53"
   },
   "peer-test/index.html": {
-    "sha": "b9bf575a6fd18ee1779c9908992e3af324bd5ca6"
+    "sha": "6f3c1a24feb8b08bbb7aaef34c0b5c6c300e29ab"
   },
   "random-iso.json": {
     "sha": "d05d34fb92c02b85a64a01f43775b5a71ce58912"
@@ -106,7 +106,7 @@
     "sha": "b7b986c76fc8f78204e95498aef051618845d170"
   },
   "sample/index.html": {
-    "sha": "082ad0d94e11214521e722e1504a3051ee9a01b1"
+    "sha": "828632a061d8b61aa5951e9a4bbc9fe46cccb824"
   },
   "src/index.ts": {
     "sha": "d1159d5cda2890245af330da6d91e42ed1fe4ae5"
