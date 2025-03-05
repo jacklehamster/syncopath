@@ -44,7 +44,7 @@
             button.style.marginLeft = "10px";
             button.onclick = () => {
               socketClient.setData(`peer/${PEER_TAG}`, clientId, {
-                push: true,
+                append: true,
               });
             };
           }

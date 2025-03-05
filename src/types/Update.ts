@@ -1,7 +1,7 @@
 export interface Update {
   path: string;
   value: any | undefined;
-  push?: boolean;
+  append?: boolean;
   insert?: number;
   delete?: number;
   confirmed?: number;

@@ -66,7 +66,7 @@ export class SocketClient implements ISharedData, IObservable {
     const update: Update = {
       path: this.#fixPath(path),
       value: options.delete ? undefined : value,
-      push: options.push,
+      append: options.append,
       insert: options.insert,
       blobs: payloadBlobs,
     };

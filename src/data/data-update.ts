@@ -12,7 +12,7 @@ export function commitUpdates(root: DataObject, updates: Update[]) {
     const parts = update.path.split("/");
     const leaf: any = getLeafObject(root, parts, 1, true)!;
     const prop = parts[parts.length - 1];
-    if (update.push) {
+    if (update.append) {
       if (!Array.isArray(leaf[prop])) {
         leaf[prop] = [];
       }

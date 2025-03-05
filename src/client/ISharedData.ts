@@ -3,7 +3,7 @@ import { Update } from "@/types/Update";
 export interface SetDataOptions {
   active?: boolean;
   room?: string;
-  push?: boolean;
+  append?: boolean;
   insert?: number;
   delete?: boolean;
 }
