@@ -13,9 +13,9 @@
   },
   "/example/chatroom/dir.json": {
     "index.html": {
-      "sha": "ecc7543e13eb7e9cb22115d8e5593700e285e6c0"
+      "sha": "7288bf123369e51902558959ef2addbb51a262de"
     },
-    "md5": "ecdb0babf67b9aba88eb8e650cd96be2"
+    "md5": "bddbb99d33d784d9146dada7f9f7fb20"
   },
   "/example/config.json": {
     "websocketHost": "api.dobuki.net",
@@ -56,16 +56,16 @@
       "sha": "a8f7b2aa31c69081e16f711724e1214506f46d9d"
     },
     "chatroom/index.html": {
-      "sha": "ecc7543e13eb7e9cb22115d8e5593700e285e6c0"
+      "sha": "7288bf123369e51902558959ef2addbb51a262de"
     },
     "config.json": {
       "sha": "98387d623bcf6077316ad093fd89f762c23f9a4f"
     },
     "dist/index.js": {
-      "sha": "ed3715fa1c2f15050e33a05ff336b71dd4a866a9"
+      "sha": "82bbfb683693798128e93457f920e545c44cba5a"
     },
     "dist/index.js.map": {
-      "sha": "d115cbd3ddb518630f16a1435509290858ca1f8e"
+      "sha": "bba70fa2904f2f047664a89bc2a18b49c1a020df"
     },
     "dist/styles-da87zv4s.css": {
       "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
@@ -127,7 +127,7 @@
     "json-test/index.html": {
       "sha": "9b3d48916b0d0404e894b2d8e29a54f067259495"
     },
-    "md5": "6d558f98cad4d1558e04cbe9183951be",
+    "md5": "77215b31cdf88d34191339969b2c3b4e",
     "mobile/index.html": {
       "sha": "0bdd4db68ab2f6f719fea937cd9d4a31658f890b"
     },
@@ -135,7 +135,7 @@
       "sha": "b02076a4e075ac42bb3c2d8188662e83573eaa53"
     },
     "peer-test/index.html": {
-      "sha": "6f3c1a24feb8b08bbb7aaef34c0b5c6c300e29ab"
+      "sha": "fb8dab023891ac0e752efa586ecb98270a197cda"
     },
     "random-iso.json": {
       "sha": "d05d34fb92c02b85a64a01f43775b5a71ce58912"
@@ -176,12 +176,12 @@
   },
   "/example/dist/dir.json": {
     "index.js": {
-      "sha": "ed3715fa1c2f15050e33a05ff336b71dd4a866a9"
+      "sha": "82bbfb683693798128e93457f920e545c44cba5a"
     },
     "index.js.map": {
-      "sha": "d115cbd3ddb518630f16a1435509290858ca1f8e"
+      "sha": "bba70fa2904f2f047664a89bc2a18b49c1a020df"
     },
-    "md5": "9e210f63eb301cab27c603e0be4f8245",
+    "md5": "deeed593aceca86b72a39fea5c8058b0",
     "styles-da87zv4s.css": {
       "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
     }
@@ -679,9 +679,9 @@
   },
   "/example/peer-test/dir.json": {
     "index.html": {
-      "sha": "6f3c1a24feb8b08bbb7aaef34c0b5c6c300e29ab"
+      "sha": "fb8dab023891ac0e752efa586ecb98270a197cda"
     },
-    "md5": "37f55c958cf5a3bb1a80ed6d46e937bb"
+    "md5": "612734f20e1eff3e5d6479f99e508550"
   },
   "/example/random-iso.json": {
     "frames": {
@@ -1196,7 +1196,7 @@
   },
   "/package.json": {
     "name": "@dobuki/syncopath",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "module": "src/index.ts",
     "type": "module",
     "repository": {
@@ -1254,7 +1254,7 @@
       "sha": "8dce059249b75c2ddc823fa73e3bc208ca0a8dc8"
     },
     "ISharedData.ts": {
-      "sha": "47d719793881f7ece642c11da1bbd937537cf37f"
+      "sha": "7f4867ce2f8638d70e38823797225ea99a97432e"
     },
     "Observer.ts": {
       "sha": "640a5c9af9d2a0826ec2ca28b99b9e361c1b94b0"
@@ -1263,21 +1263,21 @@
       "sha": "923fcb3f529212593b63fccd5f15595fc7fcd002"
     },
     "SocketClient.ts": {
-      "sha": "437adcb9fc48f09df5cf9e04f8b93fad7ea849d3"
+      "sha": "298d50bf3713ba3b9cd9e000128c400eacc90123"
     },
     "SubData.ts": {
       "sha": "4d075bacd738d5077397908f75e5c34630c1571f"
     },
-    "md5": "817154d864418cd468b8b24d803b1547"
+    "md5": "a17f592dca58cc7dec78f6642abdc308"
   },
   "/src/data/dir.json": {
     "data-update.test.ts": {
       "sha": "b143a1364dca0e14f94bdf8f0911c5773cdfa4e8"
     },
     "data-update.ts": {
-      "sha": "5d68ced164ad3d9bdb391e415d5b15041b6c2ff7"
+      "sha": "fccbf21791fce2da00082cc5895a6b3bb90d1d23"
     },
-    "md5": "75d571f6d9064552e3f23d8a5938acfe"
+    "md5": "6805cc02ded4394fb974eeb61355915e"
   },
   "/src/dir.json": {
     "client/ClientData.ts": {
@@ -1287,7 +1287,7 @@
       "sha": "8dce059249b75c2ddc823fa73e3bc208ca0a8dc8"
     },
     "client/ISharedData.ts": {
-      "sha": "47d719793881f7ece642c11da1bbd937537cf37f"
+      "sha": "7f4867ce2f8638d70e38823797225ea99a97432e"
     },
     "client/Observer.ts": {
       "sha": "640a5c9af9d2a0826ec2ca28b99b9e361c1b94b0"
@@ -1296,7 +1296,7 @@
       "sha": "923fcb3f529212593b63fccd5f15595fc7fcd002"
     },
     "client/SocketClient.ts": {
-      "sha": "437adcb9fc48f09df5cf9e04f8b93fad7ea849d3"
+      "sha": "298d50bf3713ba3b9cd9e000128c400eacc90123"
     },
     "client/SubData.ts": {
       "sha": "4d075bacd738d5077397908f75e5c34630c1571f"
@@ -1305,12 +1305,12 @@
       "sha": "b143a1364dca0e14f94bdf8f0911c5773cdfa4e8"
     },
     "data/data-update.ts": {
-      "sha": "5d68ced164ad3d9bdb391e415d5b15041b6c2ff7"
+      "sha": "fccbf21791fce2da00082cc5895a6b3bb90d1d23"
     },
     "index.ts": {
       "sha": "267d6ea1ddf2bf9961149ae3e3f57f2670a31db3"
     },
-    "md5": "b3d5a59e814b04851d6a02f916754cad",
+    "md5": "ef9c5a1fb1c6a873765776589ad2f8ba",
     "server/SocketEventHandler.ts": {
       "sha": "aecf58955629f4178e2d85904d0c1121a1fc23dc"
     },
@@ -1329,6 +1329,9 @@
     "server/peer-utils.ts": {
       "sha": "f21755accbbca7b368e1f6f9885dffe5dff57a38"
     },
+    "types/Action.ts": {
+      "sha": "81594cbe9058b15543d99e96a11fb2d3e37b56ab"
+    },
     "types/ClientState.ts": {
       "sha": "a2f5e522070f9459ef7a6da91310746128b11d31"
     },
@@ -1339,7 +1342,7 @@
       "sha": "b0fa95798f8bb571b9c7bbe9aa2f07fac3e0c486"
     },
     "types/Update.ts": {
-      "sha": "3512580b858d740bb12f6fe3510e222cee475897"
+      "sha": "fac15db4e28cd4739d144bb3c4fa9c847e273a03"
     }
   },
   "/src/server/dir.json": {
@@ -1364,6 +1367,9 @@
     }
   },
   "/src/types/dir.json": {
+    "Action.ts": {
+      "sha": "81594cbe9058b15543d99e96a11fb2d3e37b56ab"
+    },
     "ClientState.ts": {
       "sha": "a2f5e522070f9459ef7a6da91310746128b11d31"
     },
@@ -1374,9 +1380,9 @@
       "sha": "b0fa95798f8bb571b9c7bbe9aa2f07fac3e0c486"
     },
     "Update.ts": {
-      "sha": "3512580b858d740bb12f6fe3510e222cee475897"
+      "sha": "fac15db4e28cd4739d144bb3c4fa9c847e273a03"
     },
-    "md5": "fee70869024b680f11d1613f76a2fb0e"
+    "md5": "61351c2edecb1dc0d4d516cb371d7247"
   },
   "/tsconfig.json": {
     "compilerOptions": {

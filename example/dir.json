@@ -15,16 +15,16 @@
     "sha": "a8f7b2aa31c69081e16f711724e1214506f46d9d"
   },
   "chatroom/index.html": {
-    "sha": "ecc7543e13eb7e9cb22115d8e5593700e285e6c0"
+    "sha": "7288bf123369e51902558959ef2addbb51a262de"
   },
   "config.json": {
     "sha": "98387d623bcf6077316ad093fd89f762c23f9a4f"
   },
   "dist/index.js": {
-    "sha": "ed3715fa1c2f15050e33a05ff336b71dd4a866a9"
+    "sha": "82bbfb683693798128e93457f920e545c44cba5a"
   },
   "dist/index.js.map": {
-    "sha": "d115cbd3ddb518630f16a1435509290858ca1f8e"
+    "sha": "bba70fa2904f2f047664a89bc2a18b49c1a020df"
   },
   "dist/styles-da87zv4s.css": {
     "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
@@ -86,7 +86,7 @@
   "json-test/index.html": {
     "sha": "9b3d48916b0d0404e894b2d8e29a54f067259495"
   },
-  "md5": "6d558f98cad4d1558e04cbe9183951be",
+  "md5": "77215b31cdf88d34191339969b2c3b4e",
   "mobile/index.html": {
     "sha": "0bdd4db68ab2f6f719fea937cd9d4a31658f890b"
   },
@@ -94,7 +94,7 @@
     "sha": "b02076a4e075ac42bb3c2d8188662e83573eaa53"
   },
   "peer-test/index.html": {
-    "sha": "6f3c1a24feb8b08bbb7aaef34c0b5c6c300e29ab"
+    "sha": "fb8dab023891ac0e752efa586ecb98270a197cda"
   },
   "random-iso.json": {
     "sha": "d05d34fb92c02b85a64a01f43775b5a71ce58912"
