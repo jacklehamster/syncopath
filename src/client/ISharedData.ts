@@ -1,8 +1,10 @@
 import { Update } from "@/types/Update";
 
-export interface SetDataOptions {
+export interface UpdateOptions {
   active?: boolean;
-  room?: string;
+}
+
+export interface SetDataOptions extends UpdateOptions {
   append?: boolean;
   insert?: number;
   delete?: boolean;

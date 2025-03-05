@@ -8,6 +8,9 @@
       body {
         background-color: lightgray;
       }
+      #state-div {
+        white-space: pre;
+      }
     </style>
   </head>
   <body>
@@ -15,7 +18,7 @@
       <h1>Peer Room</h1>
       <div id="status"></div>
       <div id="client-box"></div>
-      <div id="state-div" style="white-space: pre"></div>
+      <div id="state-div"></div>
     </div>
     <script type="module">
       import {
@@ -42,11 +45,11 @@
             );
             button.textContent = "Add peer data";
             button.style.marginLeft = "10px";
-            button.onclick = () => {
-              socketClient.setData(`peer/${PEER_TAG}`, clientId, {
-                append: true,
-              });
-            };
+
+            socketClient.setData(`peer/${PEER_TAG}`, []);
+
+            button.onclick = () =>
+              socketClient.pushData(`peer/${PEER_TAG}`, clientId);
           }
         },
         (clientId) => {

@@ -4,7 +4,8 @@
 
 import { commitUpdates, getLeafObject, markCommonUpdateConfirmed } from "@/data/data-update";
 import { Update } from "@/types/Update";
-import { ISharedData, SetDataOptions } from "./ISharedData";
+import { Action } from "@/types/Action";
+import { ISharedData, SetDataOptions, UpdateOptions } from "./ISharedData";
 import { ClientData } from "./ClientData";
 import { SubData } from "./SubData";
 import { Observer } from "./Observer";
@@ -52,24 +53,48 @@ export class SocketClient implements ISharedData, IObservable {
     return getLeafObject(this.state, path, 0, false, this.#selfData.id) as any;
   }
 
-  async setData(path: Update["path"], value: any, options: SetDataOptions = {}) {
-    await this.#waitForConnection();
+  async actions(path: Update["path"], actions: Action[], options: UpdateOptions = {}) {
+    await this.applyUpdate({
+      path,
+      actions,
+    }, options);
+  }
 
+  async #convertValue(path: Update["path"], value: any) {
     if (typeof value === "function") {
       const updater = value as (prev: any) => any;
       value = updater(this.getData(path));
     }
-
     const payloadBlobs: Record<string, Blob> = {};
     value = await extractBlobsFromPayload(value, payloadBlobs);
+    return [value, payloadBlobs];
+  }
 
-    const update: Update = {
+  async pushData(path: Update["path"], value: any, options: UpdateOptions = {}) {
+    const [val, payloadBlobs] = await this.#convertValue(path, value);
+
+    await this.applyUpdate({
       path: this.#fixPath(path),
-      value: options.delete ? undefined : value,
+      value: val,
+      append: true,
+      blobs: payloadBlobs,
+    }, options);
+  }
+
+  async setData(path: Update["path"], value: any, options: SetDataOptions = {}) {
+    const [val, payloadBlobs] = await this.#convertValue(path, value);
+
+    await this.applyUpdate({
+      path: this.#fixPath(path),
+      value: options.delete ? undefined : val,
       append: options.append,
       insert: options.insert,
       blobs: payloadBlobs,
-    };
+    }, options);
+  }
+
+  async applyUpdate(update: Update, options: UpdateOptions = {}) {
+    await this.#waitForConnection();
 
     if (options.active) {
       markCommonUpdateConfirmed(update, this.serverTime);

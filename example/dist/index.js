@@ -23693,7 +23693,18 @@ function commitUpdates(root, updates) {
     const parts = update.path.split("/");
     const leaf = getLeafObject(root, parts, 1, true);
     const prop = parts[parts.length - 1];
-    if (update.push) {
+    if (update.actions) {
+      const root2 = leaf[prop];
+      for (let action of update.actions) {
+        const { name, args } = action;
+        if (typeof root2[name] !== "function") {
+          break;
+        }
+        root2[name](...args ?? []);
+      }
+      return;
+    }
+    if (update.append) {
       if (!Array.isArray(leaf[prop])) {
         leaf[prop] = [];
       }
@@ -24321,21 +24332,42 @@ class SocketClient {
   getData(path) {
     return getLeafObject(this.state, path, 0, false, this.#selfData.id);
   }
-  async setData(path, value, options = {}) {
-    await this.#waitForConnection();
+  async actions(path, actions, options = {}) {
+    await this.applyUpdate({
+      path,
+      actions
+    }, options);
+  }
+  async#convertValue(path, value) {
     if (typeof value === "function") {
       const updater = value;
       value = updater(this.getData(path));
     }
     const payloadBlobs = {};
     value = await N(value, payloadBlobs);
-    const update = {
+    return [value, payloadBlobs];
+  }
+  async pushData(path, value, options = {}) {
+    const [val, payloadBlobs] = await this.#convertValue(path, value);
+    await this.applyUpdate({
       path: this.#fixPath(path),
-      value: options.delete ? undefined : value,
-      push: options.push,
+      value: val,
+      append: true,
+      blobs: payloadBlobs
+    }, options);
+  }
+  async setData(path, value, options = {}) {
+    const [val, payloadBlobs] = await this.#convertValue(path, value);
+    await this.applyUpdate({
+      path: this.#fixPath(path),
+      value: options.delete ? undefined : val,
+      append: options.append,
       insert: options.insert,
       blobs: payloadBlobs
-    };
+    }, options);
+  }
+  async applyUpdate(update, options = {}) {
+    await this.#waitForConnection();
     if (options.active) {
       markCommonUpdateConfirmed(update, this.serverTime);
     }
@@ -25175,4 +25207,4 @@ export {
   SocketClient
 };
 
-//# debugId=F068377ED89979AF64756E2164756E21
+//# debugId=2E21B303E19DB21064756E2164756E21

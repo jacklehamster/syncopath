@@ -85,18 +85,12 @@
         if (e.key === "Enter") {
           const message = e.target.textContent;
           e.target.textContent = "";
-          socketClient.setData(
-            `chat`,
-            {
-              message,
-              clientId: socketClient.clientId,
-              emoji: socketClient.self.state.emoji,
-              name: socketClient.self.state.name,
-            },
-            {
-              append: true,
-            }
-          );
+          socketClient.pushData(`chat`, {
+            message,
+            clientId: socketClient.clientId,
+            emoji: socketClient.self.state.emoji,
+            name: socketClient.self.state.name,
+          });
           socketClient.setData("chatting/{self}", undefined);
           e.preventDefault();
         }
@@ -147,6 +141,8 @@
       displayUsers(document.querySelector(".users"));
 
       document.querySelector(".chat-box").focus();
+
+      socketClient.observe().onChange(() => console.log(socketClient.state));
     </script>
   </body>
 </html>
