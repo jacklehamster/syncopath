@@ -24288,7 +24288,7 @@ class SubData {
 
 // ../src/client/SocketClient.ts
 class SocketClient {
-  state = {};
+  state;
   #children = new Set;
   #socket;
   #connectionPromise;
@@ -24298,7 +24298,8 @@ class SocketClient {
   #selfData = new ClientData(this);
   #observerManager = new ObserverManager(this);
   #serverTimeOffset = 0;
-  constructor(host, room) {
+  constructor(host, room, initialState = {}) {
+    this.state = initialState;
     const prefix = host.startsWith("ws://") || host.startsWith("wss://") ? "" : globalThis.location.protocol === "https:" ? "wss://" : "ws://";
     this.#connectionUrl = `${prefix}${host}${room ? `?room=${room}` : ""}`;
     this.#connect();
@@ -24390,9 +24391,6 @@ class SocketClient {
           resolve();
         }
         if (payload?.state) {
-          for (const key in this.state) {
-            delete this.state[key];
-          }
           for (const key in payload.state) {
             this.state[key] = payload.state[key];
           }
@@ -25177,4 +25175,4 @@ export {
   SocketClient
 };
 
-//# debugId=79B5047C6E2EE6AD64756E2164756E21
+//# debugId=F068377ED89979AF64756E2164756E21

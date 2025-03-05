@@ -12,8 +12,9 @@ import { BlobBuilder, extractPayload } from "@dobuki/data-blob";
 import { IObservable } from "./IObservable";
 import { ObserverManager } from "./ObserverManager";
 import { extractBlobsFromPayload } from "@dobuki/data-blob";
+
 export class SocketClient implements ISharedData, IObservable {
-  state: Record<string, any> = {};
+  state: Record<string, any>;
   readonly #children: Set<ISharedData> = new Set();
   #socket: WebSocket | undefined;
   #connectionPromise: Promise<void> | undefined;
@@ -24,7 +25,8 @@ export class SocketClient implements ISharedData, IObservable {
   readonly #observerManager = new ObserverManager(this);
   #serverTimeOffset = 0;
 
-  constructor(host: string, room?: string) {
+  constructor(host: string, room?: string, initialState: Record<string, any> = {}) {
+    this.state = initialState;
     const prefix = host.startsWith("ws://") || host.startsWith("wss://") ? "" : globalThis.location.protocol === "https:" ? "wss://" : "ws://";
     this.#connectionUrl = `${prefix}${host}${room ? `?room=${room}` : ""}`;
     this.#connect();
@@ -136,9 +138,6 @@ export class SocketClient implements ISharedData, IObservable {
           resolve();
         }
         if (payload?.state) {
-          for (const key in this.state) {
-            delete this.state[key];
-          }
           for (const key in payload.state) {
             this.state[key] = payload.state[key];
           }
