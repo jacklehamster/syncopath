@@ -75,11 +75,17 @@
             class="hidden"
           />
         </div>
+        <div id="state-div" style="white-space: pre"></div>
       </div>
     </div>
 
     <script type="module">
-      import { socketClient, randomEmoji, randomName } from "../dist/index.js";
+      import {
+        socketClient,
+        randomEmoji,
+        randomName,
+        stringify,
+      } from "../dist/index.js";
 
       window.socketClient = socketClient;
 
@@ -139,7 +145,15 @@
           alert("Please select an image file.");
         }
       }
-      socketClient.observe().onChange(() => console.log(socketClient.state));
+
+      socketClient
+        .observe()
+        .onChange(
+          () =>
+            (document.querySelector("#state-div").textContent = stringify(
+              socketClient.state
+            ))
+        );
     </script>
   </body>
 </html>

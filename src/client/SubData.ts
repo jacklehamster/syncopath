@@ -24,6 +24,10 @@ export class SubData implements ISharedData, IObservable {
     return this.#observerManager.observe(...updatedPaths);
   }
 
+  triggerObservers(): void {
+    this.#observerManager.triggerObservers();
+  }
+
   async setData(path: Update["path"], value: any, options?: SetDataOptions): Promise<void> {
     return this.socketClient.setData(this.#getAbsolutePath(path), value, options);
   }
@@ -34,5 +38,6 @@ export class SubData implements ISharedData, IObservable {
 
   close() {
     this.#observerManager.close();
+    this.socketClient.removeChild(this);
   }
 }

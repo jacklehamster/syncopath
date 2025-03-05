@@ -12,14 +12,9 @@ import { BlobBuilder, extractPayload } from "@dobuki/data-blob";
 import { IObservable } from "./IObservable";
 import { ObserverManager } from "./ObserverManager";
 import { extractBlobsFromPayload } from "@dobuki/data-blob";
-
-const LOCAL_TAG = "$-local";
-
 export class SocketClient implements ISharedData, IObservable {
-  state: Record<string, any> = {
-    [LOCAL_TAG]: {},
-  };
-  readonly #children: ISharedData[]
+  state: Record<string, any> = {};
+  readonly #children: Set<ISharedData> = new Set();
   #socket: WebSocket | undefined;
   #connectionPromise: Promise<void> | undefined;
   readonly #connectionUrl: string;
@@ -38,7 +33,7 @@ export class SocketClient implements ISharedData, IObservable {
         this.#connect();
       }
     });
-    this.#children = [this.#selfData];
+    this.#children = new Set([this.#selfData]);
   }
 
   #fixPath(path: Update["path"]) {
@@ -55,7 +50,7 @@ export class SocketClient implements ISharedData, IObservable {
     return getLeafObject(this.state, path, 0, false, this.#selfData.id) as any;
   }
 
-  async setData(path: Update["path"], value: any, options?: SetDataOptions) {
+  async setData(path: Update["path"], value: any, options: SetDataOptions = {}) {
     await this.#waitForConnection();
 
     if (typeof value === "function") {
@@ -68,13 +63,13 @@ export class SocketClient implements ISharedData, IObservable {
 
     const update: Update = {
       path: this.#fixPath(path),
-      value: options?.delete ? undefined : value,
-      push: options?.push,
-      insert: options?.insert,
+      value: options.delete ? undefined : value,
+      push: options.push,
+      insert: options.insert,
       blobs: payloadBlobs,
     };
 
-    if (!options?.passive) {
+    if (options.active) {
       markCommonUpdateConfirmed(update, this.serverTime);
     }
     if (!this.#usefulUpdate(update)) {
@@ -82,7 +77,7 @@ export class SocketClient implements ISharedData, IObservable {
     }
 
     //  commit updates locally
-    if (!options?.passive) {
+    if (options.active) {
       this.#queueIncomingUpdates(update);
     }
     this.#queueOutgoingUpdates(update);
@@ -97,7 +92,13 @@ export class SocketClient implements ISharedData, IObservable {
   }
 
   access(path: Update["path"]): SubData {
-    return new SubData(path, this);
+    const subData = new SubData(path, this);
+    this.#children.add(subData);
+    return subData;
+  }
+
+  removeChild(child: ISharedData) {
+    this.#children.delete(child);
   }
 
   observe(...paths: Update["path"][]): Observer {
@@ -132,11 +133,15 @@ export class SocketClient implements ISharedData, IObservable {
           // client ID confirmed
           this.#selfData.id = payload.myClientId;
           this.#connectionPromise = undefined;
-          this.localState.id = payload.myClientId;
           resolve();
         }
         if (payload?.state) {
-          this.state = { ...payload.state, [LOCAL_TAG]: this.state[LOCAL_TAG] };
+          for (const key in this.state) {
+            delete this.state[key];
+          }
+          for (const key in payload.state) {
+            this.state[key] = payload.state[key];
+          }
           this.state.blobs = blobs;
         }
         if (payload?.updates) {
@@ -213,18 +218,16 @@ export class SocketClient implements ISharedData, IObservable {
     this.#saveBlobsFromUpdates(this.#incomingUpdates);
     commitUpdates(this.state, this.#incomingUpdates);
     this.#incomingUpdates.length = 0;
-    this.#observerManager.triggerObservers();
-    this.#children.forEach(child => {
+    this.triggerObservers();
+  }
 
-    });
+  triggerObservers(): void {
+    this.#observerManager.triggerObservers();
+    this.#children.forEach(child => child.triggerObservers());
   }
 
   removeObserver(observer: Observer) {
     this.#observerManager.removeObserver(observer);
-  }
-
-  get localState() {
-    return this.state[LOCAL_TAG];
   }
 
   get serverTime() {

@@ -6,6 +6,8 @@ import { Payload } from "./SocketPayload";
 import { ClientState } from "@/types/ClientState";
 import { RoomState } from "@/types/ServerState";
 import { BlobBuilder } from "@dobuki/data-blob";
+import { removeRestrictedData, removeRestrictedPeersFromUpdates } from "./peer-utils";
+import { restrictedPath } from "./path-utils";
 
 export class SyncRoom {
   readonly #sockets: Map<WebSocket, ClientState> = new Map();
@@ -18,6 +20,7 @@ export class SyncRoom {
     this.#state = {
       clients: {},
       blobs: {},
+      peer: {},
     };
   }
 
@@ -52,8 +55,8 @@ export class SyncRoom {
       });
 
       //  remove updates that are not allowed
-      const cancelledUpdates = payload.updates?.filter(update => this.#restrictedPath(update.path, clientId));
-      payload.updates = payload.updates?.filter(update => !this.#restrictedPath(update.path, clientId));
+      // const cancelledUpdates = payload.updates?.filter(update => this.#restrictedPath(update.path, clientId));
+      payload.updates = payload.updates?.filter(update => !restrictedPath(update.path, clientId));
 
       this.#shareUpdates(payload.updates, client);
       setImmediate(() => this.#cleanupBlobs());
@@ -67,6 +70,7 @@ export class SyncRoom {
         confirmed: Date.now(),
         blobs: {},
       }]);
+
       console.log(`client ${clientId} disconnected from room ${this.room}`);
       this.#onRoomChange.forEach((callback) => callback(this.#state));
     });
@@ -78,7 +82,7 @@ export class SyncRoom {
     //  update client just connected with state and updates
     const welcomeBlobBuilder = BlobBuilder.payload<Payload>("payload", {
       myClientId: clientId,
-      state: { ...this.#state, blobs: undefined },
+      state: removeRestrictedData({ ...this.#state, blobs: {} }, clientId),
       updates: this.#updates,
       serverTime: now,
     });
@@ -89,8 +93,18 @@ export class SyncRoom {
     return { clientId };
   }
 
-  #restrictedPath(path: string, clientId: string) {
-    return path.startsWith(`clients/`) && !path.startsWith(`clients/${clientId}/`) || path.startsWith("blobs/");
+  #cleanupPeers() {
+    for (let k in this.#state.peer) {
+      const clients = k.split(":");
+      if (clients.length !== 2 || !this.#state.clients[clients[0]] && !this.#state.clients[clients[1]]) {
+        this.#shareUpdates([{
+          path: `peer/${k}`,
+          value: undefined,
+          confirmed: Date.now(),
+          blobs: {},
+        }]);
+      }
+    }
   }
 
   #shareUpdates(newUpdates?: Update[], sender?: WebSocket) {
@@ -105,21 +119,30 @@ export class SyncRoom {
     this.#updates = this.#updates.filter(update => !update.confirmed);
     this.#broadcastUpdates(newUpdates, client => client !== sender);
     this.#broadcastUpdates(updatesForSender, client => client === sender);
+    this.#cleanupPeers();
   }
 
   #pushUpdates(newUpdates: Update[] | undefined) {
     newUpdates?.forEach((update) => this.#updates.push(update));
   }
 
-  async #broadcastUpdates(newUpdates: Update[] | undefined, senderFilter?: (sender: WebSocket) => boolean) {
+  #broadcastUpdates(newUpdates: Update[] | undefined, senderFilter?: (sender: WebSocket) => boolean) {
     if (!newUpdates?.length) {
       return;
     }
-    const blobBuilder = BlobBuilder.payload("payload", { updates: newUpdates });
-    newUpdates.forEach(update => Object.entries(update.blobs ?? {}).forEach(([key, blob]) => blobBuilder.blob(key, blob)));
-    const buffer = await blobBuilder.build().arrayBuffer();
+    this.#sockets.entries().forEach(async ([client, state]) => {
+      let clientId;
+      for (let k in this.#state.clients) {
+        if (this.#state.clients[k] === state) {
+          clientId = k;
+          break;
+        }
+      }
 
-    this.#sockets.keys().forEach((client) => {
+      const blobBuilder = BlobBuilder.payload("payload", { updates: removeRestrictedPeersFromUpdates(newUpdates, clientId) });
+      newUpdates.forEach(update => Object.entries(update.blobs ?? {}).forEach(([key, blob]) => blobBuilder.blob(key, blob)));
+      const buffer = await blobBuilder.build().arrayBuffer();
+
       if (senderFilter && !senderFilter(client)) {
         return;
       }

@@ -1,8 +1,7 @@
 import { Update } from "@/types/Update";
-import { ObserverManager } from "./ObserverManager";
 
 export interface SetDataOptions {
-  passive?: boolean;
+  active?: boolean;
   room?: string;
   push?: boolean;
   insert?: number;
@@ -12,4 +11,5 @@ export interface SetDataOptions {
 export interface ISharedData {
   setData(path: Update["path"], value: any, options?: SetDataOptions): Promise<void>;
   state: Record<string, any>;
+  triggerObservers(): void;
 }

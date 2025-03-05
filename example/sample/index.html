@@ -70,13 +70,13 @@
             ` - ${location.search.slice(1)}`;
         </script>
         <label for="data-area">Common Data:</label>
-        <input type="checkbox" id="passive" />
+        <input type="checkbox" id="active" checked="true" />
         <label
           title="
-          Passive updates require response from server before being confirmed. Active updates are immediate.
+          Active updates are immediate  while passive updates require response from server.
         "
-          for="passive"
-          >Passive update</label
+          for="active"
+          >Active update</label
         >
         <br />
         <textarea id="data-area" rows="4" cols="50"></textarea>
@@ -106,7 +106,7 @@
       const dataArea = document.querySelector("#data-area");
       dataArea.addEventListener("input", (event) => {
         dataHook.setData(undefined, event.target.value || undefined, {
-          passive: document.querySelector("#passive").checked,
+          active: document.querySelector("#active").checked,
         });
       });
       dataHook.observe(undefined).onChange((observation) => {
@@ -125,9 +125,7 @@
             for (let k in state) {
               if (k !== "clients") {
                 if (stringify(state[k]) !== stringify(socketClient.state[k])) {
-                  socketClient.setData(k, state[k], {
-                    passive: true,
-                  });
+                  socketClient.setData(k, state[k]);
                 }
               }
             }
@@ -170,10 +168,7 @@
               emojiDiv.addEventListener("click", () => {
                 socketClient.setData(
                   `clients/${clientId}/emoji`,
-                  randomEmoji(true),
-                  {
-                    passive: true,
-                  }
+                  randomEmoji(true)
                 );
               });
             }
@@ -192,7 +187,10 @@
             nameInput.addEventListener("input", (event) => {
               socketClient.setData(
                 `clients/${clientId}/name`,
-                event.target.value
+                event.target.value,
+                {
+                  active: true,
+                }
               );
             });
             observers.add(
