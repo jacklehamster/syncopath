@@ -24305,25 +24305,23 @@ class PeerManager {
   #onData;
   #onClose;
   connected = false;
+  ready = false;
   constructor(peerId, onData, onIce, onClose) {
     this.peerId = peerId;
     this.#onData = onData;
     this.#onClose = onClose;
     this.#peerConnection = new RTCPeerConnection;
     this.#peerConnection.ondatachannel = (event) => {
-      console.log("Data channel created with", event.channel);
       this.#dataChannel = event.channel;
       this.#setupDataChannel();
     };
     this.#peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
-        console.log("ICE candidate", event.candidate);
         onIce(event.candidate);
       }
     };
   }
   addIceCandidate(ice) {
-    console.log("Adding ICE candidate", ice);
     this.#peerConnection.addIceCandidate(ice);
   }
   async createOffer() {
@@ -24343,34 +24341,29 @@ class PeerManager {
     });
   }
   async acceptAnswer(answer) {
-    console.log("accepting answer");
     this.connected = true;
     await this.#peerConnection.setRemoteDescription(answer);
   }
-  connectToPeer(offer) {
-    this.#peerConnection.setRemoteDescription(offer);
-    this.#peerConnection.createAnswer().then((answer) => {
-      this.#peerConnection.setLocalDescription(answer);
-      this.#dataChannel = this.#peerConnection.createDataChannel("data");
-      this.#dataChannel.onmessage = (event) => {
-        this.#onData(JSON.parse(event.data));
-      };
-      this.#dataChannel.onclose = this.#onClose;
-    });
-  }
   send(data) {
-    console.log("sending data", data);
-    this.#dataChannel?.send(JSON.stringify(data));
+    if (data instanceof Blob) {
+      this.#dataChannel?.send(data);
+    } else {
+      this.#dataChannel?.send(JSON.stringify(data));
+    }
   }
   #setupDataChannel() {
     if (!this.#dataChannel)
       return;
     this.#dataChannel.onopen = () => {
-      console.log("Data channel is open with", this.#dataChannel);
-      this.send({ author: this.peerId, type: "hello" });
+      this.send({ msg: "hello" });
     };
-    this.#dataChannel.onmessage = (event) => {
-      this.#onData(JSON.parse(event.data));
+    this.#dataChannel.onmessage = async (event) => {
+      const obj = typeof event.data === "string" ? JSON.parse(event.data) : event.data instanceof ArrayBuffer ? new Blob([event.data]) : event.data;
+      if (obj.msg === "hello") {
+        this.ready = true;
+        return;
+      }
+      this.#onData(obj);
     };
     this.#dataChannel.onclose = this.#onClose;
   }
@@ -24381,23 +24374,10 @@ function checkPeerConnections(socketClient) {
   for (const k in socketClient.state.peer) {
     const clients = k.split(":");
     if (clients[0] === socketClient.clientId) {
-      console.log("Checking peer connection", clients);
       if (clients.length >= 2 && !socketClient.state.peer[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[0]]?.offer) {
         if (!socketClient.peerManagers[clients[1]]) {
-          console.log("Creating peer manager");
-          socketClient.peerManagers[clients[1]] = new PeerManager(socketClient.clientId, (data) => {
-            console.log("Data received", data);
-          }, (ice) => {
-            const candidate = ice.candidate.split(" ")[0];
-            socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[0]}/ice/${candidate}`, ice, {
-              active: true
-            });
-          }, () => {
-            delete socketClient.peerManagers[clients[1]];
-            console.log("Peer closed");
-          });
+          createPeerManager(socketClient, `${clients[0]}:${clients[1]}`, clients[1]);
           socketClient.peerManagers[clients[1]].createOffer().then((offer) => {
-            console.log("Offer created", offer);
             socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[0]}/offer`, offer, {
               active: true
             });
@@ -24422,20 +24402,8 @@ function checkPeerConnections(socketClient) {
     } else if (clients[1] === socketClient.clientId) {
       if (socketClient.state.peer[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[0]]?.offer) {
         if (!socketClient.peerManagers[clients[0]]) {
-          console.log("Creating peer manager");
-          socketClient.peerManagers[clients[0]] = new PeerManager(socketClient.clientId, (data) => {
-            console.log("Data received", data);
-          }, (ice) => {
-            const candidate = ice.candidate.split(" ")[0];
-            socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[1]}/ice/${candidate}`, ice, {
-              active: true
-            });
-          }, () => {
-            delete socketClient.peerManagers[clients[0]];
-            console.log("Peer closed");
-          });
+          createPeerManager(socketClient, `${clients[0]}:${clients[1]}`, clients[0]);
           socketClient.peerManagers[clients[0]].acceptOffer(socketClient.state.peer[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[0]]?.offer).then((answer) => {
-            console.log("Answer created", answer);
             socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[1]}/answer`, answer, {
               active: true
             });
@@ -24453,6 +24421,22 @@ function checkPeerConnections(socketClient) {
     }
   }
 }
+function createPeerManager(socketClient, tag, peerId) {
+  console.log("Creating peer manager");
+  socketClient.peerManagers[peerId] = new PeerManager(socketClient.clientId, (data) => {
+    if (data instanceof Blob) {
+      socketClient.processDataBlob(data);
+    }
+  }, (ice) => {
+    const candidate = ice.candidate.split(" ")[0];
+    socketClient.setData(`peer/${tag}:webRTC/${socketClient.clientId}/ice/${candidate}`, ice, {
+      active: true
+    });
+  }, () => {
+    delete socketClient.peerManagers[peerId];
+    console.log("Peer closed");
+  });
+}
 
 // ../src/client/SocketClient.ts
 class SocketClient {
@@ -24467,6 +24451,7 @@ class SocketClient {
   #observerManager = new ObserverManager(this);
   peerManagers = {};
   #serverTimeOffset = 0;
+  #nextFrameInProcess = false;
   constructor(host, room, initialState = {}) {
     this.state = initialState;
     const prefix = host.startsWith("ws://") || host.startsWith("wss://") ? "" : globalThis.location.protocol === "https:" ? "wss://" : "ws://";
@@ -24526,13 +24511,13 @@ class SocketClient {
   }
   async applyUpdate(update, options = {}) {
     await this.#waitForConnection();
-    if (options.active) {
+    if (options.active || this.#isPeerUpdate(update)) {
       markCommonUpdateConfirmed(update, this.serverTime);
     }
     if (!this.#usefulUpdate(update)) {
       return;
     }
-    if (options.active) {
+    if (update.confirmed) {
       this.#queueIncomingUpdates(update);
     }
     this.#queueOutgoingUpdates(update);
@@ -24571,30 +24556,7 @@ class SocketClient {
         reject(event);
       });
       socket.addEventListener("message", async (event) => {
-        const { payload, ...blobs } = await W(event.data);
-        if (payload?.serverTime) {
-          this.#serverTimeOffset = payload.serverTime - Date.now();
-        }
-        if (payload?.myClientId) {
-          this.#selfData.id = payload.myClientId;
-          this.#connectionPromise = undefined;
-          resolve();
-        }
-        if (payload?.state) {
-          for (const key in payload.state) {
-            this.state[key] = payload.state[key];
-          }
-          this.state.blobs = blobs;
-        }
-        if (payload?.updates) {
-          const updates = payload.updates;
-          updates.forEach((update) => {
-            const updateBlobs = update.blobs ?? {};
-            Object.keys(updateBlobs).forEach((key) => updateBlobs[key] = blobs[key]);
-          });
-          this.#queueIncomingUpdates(...payload.updates);
-        }
-        this.#observerManager.triggerObservers();
+        this.processDataBlob(event.data, resolve);
       });
       socket.addEventListener("close", () => {
         console.log("Disconnected from WebSocket server");
@@ -24603,16 +24565,41 @@ class SocketClient {
       });
     });
   }
-  nextFrameInProcess = false;
+  async processDataBlob(blob, onClientIdConfirmed) {
+    const { payload, ...blobs } = await W(blob);
+    if (payload?.serverTime) {
+      this.#serverTimeOffset = payload.serverTime - Date.now();
+    }
+    if (payload?.myClientId) {
+      this.#selfData.id = payload.myClientId;
+      this.#connectionPromise = undefined;
+      onClientIdConfirmed?.();
+    }
+    if (payload?.state) {
+      for (const key in payload.state) {
+        this.state[key] = payload.state[key];
+      }
+      this.state.blobs = blobs;
+    }
+    if (payload?.updates) {
+      const updates = payload.updates;
+      updates.forEach((update) => {
+        const updateBlobs = update.blobs ?? {};
+        Object.keys(updateBlobs).forEach((key) => updateBlobs[key] = blobs[key]);
+      });
+      this.#queueIncomingUpdates(...payload.updates);
+    }
+    this.#observerManager.triggerObservers();
+  }
   #prepareNextFrame() {
-    if (this.nextFrameInProcess) {
+    if (this.#nextFrameInProcess) {
       return;
     }
-    this.nextFrameInProcess = true;
+    this.#nextFrameInProcess = true;
     requestAnimationFrame(() => this.#processNextFrame());
   }
   #processNextFrame() {
-    this.nextFrameInProcess = false;
+    this.#nextFrameInProcess = false;
     if (this.#incomingUpdates.length) {
       this.#applyUpdates();
     }
@@ -24630,9 +24617,28 @@ class SocketClient {
   }
   async#broadcastUpdates() {
     await this.#waitForConnection();
-    const blobBuilder = A.payload("payload", { updates: this.#outgoingUpdates });
+    const filterdUpdates = this.#outgoingUpdates.filter((update) => {
+      if (update.path?.startsWith("peer/")) {
+        const tag = update.path.split("/")[1];
+        const clientIds = tag.split(":");
+        if (clientIds.length === 2) {
+          const peerId = clientIds[0] === this.clientId ? clientIds[1] : clientIds[0];
+          if (this.peerManagers[peerId]?.ready) {
+            this.peerManagers[peerId].send(this.#packageUpdates([{ ...update }]));
+            return false;
+          }
+        }
+      }
+      return true;
+    });
+    const blob = this.#packageUpdates(filterdUpdates);
+    this.#socket?.send(blob);
+    this.#outgoingUpdates.length = 0;
+  }
+  #packageUpdates(updates) {
+    const blobBuilder = A.payload("payload", { updates });
     const addedBlob = new Set;
-    this.#outgoingUpdates.forEach((update) => {
+    updates.forEach((update) => {
       Object.entries(update.blobs ?? {}).forEach(([key, blob]) => {
         if (!addedBlob.has(key)) {
           blobBuilder.blob(key, blob);
@@ -24640,8 +24646,7 @@ class SocketClient {
         }
       });
     });
-    this.#socket?.send(blobBuilder.build());
-    this.#outgoingUpdates.length = 0;
+    return blobBuilder.build();
   }
   #saveBlobsFromUpdates(updates) {
     updates.forEach((update) => Object.entries(update.blobs ?? {}).forEach(([key, blob]) => {
@@ -24654,6 +24659,14 @@ class SocketClient {
     this.#incomingUpdates.length = 0;
     this.triggerObservers();
     checkPeerConnections(this);
+  }
+  #isPeerUpdate(update) {
+    if (update.path?.startsWith("peer/")) {
+      const tag = update.path.split("/")[1];
+      const clientIds = tag.split(":");
+      return clientIds.length === 2 && (clientIds[0] === this.clientId || clientIds[1] === this.clientId);
+    }
+    return false;
   }
   triggerObservers() {
     this.#observerManager.triggerObservers();
@@ -25366,4 +25379,4 @@ export {
   SocketClient
 };
 
-//# debugId=F4760B45EFC286B964756E2164756E21
+//# debugId=C99D2681741514EC64756E2164756E21

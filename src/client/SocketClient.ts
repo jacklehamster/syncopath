@@ -100,7 +100,7 @@ export class SocketClient implements ISharedData, IObservable {
   async applyUpdate(update: Update, options: UpdateOptions = {}) {
     await this.#waitForConnection();
 
-    if (options.active) {
+    if (options.active || this.#isPeerUpdate(update)) {
       markCommonUpdateConfirmed(update, this.serverTime);
     }
     if (!this.#usefulUpdate(update)) {
@@ -108,7 +108,7 @@ export class SocketClient implements ISharedData, IObservable {
     }
 
     //  commit updates locally
-    if (options.active) {
+    if (update.confirmed) {
       this.#queueIncomingUpdates(update);
     }
     this.#queueOutgoingUpdates(update);
@@ -155,32 +155,7 @@ export class SocketClient implements ISharedData, IObservable {
       });
 
       socket.addEventListener("message", async (event: MessageEvent<Blob>) => {
-        const { payload, ...blobs } = await extractPayload(event.data);
-
-        if (payload?.serverTime) {
-          this.#serverTimeOffset = payload.serverTime - Date.now();
-        }
-        if (payload?.myClientId) {
-          // client ID confirmed
-          this.#selfData.id = payload.myClientId;
-          this.#connectionPromise = undefined;
-          resolve();
-        }
-        if (payload?.state) {
-          for (const key in payload.state) {
-            this.state[key] = payload.state[key];
-          }
-          this.state.blobs = blobs;
-        }
-        if (payload?.updates) {
-          const updates: Update[] = payload.updates;
-          updates.forEach(update => {
-            const updateBlobs = update.blobs ?? {};
-            Object.keys(updateBlobs).forEach(key => updateBlobs[key] = blobs[key]);
-          });
-          this.#queueIncomingUpdates(...payload.updates);
-        }
-        this.#observerManager.triggerObservers();
+        this.processDataBlob(event.data, resolve);
       });
 
       socket.addEventListener("close", () => {
@@ -189,6 +164,35 @@ export class SocketClient implements ISharedData, IObservable {
         this.#selfData.id = "";
       });
     });
+  }
+
+  async processDataBlob(blob: Blob, onClientIdConfirmed?: () => void) {
+    const { payload, ...blobs } = await extractPayload(blob);
+
+    if (payload?.serverTime) {
+      this.#serverTimeOffset = payload.serverTime - Date.now();
+    }
+    if (payload?.myClientId) {
+      // client ID confirmed
+      this.#selfData.id = payload.myClientId;
+      this.#connectionPromise = undefined;
+      onClientIdConfirmed?.();
+    }
+    if (payload?.state) {
+      for (const key in payload.state) {
+        this.state[key] = payload.state[key];
+      }
+      this.state.blobs = blobs;
+    }
+    if (payload?.updates) {
+      const updates: Update[] = payload.updates;
+      updates.forEach(update => {
+        const updateBlobs = update.blobs ?? {};
+        Object.keys(updateBlobs).forEach(key => updateBlobs[key] = blobs[key]);
+      });
+      this.#queueIncomingUpdates(...payload.updates);
+    }
+    this.#observerManager.triggerObservers();
   }
 
   #prepareNextFrame() {
@@ -221,9 +225,31 @@ export class SocketClient implements ISharedData, IObservable {
 
   async #broadcastUpdates() {
     await this.#waitForConnection();
-    const blobBuilder = BlobBuilder.payload("payload", { updates: this.#outgoingUpdates });
+    const filterdUpdates = this.#outgoingUpdates.filter((update) => {
+      // skip updates to peers if there's a peerManager ready
+      if (update.path?.startsWith("peer/")) {
+        const tag = update.path.split("/")[1];
+        const clientIds = tag.split(":");
+        if (clientIds.length === 2) {
+          const peerId = clientIds[0] === this.clientId ? clientIds[1] : clientIds[0];
+          if (this.peerManagers[peerId]?.ready) {
+            //  Send through peer manager
+            this.peerManagers[peerId].send(this.#packageUpdates([{ ...update }]));
+            return false;
+          }
+        }
+      }
+      return true;
+    });
+    const blob = this.#packageUpdates(filterdUpdates);
+    this.#socket?.send(blob);
+    this.#outgoingUpdates.length = 0;
+  }
+
+  #packageUpdates(updates: Update[]): Blob {
+    const blobBuilder = BlobBuilder.payload("payload", { updates });
     const addedBlob = new Set<string>();
-    this.#outgoingUpdates.forEach(update => {
+    updates.forEach(update => {
       Object.entries(update.blobs ?? {}).forEach(([key, blob]) => {
         if (!addedBlob.has(key)) {
           blobBuilder.blob(key, blob);
@@ -231,8 +257,7 @@ export class SocketClient implements ISharedData, IObservable {
         }
       });
     });
-    this.#socket?.send(blobBuilder.build());
-    this.#outgoingUpdates.length = 0;
+    return blobBuilder.build();
   }
 
   #saveBlobsFromUpdates(updates: Update[]) {
@@ -247,6 +272,15 @@ export class SocketClient implements ISharedData, IObservable {
     this.#incomingUpdates.length = 0;
     this.triggerObservers();
     checkPeerConnections(this);
+  }
+
+  #isPeerUpdate(update: Update) {
+    if (update.path?.startsWith("peer/")) {
+      const tag = update.path.split("/")[1];
+      const clientIds = tag.split(":");
+      return clientIds.length === 2 && (clientIds[0] === this.clientId || clientIds[1] === this.clientId);
+    }
+    return false;
   }
 
   triggerObservers(): void {

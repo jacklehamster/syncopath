@@ -49,7 +49,10 @@
             socketClient.setData(`peer/${PEER_TAG}`, []);
 
             button.onclick = () =>
-              socketClient.pushData(`peer/${PEER_TAG}`, clientId);
+              socketClient.pushData(
+                `peer/${PEER_TAG}`,
+                `${socketClient.clientId}->${clientId}`
+              );
           }
         },
         (clientId) => {
