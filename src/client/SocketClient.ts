@@ -29,7 +29,6 @@ export class SocketClient implements ISharedData, IObservable {
   readonly peerManagers: Record<string, PeerManager> = {};
   #serverTimeOffset = 0;
   #nextFrameInProcess = false;
-  peerOnly = false;
 
   constructor(host: string, room?: string, initialState: Record<string, any> = {}) {
     this.state = initialState;
@@ -38,7 +37,9 @@ export class SocketClient implements ISharedData, IObservable {
     this.#connect();
     globalThis.addEventListener("focus", () => {
       if (!this.#socket) {
-        this.#connect();
+        this.#connect().catch(e => {
+          console.warn("Failed to reconnect");
+        });
       }
     });
     this.#children = new Set([this.#selfData]);
@@ -148,9 +149,6 @@ export class SocketClient implements ISharedData, IObservable {
   }
 
   async #connect() {
-    if (this.peerOnly) {
-      return;
-    }
     const socket = this.#socket = new WebSocket(this.#connectionUrl);
     return this.#connectionPromise = new Promise<void>((resolve, reject) => {
       socket.addEventListener("open", () => {
@@ -168,9 +166,6 @@ export class SocketClient implements ISharedData, IObservable {
       socket.addEventListener("close", () => {
         console.log("Disconnected from WebSocket server");
         this.#socket = undefined;
-        if (Object.keys(this.peerManagers).length) {
-          this.peerOnly = true;
-        }
       });
     });
   }
@@ -253,9 +248,13 @@ export class SocketClient implements ISharedData, IObservable {
         }
       }
     });
-    await this.#waitForConnection();
-    const blob = this.#packageUpdates(this.#outgoingUpdates.filter(update => !!update));
-    this.#socket?.send(blob);
+
+    const outUpdates = this.#outgoingUpdates.filter(update => !!update);
+    if (outUpdates.length) {
+      await this.#waitForConnection();
+      const blob = this.#packageUpdates(outUpdates);
+      this.#socket?.send(blob);
+    }
     this.#outgoingUpdates.length = 0;
   }
 

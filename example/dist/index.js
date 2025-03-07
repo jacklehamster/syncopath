@@ -24452,7 +24452,6 @@ class SocketClient {
   peerManagers = {};
   #serverTimeOffset = 0;
   #nextFrameInProcess = false;
-  peerOnly = false;
   constructor(host, room, initialState = {}) {
     this.state = initialState;
     const prefix = host.startsWith("ws://") || host.startsWith("wss://") ? "" : globalThis.location.protocol === "https:" ? "wss://" : "ws://";
@@ -24460,7 +24459,9 @@ class SocketClient {
     this.#connect();
     globalThis.addEventListener("focus", () => {
       if (!this.#socket) {
-        this.#connect();
+        this.#connect().catch((e) => {
+          console.warn("Failed to reconnect", e);
+        });
       }
     });
     this.#children = new Set([this.#selfData]);
@@ -24550,9 +24551,6 @@ class SocketClient {
     return this.#connectionPromise;
   }
   async#connect() {
-    if (this.peerOnly) {
-      return;
-    }
     const socket = this.#socket = new WebSocket(this.#connectionUrl);
     return this.#connectionPromise = new Promise((resolve, reject) => {
       socket.addEventListener("open", () => {
@@ -24568,9 +24566,6 @@ class SocketClient {
       socket.addEventListener("close", () => {
         console.log("Disconnected from WebSocket server");
         this.#socket = undefined;
-        if (Object.keys(this.peerManagers).length) {
-          this.peerOnly = true;
-        }
       });
     });
   }
@@ -24642,9 +24637,12 @@ class SocketClient {
         }
       }
     });
-    await this.#waitForConnection();
-    const blob = this.#packageUpdates(this.#outgoingUpdates.filter((update) => !!update));
-    this.#socket?.send(blob);
+    const outUpdates = this.#outgoingUpdates.filter((update) => !!update);
+    if (outUpdates.length) {
+      await this.#waitForConnection();
+      const blob = this.#packageUpdates(outUpdates);
+      this.#socket?.send(blob);
+    }
     this.#outgoingUpdates.length = 0;
   }
   #packageUpdates(updates) {
@@ -25391,4 +25389,4 @@ export {
   SocketClient
 };
 
-//# debugId=FB674CD2CEDA053964756E2164756E21
+//# debugId=94AA7DDE22D769E664756E2164756E21
