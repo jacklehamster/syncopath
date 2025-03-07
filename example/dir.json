@@ -21,10 +21,10 @@
     "sha": "98387d623bcf6077316ad093fd89f762c23f9a4f"
   },
   "dist/index.js": {
-    "sha": "2af0fe73985fa8615898e1796e2362480db280a1"
+    "sha": "81c6030a21cf646fa729fb22ec69cea934fc41cd"
   },
   "dist/index.js.map": {
-    "sha": "f209c9c16751f2dce51e403b61d9e056902ca0da"
+    "sha": "ce56287b1d8c85583d513fd735c3a4436a30c328"
   },
   "dist/styles-da87zv4s.css": {
     "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
@@ -86,7 +86,7 @@
   "json-test/index.html": {
     "sha": "9b3d48916b0d0404e894b2d8e29a54f067259495"
   },
-  "md5": "49d5db9cf914e01e1aa402d256ae89d8",
+  "md5": "81c40d466e990d278d523fb0b7392dda",
   "mobile/index.html": {
     "sha": "0bdd4db68ab2f6f719fea937cd9d4a31658f890b"
   },
@@ -94,7 +94,7 @@
     "sha": "b02076a4e075ac42bb3c2d8188662e83573eaa53"
   },
   "peer-test/index.html": {
-    "sha": "fb8dab023891ac0e752efa586ecb98270a197cda"
+    "sha": "a9226bb48c9f17cf1c2926aa0d5b0f6ada579f8f"
   },
   "random-iso.json": {
     "sha": "d05d34fb92c02b85a64a01f43775b5a71ce58912"
