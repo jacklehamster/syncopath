@@ -1,18 +1,18 @@
 //  Share peer information using WebRTC
 
-import { extractPayload } from "@dobuki/data-blob";
-
 export class PeerManager {
   #peerConnection: RTCPeerConnection;
   #dataChannel?: RTCDataChannel;
   #onData: (data: any) => void;
   #onClose: () => void;
+  #onReady: () => void;
   connected = false;
   ready = false;
 
-  constructor(private peerId: string, onData: (data: any) => void, onIce: (ice: any) => void, onClose: () => void) {
+  constructor(private peerId: string, onData: (data: any) => void, onIce: (ice: any) => void, onClose: () => void, onReady: () => void) {
     this.#onData = onData;
     this.#onClose = onClose;
+    this.#onReady = onReady;
     this.#peerConnection = new RTCPeerConnection();
     this.#peerConnection.ondatachannel = (event) => {
       this.#dataChannel = event.channel;
@@ -76,6 +76,7 @@ export class PeerManager {
           : event.data;
       if (obj.msg === "hello") {
         this.ready = true;
+        this.#onReady();
         return;
       }
       this.#onData(obj);

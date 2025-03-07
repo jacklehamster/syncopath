@@ -24102,7 +24102,7 @@ class SyncSocket {
       this.#rooms[roomName] = new SyncRoom(roomName);
       this.#rooms[roomName].addRoomChangeListener((roomState) => {
         setTimeout(() => {
-          if (!Object.values(roomState.clients).length) {
+          if (this.#rooms[roomName] && !Object.values(roomState.clients).length) {
             console.log("closing room", roomName);
             delete this.#rooms[roomName];
           }
@@ -24304,12 +24304,14 @@ class PeerManager {
   #dataChannel;
   #onData;
   #onClose;
+  #onReady;
   connected = false;
   ready = false;
-  constructor(peerId, onData, onIce, onClose) {
+  constructor(peerId, onData, onIce, onClose, onReady) {
     this.peerId = peerId;
     this.#onData = onData;
     this.#onClose = onClose;
+    this.#onReady = onReady;
     this.#peerConnection = new RTCPeerConnection;
     this.#peerConnection.ondatachannel = (event) => {
       this.#dataChannel = event.channel;
@@ -24361,6 +24363,7 @@ class PeerManager {
       const obj = typeof event.data === "string" ? JSON.parse(event.data) : event.data instanceof ArrayBuffer ? new Blob([event.data]) : event.data;
       if (obj.msg === "hello") {
         this.ready = true;
+        this.#onReady();
         return;
       }
       this.#onData(obj);
@@ -24370,6 +24373,7 @@ class PeerManager {
 }
 
 // ../src/client/peer/check-peer.ts
+var DELAY_TO_DISCONNECT_WEBSOCKET_AFTER_PEER = 3000;
 function checkPeerConnections(socketClient) {
   for (const k in socketClient.state.peer) {
     const clients = k.split(":");
@@ -24435,6 +24439,12 @@ function createPeerManager(socketClient, tag, peerId) {
   }, () => {
     delete socketClient.peerManagers[peerId];
     console.log("Peer closed");
+  }, () => {
+    if (socketClient.state.config.peerOnly) {
+      setTimeout(() => {
+        socketClient.closeSocket();
+      }, DELAY_TO_DISCONNECT_WEBSOCKET_AFTER_PEER);
+    }
   });
 }
 
@@ -24459,9 +24469,12 @@ class SocketClient {
     this.#connect();
     globalThis.addEventListener("focus", () => {
       if (!this.#socket) {
-        this.#connect().catch((e) => {
-          console.warn("Failed to reconnect", e);
-        });
+        const autoReconnect = this.state.config.autoReconnect ?? true;
+        if (autoReconnect) {
+          this.#connect().catch((e) => {
+            console.warn("Failed to reconnect");
+          });
+        }
       }
     });
     this.#children = new Set([this.#selfData]);
@@ -25389,4 +25402,4 @@ export {
   SocketClient
 };
 
-//# debugId=94AA7DDE22D769E664756E2164756E21
+//# debugId=FA904F208CFCAAD464756E2164756E21

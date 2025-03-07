@@ -37,9 +37,12 @@ export class SocketClient implements ISharedData, IObservable {
     this.#connect();
     globalThis.addEventListener("focus", () => {
       if (!this.#socket) {
-        this.#connect().catch(e => {
-          console.warn("Failed to reconnect");
-        });
+        const autoReconnect = this.state.config.autoReconnect ?? true;
+        if (autoReconnect) {
+          this.#connect().catch(e => {
+            console.warn("Failed to reconnect");
+          });
+        }
       }
     });
     this.#children = new Set([this.#selfData]);

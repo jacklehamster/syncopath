@@ -1,6 +1,8 @@
 import { SocketClient } from "../SocketClient";
 import { PeerManager } from "./PeerManager";
 
+const DELAY_TO_DISCONNECT_WEBSOCKET_AFTER_PEER = 3000;
+
 export function checkPeerConnections(socketClient: SocketClient) {
   for (const k in socketClient.state.peer) {
     const clients = k.split(":");
@@ -73,6 +75,13 @@ function createPeerManager(socketClient: SocketClient, tag: string, peerId: stri
     () => {
       delete socketClient.peerManagers[peerId];
       console.log("Peer closed");
+    },
+    () => {
+      if (socketClient.state.config.peerOnly) {
+        setTimeout(() => {
+          socketClient.closeSocket();
+        }, DELAY_TO_DISCONNECT_WEBSOCKET_AFTER_PEER);
+      }
     },
   );
 }

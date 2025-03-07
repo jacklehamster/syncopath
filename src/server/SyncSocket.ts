@@ -35,7 +35,7 @@ export class SyncSocket {
       this.#rooms[roomName].addRoomChangeListener((roomState) => {
         //  close room after 10s if no clients
         setTimeout(() => {
-          if (!Object.values(roomState.clients).length) {
+          if (this.#rooms[roomName] && !Object.values(roomState.clients).length) {
             console.log("closing room", roomName);
             delete this.#rooms[roomName];
           }

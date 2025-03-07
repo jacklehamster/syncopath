@@ -53,6 +53,9 @@
                 `peer/${PEER_TAG}`,
                 `${socketClient.clientId}->${clientId}`
               );
+          } else {
+            socketClient.setData("config/autoReconnect", false);
+            socketClient.setData("config/peerOnly", true);
           }
         },
         (clientId) => {
