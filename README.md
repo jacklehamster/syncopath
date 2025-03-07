@@ -3,6 +3,6 @@
 
 ## Demo
 
-<https://synco.dobuki.net>
+<https://synco.dobuki.net?show-tab=true>
 
 
