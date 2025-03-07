@@ -98,13 +98,16 @@ export class SocketClient implements ISharedData, IObservable {
   }
 
   async applyUpdate(update: Update, options: UpdateOptions = {}) {
-    await this.#waitForConnection();
-
-    if (options.active || this.#isPeerUpdate(update)) {
-      markCommonUpdateConfirmed(update, this.serverTime);
-    }
     if (!this.#usefulUpdate(update)) {
       return;
+    }
+    const isPeerUpdate = this.#isPeerUpdate(update);
+    if (!isPeerUpdate) {
+      await this.#waitForConnection();
+    }
+
+    if (options.active || isPeerUpdate) {
+      markCommonUpdateConfirmed(update, this.serverTime);
     }
 
     //  commit updates locally
