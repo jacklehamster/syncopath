@@ -96,7 +96,7 @@ export class SyncRoom {
   #cleanupPeers() {
     for (let k in this.#state.peer) {
       const clients = k.split(":");
-      if (clients.length !== 2 || !this.#state.clients[clients[0]] && !this.#state.clients[clients[1]]) {
+      if (clients.length < 2 || !this.#state.clients[clients[0]] && !this.#state.clients[clients[1]]) {
         this.#shareUpdates([{
           path: `peer/${k}`,
           value: undefined,

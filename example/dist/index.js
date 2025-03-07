@@ -23888,7 +23888,7 @@ function removeRestrictedData(state, clientId) {
   };
   for (const key in newState.peer) {
     const clients = key.split(":");
-    if (clients.length !== 2 || !clients.includes(clientId)) {
+    if (clients.length < 2 || clients[0] !== clientId && clients[1] !== clientId) {
       delete newState.peer[key];
     }
   }
@@ -23899,7 +23899,7 @@ function removeRestrictedPeersFromUpdates(updates, clientId) {
     const parts = update.path.split("/");
     if (parts[0] === "peer") {
       const clients = parts[1].split(":");
-      return clients.length === 2 && (!clientId || clients.includes(clientId));
+      return clients.length >= 2 && (clients[0] === clientId || clients[1] === clientId);
     }
     return true;
   });
@@ -23919,7 +23919,7 @@ function restrictedPath(path, clientId) {
     case "peer":
       const tag = pathSplit[1];
       const clientIds = tag.split(":");
-      if (clientIds.length === 2 && clientId && clientIds.includes(clientId)) {
+      if (clientIds.length >= 2 && clientId && clientIds.includes(clientId)) {
         return false;
       }
       return true;
@@ -23996,7 +23996,7 @@ class SyncRoom {
   #cleanupPeers() {
     for (let k in this.#state.peer) {
       const clients = k.split(":");
-      if (clients.length !== 2 || !this.#state.clients[clients[0]] && !this.#state.clients[clients[1]]) {
+      if (clients.length < 2 || !this.#state.clients[clients[0]] && !this.#state.clients[clients[1]]) {
         this.#shareUpdates([{
           path: `peer/${k}`,
           value: undefined,
@@ -24297,6 +24297,163 @@ class SubData {
   }
 }
 
+// ../src/client/peer/PeerManager.ts
+class PeerManager {
+  peerId;
+  #peerConnection;
+  #dataChannel;
+  #onData;
+  #onClose;
+  connected = false;
+  constructor(peerId, onData, onIce, onClose) {
+    this.peerId = peerId;
+    this.#onData = onData;
+    this.#onClose = onClose;
+    this.#peerConnection = new RTCPeerConnection;
+    this.#peerConnection.ondatachannel = (event) => {
+      console.log("Data channel created with", event.channel);
+      this.#dataChannel = event.channel;
+      this.#setupDataChannel();
+    };
+    this.#peerConnection.onicecandidate = (event) => {
+      if (event.candidate) {
+        console.log("ICE candidate", event.candidate);
+        onIce(event.candidate);
+      }
+    };
+  }
+  addIceCandidate(ice) {
+    console.log("Adding ICE candidate", ice);
+    this.#peerConnection.addIceCandidate(ice);
+  }
+  async createOffer() {
+    this.#dataChannel = this.#peerConnection.createDataChannel("data");
+    this.#setupDataChannel();
+    return this.#peerConnection.createOffer().then((offer) => {
+      this.#peerConnection.setLocalDescription(offer);
+      return offer;
+    });
+  }
+  async acceptOffer(offer) {
+    this.#peerConnection.setRemoteDescription(offer);
+    this.connected = true;
+    return this.#peerConnection.createAnswer().then((answer) => {
+      this.#peerConnection.setLocalDescription(answer);
+      return answer;
+    });
+  }
+  async acceptAnswer(answer) {
+    console.log("accepting answer");
+    this.connected = true;
+    await this.#peerConnection.setRemoteDescription(answer);
+  }
+  connectToPeer(offer) {
+    this.#peerConnection.setRemoteDescription(offer);
+    this.#peerConnection.createAnswer().then((answer) => {
+      this.#peerConnection.setLocalDescription(answer);
+      this.#dataChannel = this.#peerConnection.createDataChannel("data");
+      this.#dataChannel.onmessage = (event) => {
+        this.#onData(JSON.parse(event.data));
+      };
+      this.#dataChannel.onclose = this.#onClose;
+    });
+  }
+  send(data) {
+    console.log("sending data", data);
+    this.#dataChannel?.send(JSON.stringify(data));
+  }
+  #setupDataChannel() {
+    if (!this.#dataChannel)
+      return;
+    this.#dataChannel.onopen = () => {
+      console.log("Data channel is open with", this.#dataChannel);
+      this.send({ author: this.peerId, type: "hello" });
+    };
+    this.#dataChannel.onmessage = (event) => {
+      this.#onData(JSON.parse(event.data));
+    };
+    this.#dataChannel.onclose = this.#onClose;
+  }
+}
+
+// ../src/client/peer/check-peer.ts
+function checkPeerConnections(socketClient) {
+  for (const k in socketClient.state.peer) {
+    const clients = k.split(":");
+    if (clients[0] === socketClient.clientId) {
+      console.log("Checking peer connection", clients);
+      if (clients.length >= 2 && !socketClient.state.peer[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[0]]?.offer) {
+        if (!socketClient.peerManagers[clients[1]]) {
+          console.log("Creating peer manager");
+          socketClient.peerManagers[clients[1]] = new PeerManager(socketClient.clientId, (data) => {
+            console.log("Data received", data);
+          }, (ice) => {
+            const candidate = ice.candidate.split(" ")[0];
+            socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[0]}/ice/${candidate}`, ice, {
+              active: true
+            });
+          }, () => {
+            delete socketClient.peerManagers[clients[1]];
+            console.log("Peer closed");
+          });
+          socketClient.peerManagers[clients[1]].createOffer().then((offer) => {
+            console.log("Offer created", offer);
+            socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[0]}/offer`, offer, {
+              active: true
+            });
+          });
+        }
+      }
+      if (socketClient.state.peer[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[1]]?.answer) {
+        if (!socketClient.peerManagers[clients[1]].connected) {
+          socketClient.peerManagers[clients[1]].acceptAnswer(socketClient.state.peer[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[1]]?.answer).then(() => {
+            console.log("Peer connected");
+          });
+          socketClient.observe(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[1]}/ice/{keys}`).onElementsAdded((candidates) => {
+            candidates?.forEach((candidateName) => {
+              const candidate = socketClient.state.peer[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[1]]?.ice?.[candidateName];
+              socketClient.peerManagers[clients[1]].addIceCandidate(candidate);
+              socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[1]}/ice/${candidateName}`, undefined);
+            });
+          });
+          socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[1]}/answer`, undefined);
+        }
+      }
+    } else if (clients[1] === socketClient.clientId) {
+      if (socketClient.state.peer[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[0]]?.offer) {
+        if (!socketClient.peerManagers[clients[0]]) {
+          console.log("Creating peer manager");
+          socketClient.peerManagers[clients[0]] = new PeerManager(socketClient.clientId, (data) => {
+            console.log("Data received", data);
+          }, (ice) => {
+            const candidate = ice.candidate.split(" ")[0];
+            socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[1]}/ice/${candidate}`, ice, {
+              active: true
+            });
+          }, () => {
+            delete socketClient.peerManagers[clients[0]];
+            console.log("Peer closed");
+          });
+          socketClient.peerManagers[clients[0]].acceptOffer(socketClient.state.peer[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[0]]?.offer).then((answer) => {
+            console.log("Answer created", answer);
+            socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[1]}/answer`, answer, {
+              active: true
+            });
+            socketClient.observe(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[0]}/ice/{keys}`).onElementsAdded((candidates) => {
+              candidates?.forEach((candidateName) => {
+                const candidate = socketClient.state.peer[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[0]]?.ice?.[candidateName];
+                socketClient.peerManagers[clients[0]].addIceCandidate(candidate);
+                socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[0]}/ice/${candidateName}`, undefined);
+              });
+            });
+          });
+          socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[0]}/offer`, undefined);
+        }
+      }
+    }
+  }
+}
+
 // ../src/client/SocketClient.ts
 class SocketClient {
   state;
@@ -24308,6 +24465,7 @@ class SocketClient {
   #incomingUpdates = [];
   #selfData = new ClientData(this);
   #observerManager = new ObserverManager(this);
+  peerManagers = {};
   #serverTimeOffset = 0;
   constructor(host, room, initialState = {}) {
     this.state = initialState;
@@ -24495,6 +24653,7 @@ class SocketClient {
     commitUpdates(this.state, this.#incomingUpdates);
     this.#incomingUpdates.length = 0;
     this.triggerObservers();
+    checkPeerConnections(this);
   }
   triggerObservers() {
     this.#observerManager.triggerObservers();
@@ -25207,4 +25366,4 @@ export {
   SocketClient
 };
 
-//# debugId=2E21B303E19DB21064756E2164756E21
+//# debugId=F4760B45EFC286B964756E2164756E21

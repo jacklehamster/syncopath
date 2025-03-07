@@ -13,9 +13,11 @@ import { BlobBuilder, extractPayload } from "@dobuki/data-blob";
 import { IObservable } from "./IObservable";
 import { ObserverManager } from "./ObserverManager";
 import { extractBlobsFromPayload } from "@dobuki/data-blob";
+import { PeerManager } from "./peer/PeerManager";
+import { checkPeerConnections } from "./peer/check-peer";
 
 export class SocketClient implements ISharedData, IObservable {
-  state: Record<string, any>;
+  readonly state: Record<string, any>;
   readonly #children: Set<ISharedData> = new Set();
   #socket: WebSocket | undefined;
   #connectionPromise: Promise<void> | undefined;
@@ -24,7 +26,9 @@ export class SocketClient implements ISharedData, IObservable {
   readonly #incomingUpdates: Update[] = [];
   readonly #selfData: ClientData = new ClientData(this);
   readonly #observerManager = new ObserverManager(this);
+  readonly peerManagers: Record<string, PeerManager> = {};
   #serverTimeOffset = 0;
+  #nextFrameInProcess = false;
 
   constructor(host: string, room?: string, initialState: Record<string, any> = {}) {
     this.state = initialState;
@@ -187,17 +191,16 @@ export class SocketClient implements ISharedData, IObservable {
     });
   }
 
-  nextFrameInProcess = false;
   #prepareNextFrame() {
-    if (this.nextFrameInProcess) {
+    if (this.#nextFrameInProcess) {
       return;
     }
-    this.nextFrameInProcess = true;
+    this.#nextFrameInProcess = true;
     requestAnimationFrame(() => this.#processNextFrame());
   }
 
   #processNextFrame() {
-    this.nextFrameInProcess = false;
+    this.#nextFrameInProcess = false;
     if (this.#incomingUpdates.length) {
       this.#applyUpdates();
     }
@@ -243,6 +246,7 @@ export class SocketClient implements ISharedData, IObservable {
     commitUpdates(this.state, this.#incomingUpdates);
     this.#incomingUpdates.length = 0;
     this.triggerObservers();
+    checkPeerConnections(this);
   }
 
   triggerObservers(): void {

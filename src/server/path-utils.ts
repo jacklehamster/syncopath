@@ -11,7 +11,7 @@ export function restrictedPath(path: string, clientId?: string) {
     case "peer":
       const tag = pathSplit[1];
       const clientIds = tag.split(":");
-      if (clientIds.length === 2 && clientId && clientIds.includes(clientId)) {
+      if (clientIds.length >= 2 && clientId && clientIds.includes(clientId)) {
         return false;
       }
       return true;
