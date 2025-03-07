@@ -24452,6 +24452,7 @@ class SocketClient {
   peerManagers = {};
   #serverTimeOffset = 0;
   #nextFrameInProcess = false;
+  peerOnly = false;
   constructor(host, room, initialState = {}) {
     this.state = initialState;
     const prefix = host.startsWith("ws://") || host.startsWith("wss://") ? "" : globalThis.location.protocol === "https:" ? "wss://" : "ws://";
@@ -24510,12 +24511,15 @@ class SocketClient {
     }, options);
   }
   async applyUpdate(update, options = {}) {
-    await this.#waitForConnection();
-    if (options.active || this.#isPeerUpdate(update)) {
-      markCommonUpdateConfirmed(update, this.serverTime);
-    }
     if (!this.#usefulUpdate(update)) {
       return;
+    }
+    const isPeerUpdate = this.#isPeerUpdate(update);
+    if (!isPeerUpdate) {
+      await this.#waitForConnection();
+    }
+    if (options.active || isPeerUpdate) {
+      markCommonUpdateConfirmed(update, this.serverTime);
     }
     if (update.confirmed) {
       this.#queueIncomingUpdates(update);
@@ -24546,6 +24550,9 @@ class SocketClient {
     return this.#connectionPromise;
   }
   async#connect() {
+    if (this.peerOnly) {
+      return;
+    }
     const socket = this.#socket = new WebSocket(this.#connectionUrl);
     return this.#connectionPromise = new Promise((resolve, reject) => {
       socket.addEventListener("open", () => {
@@ -24561,9 +24568,14 @@ class SocketClient {
       socket.addEventListener("close", () => {
         console.log("Disconnected from WebSocket server");
         this.#socket = undefined;
-        this.#selfData.id = "";
+        if (Object.keys(this.peerManagers).length) {
+          this.peerOnly = true;
+        }
       });
     });
+  }
+  closeSocket() {
+    this.#socket?.close();
   }
   async processDataBlob(blob, onClientIdConfirmed) {
     const { payload, ...blobs } = await W(blob);
@@ -24616,22 +24628,22 @@ class SocketClient {
     this.#incomingUpdates.push(...updates);
   }
   async#broadcastUpdates() {
-    await this.#waitForConnection();
-    const filterdUpdates = this.#outgoingUpdates.filter((update) => {
-      if (update.path?.startsWith("peer/")) {
+    this.#outgoingUpdates.forEach((update, index) => {
+      if (update?.path?.startsWith("peer/")) {
         const tag = update.path.split("/")[1];
         const clientIds = tag.split(":");
         if (clientIds.length === 2) {
           const peerId = clientIds[0] === this.clientId ? clientIds[1] : clientIds[0];
           if (this.peerManagers[peerId]?.ready) {
             this.peerManagers[peerId].send(this.#packageUpdates([{ ...update }]));
+            this.#outgoingUpdates[index] = undefined;
             return false;
           }
         }
       }
-      return true;
     });
-    const blob = this.#packageUpdates(filterdUpdates);
+    await this.#waitForConnection();
+    const blob = this.#packageUpdates(this.#outgoingUpdates.filter((update) => !!update));
     this.#socket?.send(blob);
     this.#outgoingUpdates.length = 0;
   }
@@ -24639,7 +24651,7 @@ class SocketClient {
     const blobBuilder = A.payload("payload", { updates });
     const addedBlob = new Set;
     updates.forEach((update) => {
-      Object.entries(update.blobs ?? {}).forEach(([key, blob]) => {
+      Object.entries(update?.blobs ?? {}).forEach(([key, blob]) => {
         if (!addedBlob.has(key)) {
           blobBuilder.blob(key, blob);
           addedBlob.add(key);
@@ -25379,4 +25391,4 @@ export {
   SocketClient
 };
 
-//# debugId=C99D2681741514EC64756E2164756E21
+//# debugId=FB674CD2CEDA053964756E2164756E21

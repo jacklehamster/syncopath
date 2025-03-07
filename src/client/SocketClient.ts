@@ -22,13 +22,14 @@ export class SocketClient implements ISharedData, IObservable {
   #socket: WebSocket | undefined;
   #connectionPromise: Promise<void> | undefined;
   readonly #connectionUrl: string;
-  readonly #outgoingUpdates: Update[] = [];
+  readonly #outgoingUpdates: (Update | undefined)[] = [];
   readonly #incomingUpdates: Update[] = [];
   readonly #selfData: ClientData = new ClientData(this);
   readonly #observerManager = new ObserverManager(this);
   readonly peerManagers: Record<string, PeerManager> = {};
   #serverTimeOffset = 0;
   #nextFrameInProcess = false;
+  peerOnly = false;
 
   constructor(host: string, room?: string, initialState: Record<string, any> = {}) {
     this.state = initialState;
@@ -147,6 +148,9 @@ export class SocketClient implements ISharedData, IObservable {
   }
 
   async #connect() {
+    if (this.peerOnly) {
+      return;
+    }
     const socket = this.#socket = new WebSocket(this.#connectionUrl);
     return this.#connectionPromise = new Promise<void>((resolve, reject) => {
       socket.addEventListener("open", () => {
@@ -164,9 +168,15 @@ export class SocketClient implements ISharedData, IObservable {
       socket.addEventListener("close", () => {
         console.log("Disconnected from WebSocket server");
         this.#socket = undefined;
-        this.#selfData.id = "";
+        if (Object.keys(this.peerManagers).length) {
+          this.peerOnly = true;
+        }
       });
     });
+  }
+
+  closeSocket() {
+    this.#socket?.close();
   }
 
   async processDataBlob(blob: Blob, onClientIdConfirmed?: () => void) {
@@ -227,10 +237,9 @@ export class SocketClient implements ISharedData, IObservable {
   }
 
   async #broadcastUpdates() {
-    await this.#waitForConnection();
-    const filterdUpdates = this.#outgoingUpdates.filter((update) => {
+    this.#outgoingUpdates.forEach((update, index) => {
       // skip updates to peers if there's a peerManager ready
-      if (update.path?.startsWith("peer/")) {
+      if (update?.path?.startsWith("peer/")) {
         const tag = update.path.split("/")[1];
         const clientIds = tag.split(":");
         if (clientIds.length === 2) {
@@ -238,13 +247,14 @@ export class SocketClient implements ISharedData, IObservable {
           if (this.peerManagers[peerId]?.ready) {
             //  Send through peer manager
             this.peerManagers[peerId].send(this.#packageUpdates([{ ...update }]));
+            this.#outgoingUpdates[index] = undefined;
             return false;
           }
         }
       }
-      return true;
     });
-    const blob = this.#packageUpdates(filterdUpdates);
+    await this.#waitForConnection();
+    const blob = this.#packageUpdates(this.#outgoingUpdates.filter(update => !!update));
     this.#socket?.send(blob);
     this.#outgoingUpdates.length = 0;
   }
@@ -253,7 +263,7 @@ export class SocketClient implements ISharedData, IObservable {
     const blobBuilder = BlobBuilder.payload("payload", { updates });
     const addedBlob = new Set<string>();
     updates.forEach(update => {
-      Object.entries(update.blobs ?? {}).forEach(([key, blob]) => {
+      Object.entries(update?.blobs ?? {}).forEach(([key, blob]) => {
         if (!addedBlob.has(key)) {
           blobBuilder.blob(key, blob);
           addedBlob.add(key);
