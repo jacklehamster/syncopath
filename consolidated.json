@@ -62,10 +62,10 @@
       "sha": "98387d623bcf6077316ad093fd89f762c23f9a4f"
     },
     "dist/index.js": {
-      "sha": "81c6030a21cf646fa729fb22ec69cea934fc41cd"
+      "sha": "a06c2e57c196f3b551eaf6e88909957262331d36"
     },
     "dist/index.js.map": {
-      "sha": "ce56287b1d8c85583d513fd735c3a4436a30c328"
+      "sha": "57a8260ad50d30d5145980ae9c63ec540b571823"
     },
     "dist/styles-da87zv4s.css": {
       "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
@@ -127,7 +127,7 @@
     "json-test/index.html": {
       "sha": "9b3d48916b0d0404e894b2d8e29a54f067259495"
     },
-    "md5": "81c40d466e990d278d523fb0b7392dda",
+    "md5": "5ec5a54bd3e0174d41d9ae6561a11676",
     "mobile/index.html": {
       "sha": "0bdd4db68ab2f6f719fea937cd9d4a31658f890b"
     },
@@ -176,12 +176,12 @@
   },
   "/example/dist/dir.json": {
     "index.js": {
-      "sha": "81c6030a21cf646fa729fb22ec69cea934fc41cd"
+      "sha": "a06c2e57c196f3b551eaf6e88909957262331d36"
     },
     "index.js.map": {
-      "sha": "ce56287b1d8c85583d513fd735c3a4436a30c328"
+      "sha": "57a8260ad50d30d5145980ae9c63ec540b571823"
     },
-    "md5": "de1763c9ee40608e2014b43ffec18a7c",
+    "md5": "7d1301dd2737454120afc7d71c369cf4",
     "styles-da87zv4s.css": {
       "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
     }
@@ -1263,12 +1263,12 @@
       "sha": "923fcb3f529212593b63fccd5f15595fc7fcd002"
     },
     "SocketClient.ts": {
-      "sha": "403062cca0f4cee9793245047e88a722a2ece9cb"
+      "sha": "f8a8c386352d639d3d2cf41f6fb43b12ab935dbf"
     },
     "SubData.ts": {
       "sha": "4d075bacd738d5077397908f75e5c34630c1571f"
     },
-    "md5": "30250b4a69a959ab18688f3626a9c58d",
+    "md5": "c136a8f6d55bba2c13b4e7e4a003c3f6",
     "peer/PeerManager.ts": {
       "sha": "6dcb6524679c96eada7d9406442718aabc9bcb37"
     },
@@ -1311,7 +1311,7 @@
       "sha": "923fcb3f529212593b63fccd5f15595fc7fcd002"
     },
     "client/SocketClient.ts": {
-      "sha": "403062cca0f4cee9793245047e88a722a2ece9cb"
+      "sha": "f8a8c386352d639d3d2cf41f6fb43b12ab935dbf"
     },
     "client/SubData.ts": {
       "sha": "4d075bacd738d5077397908f75e5c34630c1571f"
@@ -1331,7 +1331,7 @@
     "index.ts": {
       "sha": "267d6ea1ddf2bf9961149ae3e3f57f2670a31db3"
     },
-    "md5": "dcc4d085d55e5207ac8983fe6c3e9161",
+    "md5": "7d347d45ba9ec314b0ef20b0091065cd",
     "server/SocketEventHandler.ts": {
       "sha": "aecf58955629f4178e2d85904d0c1121a1fc23dc"
     },
