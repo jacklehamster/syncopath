@@ -9,22 +9,22 @@
     "sha": "7f4867ce2f8638d70e38823797225ea99a97432e"
   },
   "Observer.ts": {
-    "sha": "640a5c9af9d2a0826ec2ca28b99b9e361c1b94b0"
+    "sha": "5960def41d9f510fbf32034a06c7afaccc2ffaeb"
   },
   "ObserverManager.ts": {
     "sha": "923fcb3f529212593b63fccd5f15595fc7fcd002"
   },
   "SocketClient.ts": {
-    "sha": "a16c93d0923cabd7574743984915877d2c5b7e97"
+    "sha": "5a2d1b9627d807450c707b520de1fc098828ca57"
   },
   "SubData.ts": {
-    "sha": "4d075bacd738d5077397908f75e5c34630c1571f"
+    "sha": "521e518ff533a5b9ffc6416357ac6ca15687fe69"
   },
-  "md5": "905d6adee1997edafb9399dae458d2c0",
+  "md5": "ab8722faea5a8bc15e21e66b919ccda7",
   "peer/PeerManager.ts": {
     "sha": "00af3c5abb1582f18bc9990e3980b5c86a08c9b6"
   },
   "peer/check-peer.ts": {
-    "sha": "70ef13349d0ba03b33002d62e8a2bb7cc5475cdc"
+    "sha": "898373c912a2cc1d2f3a21dfb05194b953561044"
   }
 }

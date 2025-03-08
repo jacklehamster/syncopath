@@ -9,33 +9,33 @@
     "sha": "7f4867ce2f8638d70e38823797225ea99a97432e"
   },
   "client/Observer.ts": {
-    "sha": "640a5c9af9d2a0826ec2ca28b99b9e361c1b94b0"
+    "sha": "5960def41d9f510fbf32034a06c7afaccc2ffaeb"
   },
   "client/ObserverManager.ts": {
     "sha": "923fcb3f529212593b63fccd5f15595fc7fcd002"
   },
   "client/SocketClient.ts": {
-    "sha": "a16c93d0923cabd7574743984915877d2c5b7e97"
+    "sha": "5a2d1b9627d807450c707b520de1fc098828ca57"
   },
   "client/SubData.ts": {
-    "sha": "4d075bacd738d5077397908f75e5c34630c1571f"
+    "sha": "521e518ff533a5b9ffc6416357ac6ca15687fe69"
   },
   "client/peer/PeerManager.ts": {
     "sha": "00af3c5abb1582f18bc9990e3980b5c86a08c9b6"
   },
   "client/peer/check-peer.ts": {
-    "sha": "70ef13349d0ba03b33002d62e8a2bb7cc5475cdc"
+    "sha": "898373c912a2cc1d2f3a21dfb05194b953561044"
   },
   "data/data-update.test.ts": {
     "sha": "b143a1364dca0e14f94bdf8f0911c5773cdfa4e8"
   },
   "data/data-update.ts": {
-    "sha": "fccbf21791fce2da00082cc5895a6b3bb90d1d23"
+    "sha": "c8b61584639cf77a82b370028884f8ef084cc48b"
   },
   "index.ts": {
     "sha": "267d6ea1ddf2bf9961149ae3e3f57f2670a31db3"
   },
-  "md5": "28c90424a43a4a9b2e6939b32fbbadd9",
+  "md5": "a50d6fc0e54b2cb3ae5f22367efd1e30",
   "server/SocketEventHandler.ts": {
     "sha": "aecf58955629f4178e2d85904d0c1121a1fc23dc"
   },
@@ -43,28 +43,28 @@
     "sha": "5c34076961b7c5986bb46fc559745b4c09c576c6"
   },
   "server/SyncRoom.ts": {
-    "sha": "7e0d301cea9ede9e3fb5f7c99662e6495d4876d4"
+    "sha": "b81f0a8125cea7f78b81e6535ccef4fda859df62"
   },
   "server/SyncSocket.ts": {
-    "sha": "8ad5e2ab6cc2f963d096597d71194faf8e5727cb"
+    "sha": "14f756b15a966c79b97a1c50dd4c04a4420d40af"
   },
   "server/path-utils.ts": {
     "sha": "5895904b11307ff78f1ba09530efa40274864655"
   },
   "server/peer-utils.ts": {
-    "sha": "2fb2d48c1722632c60c44e224ed47b1580b6edc1"
+    "sha": "eeb9184fbca56566711e28912c370ff3ce90ba63"
   },
   "types/Action.ts": {
     "sha": "81594cbe9058b15543d99e96a11fb2d3e37b56ab"
   },
   "types/ClientState.ts": {
-    "sha": "a2f5e522070f9459ef7a6da91310746128b11d31"
+    "sha": "9e6c1fdea2ce7724f9f2488ee9036e8a44129228"
   },
   "types/DataObject.ts": {
     "sha": "ba747a6f38117b0f2cf5791957d0e208ba019bb4"
   },
-  "types/ServerState.ts": {
-    "sha": "b0fa95798f8bb571b9c7bbe9aa2f07fac3e0c486"
+  "types/RoomState.ts": {
+    "sha": "0d2b25b1423fc08bdde54bc366ab2c5c5003758f"
   },
   "types/Update.ts": {
     "sha": "fac15db4e28cd4739d144bb3c4fa9c847e273a03"

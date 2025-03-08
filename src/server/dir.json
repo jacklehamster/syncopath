@@ -6,16 +6,16 @@
     "sha": "5c34076961b7c5986bb46fc559745b4c09c576c6"
   },
   "SyncRoom.ts": {
-    "sha": "7e0d301cea9ede9e3fb5f7c99662e6495d4876d4"
+    "sha": "b81f0a8125cea7f78b81e6535ccef4fda859df62"
   },
   "SyncSocket.ts": {
-    "sha": "8ad5e2ab6cc2f963d096597d71194faf8e5727cb"
+    "sha": "14f756b15a966c79b97a1c50dd4c04a4420d40af"
   },
-  "md5": "84f47a0101199faa7740085ff7a01676",
+  "md5": "089bfc95cbbe38ef00456e5e28c939da",
   "path-utils.ts": {
     "sha": "5895904b11307ff78f1ba09530efa40274864655"
   },
   "peer-utils.ts": {
-    "sha": "2fb2d48c1722632c60c44e224ed47b1580b6edc1"
+    "sha": "eeb9184fbca56566711e28912c370ff3ce90ba63"
   }
 }

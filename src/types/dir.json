@@ -3,16 +3,16 @@
     "sha": "81594cbe9058b15543d99e96a11fb2d3e37b56ab"
   },
   "ClientState.ts": {
-    "sha": "a2f5e522070f9459ef7a6da91310746128b11d31"
+    "sha": "9e6c1fdea2ce7724f9f2488ee9036e8a44129228"
   },
   "DataObject.ts": {
     "sha": "ba747a6f38117b0f2cf5791957d0e208ba019bb4"
   },
-  "ServerState.ts": {
-    "sha": "b0fa95798f8bb571b9c7bbe9aa2f07fac3e0c486"
+  "RoomState.ts": {
+    "sha": "0d2b25b1423fc08bdde54bc366ab2c5c5003758f"
   },
   "Update.ts": {
     "sha": "fac15db4e28cd4739d144bb3c4fa9c847e273a03"
   },
-  "md5": "61351c2edecb1dc0d4d516cb371d7247"
+  "md5": "54de361dff7ddb0182c0a64c790dc0c3"
 }
