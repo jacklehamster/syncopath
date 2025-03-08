@@ -104,9 +104,9 @@
               if (acceleration.value) {
                 clientDiv.style.display = "";
                 const { x, y, z } = acceleration.value;
-                const xVal = Math.round((x ?? 0) / 100) * 100;
-                const yVal = Math.round((y ?? 0) / 100) * 100;
-                const zVal = Math.round((z ?? 0) / 100) * 100;
+                const xVal = Math.round((x ?? 0) * 100) / 100;
+                const yVal = Math.round((y ?? 0) * 100) / 100;
+                const zVal = Math.round((z ?? 0) * 100) / 100;
                 xKnob.value = xVal;
                 yKnob.value = yVal;
                 zKnob.value = zVal;
