@@ -8,6 +8,7 @@ import { RoomState } from "@/types/RoomState";
 import { BlobBuilder } from "@dobuki/data-blob";
 import { removeRestrictedData, removeRestrictedPeersFromUpdates } from "./peer-utils";
 import { restrictedPath } from "./path-utils";
+import { validatePayload } from "@dobuki/payload-validator";
 
 export class SyncRoom {
   readonly #sockets: Map<WebSocket, string> = new Map();
@@ -40,6 +41,7 @@ export class SyncRoom {
 
   async welcomeClient(client: WebSocket) {
     const now = Date.now();
+    const secret = crypto.randomUUID();
 
     //  initialize client state
     const clientId = `client-${SyncRoom.nextClientId++}`;
@@ -60,6 +62,10 @@ export class SyncRoom {
     //  setup events
     addMessageReceiver(client, (payload, blobs) => {
       Object.entries(blobs).forEach(([key, blob]) => this.#setBlob(key, blob));
+      if (!payload.updates?.every(update => validatePayload(update, { secret }))) {
+        console.warn("Invalid payload received from ", clientId);
+        return;
+      }
       payload.updates?.forEach(update => {
         const blobs = update.blobs ?? {};
         Object.keys(blobs).forEach(key => {
@@ -100,6 +106,7 @@ export class SyncRoom {
       state: removeRestrictedData({ ...this.#state }, clientId),
       updates: this.#updates,
       serverTime: now,
+      secret,
     });
     Object.entries(this.#state.blobs ?? {}).forEach(([key, blob]) => welcomeBlobBuilder.blob(key, blob));
     this.#updates.forEach(update => Object.entries(update.blobs ?? {}).forEach(([key, blob]) => welcomeBlobBuilder.blob(key, blob)));

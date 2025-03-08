@@ -1,7 +1,11 @@
+import { SetDataOptions } from "../ISharedData";
 import { SocketClient } from "../SocketClient";
 import { PeerManager } from "./PeerManager";
 
 const DELAY_TO_DISCONNECT_WEBSOCKET_AFTER_PEER = 3000;
+const PEER_OPTIONS: SetDataOptions = {
+  active: true,
+};
 
 export function checkPeerConnections(socketClient: SocketClient) {
   for (const k in socketClient.state.peer) {
@@ -13,9 +17,7 @@ export function checkPeerConnections(socketClient: SocketClient) {
         if (!socketClient.peerManagers[clients[1]]) {
           createPeerManager(socketClient, `${clients[0]}:${clients[1]}`, clients[1]);
           socketClient.peerManagers[clients[1]].createOffer().then(offer => {
-            socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[0]}/offer`, offer, {
-              active: true,
-            });
+            socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[0]}/offer`, offer, PEER_OPTIONS);
           });
         }
       }
@@ -28,10 +30,10 @@ export function checkPeerConnections(socketClient: SocketClient) {
             candidates?.forEach(candidateName => {
               const candidate = socketClient.state.peer?.[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[1]]?.ice?.[candidateName];
               socketClient.peerManagers[clients[1]].addIceCandidate(candidate);
-              socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[1]}/ice/${candidateName}`, undefined);
+              socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[1]}/ice/${candidateName}`, undefined, PEER_OPTIONS);
             });
           });
-          socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[1]}/answer`, undefined);
+          socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[1]}/answer`, undefined, PEER_OPTIONS);
         }
       }
     } else if (clients[1] === socketClient.clientId) {
@@ -40,18 +42,16 @@ export function checkPeerConnections(socketClient: SocketClient) {
         if (!socketClient.peerManagers[clients[0]]) {
           createPeerManager(socketClient, `${clients[0]}:${clients[1]}`, clients[0]);
           socketClient.peerManagers[clients[0]].acceptOffer(socketClient.state.peer[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[0]]?.offer).then(answer => {
-            socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[1]}/answer`, answer, {
-              active: true,
-            });
+            socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[1]}/answer`, answer, PEER_OPTIONS);
             socketClient.observe(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[0]}/ice/{keys}`).onElementsAdded((candidates) => {
               candidates?.forEach(candidateName => {
                 const candidate = socketClient.state.peer?.[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[0]]?.ice?.[candidateName];
                 socketClient.peerManagers[clients[0]].addIceCandidate(candidate);
-                socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[0]}/ice/${candidateName}`, undefined);
+                socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[0]}/ice/${candidateName}`, undefined, PEER_OPTIONS);
               });
             });
           });
-          socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[0]}/offer`, undefined);
+          socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[0]}/offer`, undefined, PEER_OPTIONS);
         }
       }
     }
@@ -68,9 +68,7 @@ function createPeerManager(socketClient: SocketClient, tag: string, peerId: stri
     },
     (ice) => {
       const candidate = ice.candidate.split(" ")[0];
-      socketClient.setData(`peer/${tag}:webRTC/${socketClient.clientId}/ice/${candidate}`, ice, {
-        active: true,
-      });
+      socketClient.setData(`peer/${tag}:webRTC/${socketClient.clientId}/ice/${candidate}`, ice, PEER_OPTIONS);
     },
     () => {
       delete socketClient.peerManagers[peerId];

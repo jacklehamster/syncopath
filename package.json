@@ -10,7 +10,7 @@
   "devDependencies": {
     "@dobuki/dev-dependencies": "latest",
     "@types/jest": "^29.5.14",
-    "@types/ws": "^8.5.14",
+    "@types/ws": "^8.18.0",
     "fetch-blob": "^4.0.0",
     "jest": "^29.7.0",
     "ts-jest": "^29.2.5"
@@ -46,7 +46,8 @@
   },
   "description": "Synchronize data across clients using WebSocket",
   "dependencies": {
-    "@dobuki/data-blob": "^1.0.12"
+    "@dobuki/data-blob": "^1.0.12",
+    "@dobuki/payload-validator": "^1.0.8"
   },
   "keywords": []
 }

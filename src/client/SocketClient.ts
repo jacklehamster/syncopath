@@ -16,6 +16,7 @@ import { extractBlobsFromPayload } from "@dobuki/data-blob";
 import { PeerManager } from "./peer/PeerManager";
 import { checkPeerConnections } from "./peer/check-peer";
 import { RoomState } from "@/types/RoomState";
+import { signedPayload } from "@dobuki/payload-validator";
 
 export class SocketClient implements ISharedData, IObservable {
   readonly state: RoomState;
@@ -30,6 +31,7 @@ export class SocketClient implements ISharedData, IObservable {
   readonly peerManagers: Record<string, PeerManager> = {};
   #serverTimeOffset = 0;
   #nextFrameInProcess = false;
+  #secret?: string;
 
   constructor(host: string, room?: string, initialState: RoomState = {}) {
     this.state = initialState;
@@ -112,8 +114,9 @@ export class SocketClient implements ISharedData, IObservable {
     if (!isPeerUpdate) {
       await this.#waitForConnection();
     }
+    const active = options.active ?? this.state.config?.activeUpdates ?? false;
 
-    if (options.active || isPeerUpdate) {
+    if (active || isPeerUpdate) {
       markUpdateConfirmed(update, this.now);
     }
 
@@ -191,6 +194,9 @@ export class SocketClient implements ISharedData, IObservable {
   async processDataBlob(blob: Blob, onClientIdConfirmed?: () => void) {
     const { payload, ...blobs } = await extractPayload(blob);
 
+    if (payload?.secret) {
+      this.#secret = payload.secret;
+    }
     if (payload?.serverTime) {
       this.#serverTimeOffset = payload.serverTime - Date.now();
     }
@@ -265,7 +271,9 @@ export class SocketClient implements ISharedData, IObservable {
       }
     });
 
-    const outUpdates = this.#outgoingUpdates.filter(update => !!update);
+    const outUpdates = this.#outgoingUpdates
+      .filter(update => !!update)
+      .map(update => signedPayload(update, { secret: this.#secret }));
     if (outUpdates.length) {
       await this.#waitForConnection();
       const blob = this.#packageUpdates(outUpdates);

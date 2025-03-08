@@ -187,10 +187,7 @@
             nameInput.addEventListener("input", (event) => {
               socketClient.setData(
                 `clients/${clientId}/name`,
-                event.target.value,
-                {
-                  active: true,
-                }
+                event.target.value
               );
             });
             observers.add(

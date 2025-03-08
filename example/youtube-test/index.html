@@ -31,7 +31,7 @@
           id="ytplayer"
           width="560"
           height="315"
-          src="https://www.youtube.com/embed/u30MbFhLLvw?controls=0&enablejsapi=1&autoplay=1&mute=1&rel=0&disablekb=1&iv_load_policy=3"
+          src="https://www.youtube.com/embed/u30MbFhLLvw?controls=0&enablejsapi=1&autoplay=1&mute=1&rel=0&disablekb=1&modestbranding=1&showinfo=0&iv_load_policy=3"
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         ></iframe>
@@ -54,6 +54,7 @@
       <input type="checkbox" id="mute" />
     </div>
     <div id="client-list"></div>
+    <div id="state-div" style="white-space: pre"></div>
     <script type="module">
       import {
         trackCursor,
@@ -116,7 +117,7 @@
 
       document.querySelector("#video").addEventListener("click", () => {
         const isPlaying = socketClient.state.videoStarted;
-        const videoStarted = !isPlaying ? socketClient.serverTime : 0;
+        const videoStarted = !isPlaying ? socketClient.now : 0;
         socketClient.setData("videoStarted", videoStarted);
       });
 
@@ -128,7 +129,7 @@
         socketClient.setData("playhead", event.target.value);
         const isPlaying = socketClient.state.videoStarted;
         if (isPlaying) {
-          socketClient.setData("videoStarted", socketClient.serverTime);
+          socketClient.setData("videoStarted", socketClient.now);
         }
       });
 
@@ -141,7 +142,6 @@
       });
 
       socketClient.observe("videoStarted").onChange((videoStarted) => {
-        window.videoStarted = videoStarted.value;
         catchUp();
       });
 
@@ -157,9 +157,14 @@
         }
       });
 
-      //      socketClient
-      //      .observe()
-      //    .onChange(() => console.log(stringify(socketClient.state)));
+      socketClient
+        .observe()
+        .onChange(
+          () =>
+            (document.querySelector("#state-div").textContent = stringify(
+              socketClient.state
+            ))
+        );
     </script>
     <script src="https://www.youtube.com/iframe_api"></script>
     <script>
@@ -167,15 +172,21 @@
 
       function checkPlayState() {
         const socketClient = window.socketClient;
-        if (player.getPlayerState) {
-          if (window.videoStarted && player.getPlayerState() !== 1) {
+        if (player?.getPlayerState) {
+          if (
+            socketClient.state.videoStarted &&
+            player.getPlayerState() !== 1
+          ) {
             player.playVideo();
             if (socketClient.state.muted) {
               player.mute();
             } else {
               player.unMute();
             }
-          } else if (!window.videoStarted && player.getPlayerState() === 1) {
+          } else if (
+            !socketClient.state.videoStarted &&
+            player.getPlayerState() === 1
+          ) {
             player.pauseVideo();
           }
         }
@@ -190,12 +201,12 @@
       function catchUp() {
         const socketClient = window.socketClient;
         checkPlayState();
-        if (player.getCurrentTime) {
+        if (player?.getCurrentTime) {
           const playHead = document.querySelector("#playhead");
           const playHeadTimeMs = playHead.value * player.getDuration();
-          if (window.videoStarted) {
+          if (socketClient.state.videoStarted) {
             const timeSinceStart =
-              socketClient.serverTime - window.videoStarted;
+              socketClient.now - socketClient.state.videoStarted;
             const time = timeSinceStart / 1000 + playHeadTimeMs;
             if (Math.abs(time - player.getCurrentTime()) > 0.1) {
               player.seekTo(time, true);
@@ -203,7 +214,7 @@
           }
         }
 
-        if (player.getCurrentTime) {
+        if (player?.getCurrentTime) {
           document.querySelector("#current-time").textContent = formatTime(
             player.getCurrentTime()
           );
@@ -213,13 +224,22 @@
         }
       }
 
+      function updateBar(bar) {
+        if (player?.getCurrentTime) {
+          bar.value = player.getCurrentTime() / player.getDuration();
+          document.querySelector("#current-time").textContent = formatTime(
+            player.getCurrentTime()
+          );
+        }
+      }
+
       function onPlayerStateChange(event) {
         if (event.data == YT.PlayerState.ENDED) {
           console.log("ENDED");
         } else {
-          const bar = document.querySelector("#playhead");
-          if (!window.videoStarted) {
-            bar.value = player.getCurrentTime() / player.getDuration();
+          if (!socketClient.state.videoStarted) {
+            const bar = document.querySelector("#playhead");
+            updateBar(bar);
           }
           catchUp();
         }

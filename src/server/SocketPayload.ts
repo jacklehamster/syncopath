@@ -5,4 +5,5 @@ export interface Payload {
   state?: Record<string, any>;
   updates?: Update[];
   serverTime?: number;
+  secret?: string;
 }

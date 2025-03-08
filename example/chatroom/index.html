@@ -100,7 +100,7 @@
       socketClient.observe("chatting/{keys}").onChange((chattingClients) => {
         const chatting = document.querySelector(".chatting");
         const otherClientsTyping = chattingClients.value
-          .filter(
+          ?.filter(
             (clientId) =>
               clientId !== socketClient.clientId && clients.state[clientId]
           )
@@ -108,10 +108,9 @@
             (clientId) =>
               ` ${clients.state[clientId].emoji} ${clients.state[clientId].name}`
           );
-        chatting.textContent =
-          otherClientsTyping.length > 0
-            ? `${otherClientsTyping.join(", ")} typing...`
-            : "";
+        chatting.textContent = otherClientsTyping?.length
+          ? `${otherClientsTyping.join(", ")} typing...`
+          : "";
       });
 
       socketClient.observe("chat").onElementsAdded((elems) => {

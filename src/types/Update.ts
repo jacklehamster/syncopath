@@ -9,4 +9,5 @@ export interface Update {
   confirmed?: number;
   actions?: Action[];
   blobs?: { [key: string]: Blob };
+  signature?: string;
 }
