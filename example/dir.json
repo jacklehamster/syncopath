@@ -15,16 +15,16 @@
     "sha": "a8f7b2aa31c69081e16f711724e1214506f46d9d"
   },
   "chatroom/index.html": {
-    "sha": "d01ff78b902182d186620dc7e38fe0e0f2f554b3"
+    "sha": "4753c93f72152da3aa8752682412d165a29b28ab"
   },
   "config.json": {
     "sha": "98387d623bcf6077316ad093fd89f762c23f9a4f"
   },
   "dist/index.js": {
-    "sha": "6e2fcce8d5c38d4d47311c5e5d77526fedb9d33d"
+    "sha": "084aa8104cb6e85a296afed099092816d8cc02f5"
   },
   "dist/index.js.map": {
-    "sha": "d5eb9844665c4be881c702c03cd757570c9a14bd"
+    "sha": "865feb356ea965da155a6cbc58ebc29dc65f8dae"
   },
   "dist/styles-da87zv4s.css": {
     "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
@@ -86,7 +86,7 @@
   "json-test/index.html": {
     "sha": "9ec0f95dcdc56365093036252745434e014fdd8a"
   },
-  "md5": "964348360b162e8e8ed83a1f877f9e40",
+  "md5": "1e0e122b4c21574f29e4338eec0819ec",
   "mobile/index.html": {
     "sha": "cb60ec11cb819e6fa4e059963b66419af92ba599"
   },
@@ -106,7 +106,7 @@
     "sha": "b7b986c76fc8f78204e95498aef051618845d170"
   },
   "sample/index.html": {
-    "sha": "828632a061d8b61aa5951e9a4bbc9fe46cccb824"
+    "sha": "6fbb9a4b896f5da99b5f205b580d6a2f71f697b9"
   },
   "src/index.ts": {
     "sha": "d1159d5cda2890245af330da6d91e42ed1fe4ae5"
@@ -130,6 +130,6 @@
     "sha": "5d54bba5d6d02edc48c065729f8965af5541693d"
   },
   "youtube-test/index.html": {
-    "sha": "e085fb732f23ed3fbefde35ba679ac2fb1408a54"
+    "sha": "12eaf60e736f53f2083f8962b2da3e108cf7b7be"
   }
 }
