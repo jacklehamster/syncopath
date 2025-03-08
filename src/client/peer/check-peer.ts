@@ -26,7 +26,7 @@ export function checkPeerConnections(socketClient: SocketClient) {
           });
           socketClient.observe(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[1]}/ice/{keys}`).onElementsAdded((candidates) => {
             candidates?.forEach(candidateName => {
-              const candidate = socketClient.state.peer[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[1]]?.ice?.[candidateName];
+              const candidate = socketClient.state.peer?.[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[1]]?.ice?.[candidateName];
               socketClient.peerManagers[clients[1]].addIceCandidate(candidate);
               socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[1]}/ice/${candidateName}`, undefined);
             });
@@ -45,7 +45,7 @@ export function checkPeerConnections(socketClient: SocketClient) {
             });
             socketClient.observe(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[0]}/ice/{keys}`).onElementsAdded((candidates) => {
               candidates?.forEach(candidateName => {
-                const candidate = socketClient.state.peer[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[0]]?.ice?.[candidateName];
+                const candidate = socketClient.state.peer?.[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[0]]?.ice?.[candidateName];
                 socketClient.peerManagers[clients[0]].addIceCandidate(candidate);
                 socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[0]}/ice/${candidateName}`, undefined);
               });
@@ -77,7 +77,7 @@ function createPeerManager(socketClient: SocketClient, tag: string, peerId: stri
       console.log("Peer closed");
     },
     () => {
-      if (socketClient.state.config.peerOnly) {
+      if (socketClient.state.config?.peerOnly) {
         setTimeout(() => {
           socketClient.closeSocket();
         }, DELAY_TO_DISCONNECT_WEBSOCKET_AFTER_PEER);

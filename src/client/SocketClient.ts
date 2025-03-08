@@ -2,7 +2,7 @@
 /// <reference lib="dom" />
 /// <reference lib="dom.iterable" />
 
-import { commitUpdates, getLeafObject, markCommonUpdateConfirmed } from "@/data/data-update";
+import { commitUpdates, getLeafObject, markUpdateConfirmed } from "@/data/data-update";
 import { Update } from "@/types/Update";
 import { Action } from "@/types/Action";
 import { ISharedData, SetDataOptions, UpdateOptions } from "./ISharedData";
@@ -15,10 +15,11 @@ import { ObserverManager } from "./ObserverManager";
 import { extractBlobsFromPayload } from "@dobuki/data-blob";
 import { PeerManager } from "./peer/PeerManager";
 import { checkPeerConnections } from "./peer/check-peer";
+import { RoomState } from "@/types/RoomState";
 
 export class SocketClient implements ISharedData, IObservable {
-  readonly state: Record<string, any>;
-  readonly #children: Set<ISharedData> = new Set();
+  readonly state: RoomState;
+  readonly #children: Map<string, ISharedData> = new Map();
   #socket: WebSocket | undefined;
   #connectionPromise: Promise<void> | undefined;
   readonly #connectionUrl: string;
@@ -30,14 +31,14 @@ export class SocketClient implements ISharedData, IObservable {
   #serverTimeOffset = 0;
   #nextFrameInProcess = false;
 
-  constructor(host: string, room?: string, initialState: Record<string, any> = {}) {
+  constructor(host: string, room?: string, initialState: RoomState = {}) {
     this.state = initialState;
     const prefix = host.startsWith("ws://") || host.startsWith("wss://") ? "" : globalThis.location.protocol === "https:" ? "wss://" : "ws://";
     this.#connectionUrl = `${prefix}${host}${room ? `?room=${room}` : ""}`;
     this.#connect();
     globalThis.addEventListener("focus", () => {
       if (!this.#socket) {
-        const autoReconnect = this.state.config.autoReconnect ?? true;
+        const autoReconnect = this.state.config?.autoReconnect ?? true;
         if (autoReconnect) {
           this.#connect().catch(e => {
             console.warn("Failed to reconnect");
@@ -45,7 +46,7 @@ export class SocketClient implements ISharedData, IObservable {
         }
       }
     });
-    this.#children = new Set([this.#selfData]);
+    this.#children.set(`clients/{self}`, this.#selfData);
   }
 
   #fixPath(path: Update["path"]) {
@@ -59,7 +60,8 @@ export class SocketClient implements ISharedData, IObservable {
   }
 
   getData(path: Update["path"]) {
-    return getLeafObject(this.state, path, 0, false, this.#selfData.id) as any;
+    const parts = path.split("/");
+    return getLeafObject(this.state, parts, 0, false, this.#selfData.id) as any;
   }
 
   async actions(path: Update["path"], actions: Action[], options: UpdateOptions = {}) {
@@ -112,7 +114,7 @@ export class SocketClient implements ISharedData, IObservable {
     }
 
     if (options.active || isPeerUpdate) {
-      markCommonUpdateConfirmed(update, this.serverTime);
+      markUpdateConfirmed(update, this.now);
     }
 
     //  commit updates locally
@@ -130,14 +132,23 @@ export class SocketClient implements ISharedData, IObservable {
     return this.#selfData;
   }
 
-  access(path: Update["path"]): SubData {
+  access(path: Update["path"]): ISharedData {
+    const childData = this.#children.get(path);
+    if (childData) {
+      return childData;
+    }
     const subData = new SubData(path, this);
-    this.#children.add(subData);
+    this.#children.set(path, subData);
     return subData;
   }
 
-  removeChild(child: ISharedData) {
-    this.#children.delete(child);
+  peerData(peerId: string): ISharedData {
+    const peerTag = [this.clientId, peerId].sort().join(":");
+    return this.access(`peer/${peerTag}`);
+  }
+
+  removeChildData(path: string) {
+    this.#children.delete(path);
   }
 
   observe(...paths: Update["path"][]): Observer {
@@ -193,7 +204,9 @@ export class SocketClient implements ISharedData, IObservable {
       for (const key in payload.state) {
         this.state[key] = payload.state[key];
       }
-      this.state.blobs = blobs;
+      if (Object.keys(blobs).length) {
+        this.state.blobs = blobs;
+      }
     }
     if (payload?.updates) {
       const updates: Update[] = payload.updates;
@@ -277,7 +290,8 @@ export class SocketClient implements ISharedData, IObservable {
 
   #saveBlobsFromUpdates(updates: Update[]) {
     updates.forEach(update => Object.entries(update.blobs ?? {}).forEach(([key, blob]) => {
-      this.state.blobs[key] = blob;
+      const blobs = this.state.blobs ?? (this.state.blobs = {});
+      blobs[key] = blob;
     }));
   }
 
@@ -307,7 +321,7 @@ export class SocketClient implements ISharedData, IObservable {
     this.#observerManager.removeObserver(observer);
   }
 
-  get serverTime() {
+  get now() {
     return Date.now() + this.#serverTimeOffset;
   }
 }

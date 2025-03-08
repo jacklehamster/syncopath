@@ -67,6 +67,12 @@
           button.id = `${site}-button`;
           button.textContent = site;
           button.addEventListener("click", () => {
+            const buttons = document.querySelectorAll("button");
+            buttons.forEach((b) => {
+              b.style.backgroundColor = "";
+            });
+            button.style.backgroundColor = "lightblue";
+
             if (!document.querySelector(`#${site}-content`)) {
               const frameRoom = room ?? site;
               const div = container.appendChild(document.createElement("div"));

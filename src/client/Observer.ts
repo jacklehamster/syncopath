@@ -47,8 +47,8 @@ export class Observer {
   }
 
   #updatedObservations() {
-    const newValues = this.#partsArrays.map(p =>
-      getLeafObject(this.socketClient.state, p, 0, false, this.socketClient.clientId)
+    const newValues = this.#partsArrays.map(parts =>
+      getLeafObject(this.socketClient.state, parts, 0, false, this.socketClient.clientId)
     );
     if (this.#observations.length && this.#observations.every((ob, index) => {
       const newValue = newValues[index];

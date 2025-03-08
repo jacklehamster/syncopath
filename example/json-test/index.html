@@ -46,20 +46,26 @@
       jsonContainer.addEventListener("input", (event) => {
         const json = event.target.value;
         try {
-          socketClient.setData("json", JSON.parse(json));
+          const obj = JSON.parse(json);
+          for (let k in obj) {
+            socketClient.setData(k, obj[k], {
+              active: true,
+            });
+          }
           document.querySelector("#error").style.display = "none";
         } catch (error) {
           document.querySelector("#error").style.display = "block";
         }
       });
-      socketClient.observe("json").onChange((data) => {
+      socketClient.observe().onChange(() => {
+        const data = socketClient.state;
         let currentJson = undefined;
         try {
           currentJson = JSON.stringify(JSON.parse(jsonContainer.value));
         } catch (e) {}
         try {
-          if (JSON.stringify(data.value) !== currentJson) {
-            jsonContainer.value = JSON.stringify(data.value, null, 2);
+          if (JSON.stringify(data) !== currentJson) {
+            jsonContainer.value = JSON.stringify(data, null, 2);
           }
         } catch (e) {
           console.error(e);

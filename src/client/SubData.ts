@@ -38,6 +38,6 @@ export class SubData implements ISharedData, IObservable {
 
   close() {
     this.#observerManager.close();
-    this.socketClient.removeChild(this);
+    this.socketClient.removeChildData(this.path);
   }
 }

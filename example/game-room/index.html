@@ -57,14 +57,16 @@
           (keys["ArrowUp"] || keys.w ? -1 : 0);
         const x = calcX(socketClient.self.state);
         const y = calcY(socketClient.self.state);
-        socketClient.self.setData("dx", dx);
-        socketClient.self.setData("dy", dy);
-        socketClient.self.setData("x", x);
-        socketClient.self.setData("y", y);
+        socketClient.self.setData("dx", dx, { active: true });
+        socketClient.self.setData("dy", dy, { active: true });
+        socketClient.self.setData("x", x, { active: true });
+        socketClient.self.setData("y", y, { active: true });
         if (dx || dy) {
-          socketClient.self.setData("moveStart", socketClient.serverTime);
+          socketClient.self.setData("moveStart", "~{now}", {
+            active: true,
+          });
         } else {
-          socketClient.self.setData("moveStart", 0);
+          socketClient.self.setData("moveStart", 0, { active: true });
         }
       }
 
@@ -73,14 +75,14 @@
         const moveStart = client.moveStart;
         const dx = client.dx * speed;
         const x = client.x;
-        return x + dx * (moveStart ? socketClient.serverTime - moveStart : 0);
+        return x + dx * (moveStart ? socketClient.now - moveStart : 0);
       }
 
       function calcY(client) {
         const moveStart = client.moveStart;
         const dy = client.dy * speed;
         const y = client.y;
-        return y + dy * (moveStart ? socketClient.serverTime - moveStart : 0);
+        return y + dy * (moveStart ? socketClient.now - moveStart : 0);
       }
 
       const localPlayers = new Map();

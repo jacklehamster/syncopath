@@ -8,4 +8,5 @@
  *  ],
  */
 export interface ClientState {
+  joined: number;
 }

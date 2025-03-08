@@ -1,4 +1,4 @@
-import { RoomState } from "@/types/ServerState";
+import { RoomState } from "@/types/RoomState";
 import { Update } from "@/types/Update";
 
 export function removeRestrictedData(state: RoomState, clientId: string) {
@@ -11,6 +11,9 @@ export function removeRestrictedData(state: RoomState, clientId: string) {
     if (clients.length < 2 || clients[0] !== clientId && clients[1] !== clientId) {
       delete newState.peer[key];
     }
+  }
+  if (!Object.keys(newState.peer ?? {}).length) {
+    delete newState.peer;
   }
   return newState;
 }

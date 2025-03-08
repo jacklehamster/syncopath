@@ -38,32 +38,36 @@
       const clientBox = document.getElementById("client-box");
       handleUsersChanged(
         (clientId, isSelf, observers) => {
+          if (isSelf) {
+            return;
+          }
           const clientDiv = clientBox.appendChild(
             document.createElement("div")
           );
           clientDiv.style.border = "1px solid black";
           clientDiv.style.padding = "10px";
           clientDiv.id = `client-${clientId}`;
-          const RANGE = 360;
+          const MIN_RANGE = -360;
+          const MAX_RANGE = 360;
           const xValue = document.createElement("span");
           const yValue = document.createElement("span");
           const zValue = document.createElement("span");
           const xKnob = document.createElement("input");
           xKnob.type = "range";
-          xKnob.min = 0;
-          xKnob.max = RANGE;
+          xKnob.min = MIN_RANGE;
+          xKnob.max = MAX_RANGE;
           xKnob.step = 0.01;
           xKnob.value = 0;
           const yKnob = document.createElement("input");
           yKnob.type = "range";
-          yKnob.min = 0;
-          yKnob.max = RANGE;
+          yKnob.min = MIN_RANGE;
+          yKnob.max = MAX_RANGE;
           yKnob.step = 0.01;
           yKnob.value = 0;
           const zKnob = document.createElement("input");
           zKnob.type = "range";
-          zKnob.min = 0;
-          zKnob.max = RANGE;
+          zKnob.min = MIN_RANGE;
+          zKnob.max = MAX_RANGE;
           zKnob.step = 0.01;
           zKnob.value = 0;
           const xGroup = clientDiv.appendChild(document.createElement("div"));
@@ -81,10 +85,13 @@
           tapBox.style.width = "100px";
           tapBox.style.height = "20px";
 
+          clientDiv.style.display = "none";
+
+          const peerData = socketClient.peerData(clientId);
           observers.add(
-            socketClient.observe(`clients/${clientId}/tap`).onChange((tap) => {
-              console.log(tap);
+            peerData.observe("tap").onChange((tap) => {
               if (tap.value) {
+                clientDiv.style.display = "";
                 tapBox.style.backgroundColor = "red";
               } else {
                 tapBox.style.backgroundColor = "white";
@@ -93,22 +100,64 @@
           );
 
           observers.add(
-            socketClient
-              .observe(`clients/${clientId}/acceleration`)
-              .onChange((acceleration) => {
-                if (acceleration.value) {
-                  const { x, y, z } = acceleration.value;
-                  const xVal = ((x ?? 0) + RANGE) % RANGE;
-                  const yVal = ((y ?? 0) + RANGE) % RANGE;
-                  const zVal = ((z ?? 0) + RANGE) % RANGE;
-                  xKnob.value = xVal;
-                  yKnob.value = yVal;
-                  zKnob.value = zVal;
-                  xValue.textContent = `x: ${xVal.toFixed(2) ?? 0}`;
-                  yValue.textContent = `y: ${yVal.toFixed(2) ?? 0}`;
-                  zValue.textContent = `z: ${zVal.toFixed(2) ?? 0}`;
-                }
-              })
+            peerData.observe("acceleration").onChange((acceleration) => {
+              if (acceleration.value) {
+                clientDiv.style.display = "";
+                const { x, y, z } = acceleration.value;
+                const xVal = x ?? 0;
+                const yVal = y ?? 0;
+                const zVal = z ?? 0;
+                xKnob.value = xVal;
+                yKnob.value = yVal;
+                zKnob.value = zVal;
+                xValue.textContent = `x: ${xVal.toFixed(2) ?? 0}`;
+                yValue.textContent = `y: ${yVal.toFixed(2) ?? 0}`;
+                zValue.textContent = `z: ${zVal.toFixed(2) ?? 0}`;
+              } else {
+                clientDiv.style.display = "none";
+              }
+            })
+          );
+
+          window.addEventListener("deviceorientation", (event) => {
+            if (event.alpha === null) {
+              return;
+            }
+            const acceleration = {
+              x: event.alpha,
+              y: event.beta,
+              z: event.gamma,
+            };
+            peerData.setData("acceleration", acceleration);
+            peerData.observe(undefined).onChange(() => {
+              console.log(peerData.state);
+            });
+          });
+          //  detect tap
+          window.addEventListener("touchstart", (event) => {
+            event.preventDefault();
+            if (!peerData.state.tap) {
+              peerData.setData("tap", "~{now}");
+            }
+            if (
+              document.documentElement.requestFullscreen &&
+              !document.fullscreenElement
+            ) {
+              document.documentElement.requestFullscreen();
+            }
+          });
+          window.addEventListener("touchend", (event) => {
+            event.preventDefault();
+            if (peerData.state.tap) {
+              peerData.setData("tap", 0);
+            }
+          });
+          document.addEventListener(
+            "touchmove",
+            (event) => {
+              event.preventDefault();
+            },
+            { passive: false }
           );
         },
         (clientId) => {
@@ -122,26 +171,6 @@
           }
         }
       );
-
-      window.addEventListener("deviceorientation", (event) => {
-        const acceleration = {
-          x: event.alpha,
-          y: event.beta,
-          z: event.gamma,
-        };
-        socketClient.self.setData("acceleration", acceleration);
-      });
-      //  detect tap
-      window.addEventListener("touchstart", (event) => {
-        if (!socketClient.self.state.tap) {
-          socketClient.self.setData("tap", socketClient.serverTime);
-        }
-      });
-      window.addEventListener("touchend", (event) => {
-        if (socketClient.self.state.tap) {
-          socketClient.self.setData("tap", 0);
-        }
-      });
       socketClient
         .observe()
         .onChange(

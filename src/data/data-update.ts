@@ -4,8 +4,9 @@ import { Update } from "../types/Update";
 const SELF = "{self}";
 const KEYS = "{keys}";
 const VALUES = "{values}";
-const SERVER_TIME = "~{serverTime}";
+const NOW = "~{now}";
 
+// This function is used to commit updates to the root object
 export function commitUpdates(root: DataObject, updates: Update[]) {
   const confirmedUpdates = getConfirmedUpdates(updates);
   confirmedUpdates?.forEach((update) => {
@@ -40,12 +41,25 @@ export function commitUpdates(root: DataObject, updates: Update[]) {
       }
     } else if (update.value === undefined) {
       delete leaf[prop];
+      cleanupRoot(root, parts, 0);
     } else {
       leaf[prop] = update.value;
     }
   });
 }
 
+// This function is used to remove empty objects from the root object
+function cleanupRoot(root: DataObject, parts: (string | number)[], index: number) {
+  if (!root || typeof (root) !== "object" || Array.isArray(root)) {
+    return false;
+  }
+  if (cleanupRoot(root[parts[index]], parts, index + 1)) {
+    delete root[parts[index]];
+  }
+  return Object.keys(root).length === 0;
+}
+
+//  Get all confirmed updates and sort them by confirmed time
 function getConfirmedUpdates(updates: Update[]) {
   const confirmedUpdates = updates.filter(update => update.confirmed);
   confirmedUpdates?.sort((a, b) => {
@@ -59,8 +73,8 @@ function getConfirmedUpdates(updates: Update[]) {
   return confirmedUpdates;
 }
 
-export function getLeafObject(obj: DataObject, path: string | (string | number)[], offset: number, autoCreate: boolean, selfId?: string) {
-  const parts = Array.isArray(path) ? path : path.split("/");
+//  Dig into the object to get the leaf object, given the parts of the path
+export function getLeafObject(obj: DataObject, parts: (string | number)[], offset: number, autoCreate: boolean, selfId?: string) {
   let current = obj;
   for (let i = 0; i < parts.length - offset; i++) {
     let prop = selfId && parts[i] === SELF ? selfId : parts[i];
@@ -82,14 +96,15 @@ export function getLeafObject(obj: DataObject, path: string | (string | number)[
   return current;
 }
 
-export function markCommonUpdateConfirmed(update: Update, now: number) {
+//  Mark the update as confirmed
+export function markUpdateConfirmed(update: Update, now: number) {
   if (!update.confirmed) {
     update.confirmed = now;
-    //  adjust update
-    switch (update.value) {
-      case SERVER_TIME:
-        update.value = now;
-        break;
-    }
+  }
+  //  adjust update
+  switch (update.value) {
+    case NOW:
+      update.value = now;
+      break;
   }
 }
