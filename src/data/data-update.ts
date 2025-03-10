@@ -4,6 +4,9 @@ import { Update } from "../types/Update";
 const KEYS = "~{keys}";
 const VALUES = "~{values}";
 
+// ~{}  data evaluation, evaluated on the fly
+// ~<>  coded variable. Causes data binding to the variable
+
 // This function is used to commit updates to the root object
 export function commitUpdates(root: RoomState, properties: Record<string, any>) {
   sortUpdates(root.updates);
