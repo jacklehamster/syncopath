@@ -59,7 +59,7 @@ export async function getSpriteSheet(path: string) {
 }
 
 export function introduceName() {
-  socketClient.observe("clients/{self}").onChange(() => {
+  socketClient.observe("clients/~{self}").onChange(() => {
     socketClient.self.setData("name", randomName());
     socketClient.self.setData("emoji", randomEmoji());
   });
@@ -116,7 +116,7 @@ export function trackCursor({ exclude = [] }: { exclude?: string[] } = {}) {
 
 export function handleUsersChanged(onUserAdded: (clientId: string, isSelf: boolean, observers: Set<Observer>) => void, onUserRemoved?: (clientId: string) => void) {
   return socketClient
-    .observe("clients/{keys}")
+    .observe("clients/~{keys}")
     .onElementsAdded((clientIds) => {
       clientIds?.forEach((clientId) => {
         const isSelf = clientId === socketClient.clientId;

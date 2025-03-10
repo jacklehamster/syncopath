@@ -12,13 +12,13 @@ import { validatePayload } from "@dobuki/payload-validator";
 
 export class SyncRoom {
   readonly #sockets: Map<WebSocket, string> = new Map();
-  readonly #state: RoomState;
+  readonly state: RoomState;
   readonly #onRoomChange = new Set<(roomState: RoomState) => void>();
-  #updates: Update[] = [];
   static nextClientId = 1;
 
   constructor(private room: string) {
-    this.#state = {};
+    this.state = {};
+    this.state.updates = [];
   }
 
   addRoomChangeListener(callback: (roomState: RoomState) => void) {
@@ -27,14 +27,14 @@ export class SyncRoom {
 
   #setBlob(key: string, blob?: Blob) {
     if (blob) {
-      if (!this.#state.blobs) {
-        this.#state.blobs = {};
+      if (!this.state.blobs) {
+        this.state.blobs = {};
       }
-      this.#state.blobs[key] = blob;
-    } else if (this.#state.blobs) {
-      delete this.#state.blobs[key];
-      if (!Object.keys(this.#state.blobs).length) {
-        delete this.#state.blobs;
+      this.state.blobs[key] = blob;
+    } else if (this.state.blobs) {
+      delete this.state.blobs[key];
+      if (!Object.keys(this.state.blobs).length) {
+        delete this.state.blobs;
       }
     }
   }
@@ -69,8 +69,8 @@ export class SyncRoom {
       payload.updates?.forEach(update => {
         const blobs = update.blobs ?? {};
         Object.keys(blobs).forEach(key => {
-          if (this.#state.blobs?.[key]) {
-            blobs[key] = this.#state.blobs[key];
+          if (this.state.blobs?.[key]) {
+            blobs[key] = this.state.blobs[key];
           }
         });
       });
@@ -93,32 +93,31 @@ export class SyncRoom {
       }]);
 
       console.log(`client ${clientId} disconnected from room ${this.room}`);
-      this.#onRoomChange.forEach((callback) => callback(this.#state));
+      this.#onRoomChange.forEach((callback) => callback(this.state));
     });
 
     //  apply updates to clients
-    commitUpdates(this.#state, this.#updates);
-    this.#updates = this.#updates.filter(update => !update.confirmed)
+    commitUpdates(this.state, {
+      now,
+    });
 
     //  update client just connected with state and updates
     const welcomeBlobBuilder = BlobBuilder.payload<Payload>("payload", {
       myClientId: clientId,
-      state: removeRestrictedData({ ...this.#state }, clientId),
-      updates: this.#updates,
+      state: removeRestrictedData({ ...this.state }, clientId),
       serverTime: now,
       secret,
     });
-    Object.entries(this.#state.blobs ?? {}).forEach(([key, blob]) => welcomeBlobBuilder.blob(key, blob));
-    this.#updates.forEach(update => Object.entries(update.blobs ?? {}).forEach(([key, blob]) => welcomeBlobBuilder.blob(key, blob)));
+    Object.entries(this.state.blobs ?? {}).forEach(([key, blob]) => welcomeBlobBuilder.blob(key, blob));
 
     client.send(await welcomeBlobBuilder.build().arrayBuffer());
     return { clientId };
   }
 
   #cleanupPeers() {
-    for (let k in this.#state.peer) {
+    for (let k in this.state.peer) {
       const clients = k.split(":");
-      if (clients.length < 2 || !this.#state.clients?.[clients[0]] && !this.#state.clients?.[clients[1]]) {
+      if (clients.length < 2 || !this.state.clients?.[clients[0]] && !this.state.clients?.[clients[1]]) {
         this.#shareUpdates([{
           path: `peer/${k}`,
           value: undefined,
@@ -137,15 +136,19 @@ export class SyncRoom {
     const now = Date.now();
     newUpdates.forEach(update => markUpdateConfirmed(update, now));
     this.#pushUpdates(newUpdates);
-    commitUpdates(this.#state, this.#updates);
-    this.#updates = this.#updates.filter(update => !update.confirmed);
+    commitUpdates(this.state, {
+      now: Date.now(),
+    });
     this.#broadcastUpdates(newUpdates, client => client !== sender);
     this.#broadcastUpdates(updatesForSender, client => client === sender);
     this.#cleanupPeers();
   }
 
   #pushUpdates(newUpdates: Update[] | undefined) {
-    newUpdates?.forEach((update) => this.#updates.push(update));
+    if (!this.state.updates) {
+      this.state.updates = [];
+    }
+    newUpdates?.forEach((update) => this.state.updates?.push(update));
   }
 
   #broadcastUpdates(newUpdates: Update[] | undefined, senderFilter?: (sender: WebSocket) => boolean) {
@@ -168,8 +171,8 @@ export class SyncRoom {
   }
 
   #cleanupBlobs() {
-    const blobSet = new Set(Object.keys(this.#state.blobs ?? {}));
-    this.#findUsedBlobs(this.#state, blobSet);
+    const blobSet = new Set(Object.keys(this.state.blobs ?? {}));
+    this.#findUsedBlobs(this.state, blobSet);
     if (blobSet.size) {
       // Remove blobs
       const updates: Update[] = [];

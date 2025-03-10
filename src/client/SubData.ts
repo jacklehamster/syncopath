@@ -33,7 +33,9 @@ export class SubData implements ISharedData, IObservable {
   }
 
   get state(): Record<string, any> {
-    return getLeafObject(this.socketClient.state, this.#parts, 0, false) ?? {};
+    return getLeafObject(this.socketClient.state, this.#parts, 0, false, {
+      self: this.socketClient.clientId,
+    }) ?? {};
   }
 
   close() {

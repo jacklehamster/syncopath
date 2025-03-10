@@ -122,7 +122,7 @@ export async function displayIsoUI(path: string) {
 
 
   function trackIsoWorldObserver() {
-    socketClient.observe("iso/world/{keys}").onElementsAdded((keys) => {
+    socketClient.observe("iso/world/~{keys}").onElementsAdded((keys) => {
       keys?.forEach((uid) => {
         const { type, x, y } = socketClient.state.iso.world[uid];
         const sprite = spriteSheet.getTaggedSprite(type) ?? spriteSheet.getSprite(type);

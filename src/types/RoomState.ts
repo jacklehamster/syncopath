@@ -1,4 +1,5 @@
 import { ClientState } from "@/types/ClientState";
+import { Update } from "./Update";
 
 export interface RoomState {
   clients?: Record<string, ClientState>;
@@ -9,5 +10,6 @@ export interface RoomState {
     peerOnly?: boolean;
     activeUpdates?: boolean;
   };
+  updates?: Update[];
   [key: string]: any;
 }

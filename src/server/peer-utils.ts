@@ -5,6 +5,7 @@ export function removeRestrictedData(state: RoomState, clientId: string) {
   const newState: RoomState = {
     ...state,
     peer: { ...state.peer },
+    updates: undefined,
   };
   for (const key in newState.peer) {
     const clients = key.split(":");

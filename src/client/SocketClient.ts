@@ -2,7 +2,7 @@
 /// <reference lib="dom" />
 /// <reference lib="dom.iterable" />
 
-import { commitUpdates, getLeafObject, markUpdateConfirmed } from "@/data/data-update";
+import { commitUpdates, getLeafObject, markUpdateConfirmed, translateValue } from "@/data/data-update";
 import { Update } from "@/types/Update";
 import { Action } from "@/types/Action";
 import { ISharedData, SetDataOptions, UpdateOptions } from "./ISharedData";
@@ -25,7 +25,6 @@ export class SocketClient implements ISharedData, IObservable {
   #connectionPromise: Promise<void> | undefined;
   readonly #connectionUrl: string;
   readonly #outgoingUpdates: (Update | undefined)[] = [];
-  readonly #incomingUpdates: Update[] = [];
   readonly #selfData: ClientData = new ClientData(this);
   readonly #observerManager = new ObserverManager(this);
   readonly peerManagers: Record<string, PeerManager> = {};
@@ -35,6 +34,7 @@ export class SocketClient implements ISharedData, IObservable {
 
   constructor(host: string, room?: string, initialState: RoomState = {}) {
     this.state = initialState;
+    this.state.updates = [];
     const prefix = host.startsWith("ws://") || host.startsWith("wss://") ? "" : globalThis.location.protocol === "https:" ? "wss://" : "ws://";
     this.#connectionUrl = `${prefix}${host}${room ? `?room=${room}` : ""}`;
     this.#connect();
@@ -48,12 +48,14 @@ export class SocketClient implements ISharedData, IObservable {
         }
       }
     });
-    this.#children.set(`clients/{self}`, this.#selfData);
+    this.#children.set(`clients/~{self}`, this.#selfData);
   }
 
   #fixPath(path: Update["path"]) {
     const split = path.split("/");
-    return split.map(part => part === "{self}" ? this.#selfData.id : part).join("/");
+    return split.map(part => translateValue(part, {
+      self: this.#selfData.id,
+    })).join("/");
   }
 
   #usefulUpdate(update: Update) {
@@ -63,7 +65,7 @@ export class SocketClient implements ISharedData, IObservable {
 
   getData(path: Update["path"]) {
     const parts = path.split("/");
-    return getLeafObject(this.state, parts, 0, false, this.#selfData.id) as any;
+    return getLeafObject(this.state, parts, 0, false, { self: this.#selfData.id }) as any;
   }
 
   async actions(path: Update["path"], actions: Action[], options: UpdateOptions = {}) {
@@ -235,7 +237,7 @@ export class SocketClient implements ISharedData, IObservable {
 
   #processNextFrame() {
     this.#nextFrameInProcess = false;
-    if (this.#incomingUpdates.length) {
+    if (this.state.updates?.length) {
       this.#applyUpdates();
     }
     if (this.#outgoingUpdates.length) {
@@ -250,7 +252,10 @@ export class SocketClient implements ISharedData, IObservable {
 
   #queueIncomingUpdates(...updates: Update[]) {
     this.#prepareNextFrame();
-    this.#incomingUpdates.push(...updates);
+    if (!this.state.updates) {
+      this.state.updates = [];
+    }
+    this.state.updates.push(...updates);
   }
 
   async #broadcastUpdates() {
@@ -296,17 +301,18 @@ export class SocketClient implements ISharedData, IObservable {
     return blobBuilder.build();
   }
 
-  #saveBlobsFromUpdates(updates: Update[]) {
-    updates.forEach(update => Object.entries(update.blobs ?? {}).forEach(([key, blob]) => {
+  #saveBlobsFromUpdates(updates?: Update[]) {
+    updates?.forEach(update => Object.entries(update.blobs ?? {}).forEach(([key, blob]) => {
       const blobs = this.state.blobs ?? (this.state.blobs = {});
       blobs[key] = blob;
     }));
   }
 
   #applyUpdates() {
-    this.#saveBlobsFromUpdates(this.#incomingUpdates);
-    commitUpdates(this.state, this.#incomingUpdates);
-    this.#incomingUpdates.length = 0;
+    this.#saveBlobsFromUpdates(this.state.updates);
+    commitUpdates(this.state, {
+      now: this.now,
+    });
     this.triggerObservers();
     checkPeerConnections(this);
   }

@@ -19,16 +19,11 @@ export class Observer {
     readonly paths: Update["path"][],
     readonly observerManagger: ObserverManager) {
     this.#partsArrays = paths.map(p => p === undefined ? [] : p.split("/"));
-    this.#observations = paths.map(() => {
-      const observation = {
-        previous: undefined,
-        value: undefined,
-      };
-      return observation;
-    });
-    requestAnimationFrame(() => {
-      this.triggerIfChanged();
-    });
+    this.#observations = paths.map(() => ({
+      previous: undefined,
+      value: undefined,
+    }));
+    requestAnimationFrame(() => this.triggerIfChanged());
   }
 
   onChange(callback: (...values: Observation[]) => void): Observer {
@@ -48,7 +43,7 @@ export class Observer {
 
   #updatedObservations() {
     const newValues = this.#partsArrays.map(parts =>
-      getLeafObject(this.socketClient.state, parts, 0, false, this.socketClient.clientId)
+      getLeafObject(this.socketClient.state, parts, 0, false, { self: this.socketClient.clientId })
     );
     if (this.#observations.length && this.#observations.every((ob, index) => {
       const newValue = newValues[index];

@@ -23683,13 +23683,14 @@ var require_jsx_dev_runtime = __commonJS((exports, module) => {
 });
 
 // ../src/data/data-update.ts
-var SELF = "{self}";
-var KEYS = "{keys}";
-var VALUES = "{values}";
-var NOW = "~{now}";
-function commitUpdates(root, updates) {
-  const confirmedUpdates = getConfirmedUpdates(updates);
-  confirmedUpdates?.forEach((update) => {
+var KEYS = "~{keys}";
+var VALUES = "~{values}";
+function commitUpdates(root, properties) {
+  sortUpdates(root.updates);
+  root.updates?.forEach((update) => {
+    if (!update.confirmed) {
+      return;
+    }
     const parts = update.path.split("/");
     const leaf = getLeafObject(root, parts, 1, true);
     const prop = parts[parts.length - 1];
@@ -23704,27 +23705,39 @@ function commitUpdates(root, updates) {
       }
       return;
     }
+    const value = translateValue(update.value, properties);
     if (update.append) {
       if (!Array.isArray(leaf[prop])) {
         leaf[prop] = [];
       }
-      leaf[prop] = [...leaf[prop], update.value];
+      leaf[prop] = [...leaf[prop], value];
     } else if ((update.insert ?? -1) >= 0) {
       if (!Array.isArray(leaf[prop])) {
         leaf[prop] = [];
       }
-      leaf[prop] = [...leaf[prop].slice(0, update.insert ?? -1), update.value, ...leaf[prop].slice(update.insert)];
+      leaf[prop] = [...leaf[prop].slice(0, update.insert ?? -1), value, ...leaf[prop].slice(update.insert)];
     } else if ((update.delete ?? -1) >= 0) {
       if (Array.isArray(leaf[prop])) {
         leaf[prop] = [...leaf[prop].slice(0, update.delete), ...leaf[prop].slice((update.delete ?? -1) + 1)];
       }
-    } else if (update.value === undefined) {
+    } else if (value === undefined) {
       delete leaf[prop];
       cleanupRoot(root, parts, 0);
     } else {
-      leaf[prop] = update.value;
+      leaf[prop] = value;
     }
   });
+  if (root.updates) {
+    for (let i = root.updates.length - 1;i >= 0; i--) {
+      if (root.updates[i].confirmed) {
+        root.updates[i] = root.updates[root.updates.length - 1];
+        root.updates.pop();
+      }
+    }
+    if (!root.updates.length) {
+      delete root.updates;
+    }
+  }
 }
 function cleanupRoot(root, parts, index) {
   if (!root || typeof root !== "object" || Array.isArray(root)) {
@@ -23735,9 +23748,8 @@ function cleanupRoot(root, parts, index) {
   }
   return Object.keys(root).length === 0;
 }
-function getConfirmedUpdates(updates) {
-  const confirmedUpdates = updates.filter((update) => update.confirmed);
-  confirmedUpdates?.sort((a, b) => {
+function sortUpdates(updates) {
+  updates?.sort((a, b) => {
     const confirmedA = a.confirmed ?? 0;
     const confirmedB = b.confirmed ?? 0;
     if (confirmedA !== confirmedB) {
@@ -23745,37 +23757,64 @@ function getConfirmedUpdates(updates) {
     }
     return a.path.localeCompare(b.path);
   });
-  return confirmedUpdates;
 }
-function getLeafObject(obj, parts, offset, autoCreate, selfId) {
+function getLeafObject(obj, parts, offset, autoCreate, properties = {}) {
   let current = obj;
   for (let i = 0;i < parts.length - offset; i++) {
-    let prop = selfId && parts[i] === SELF ? selfId : parts[i];
-    if (prop === KEYS) {
-      return Object.keys(current);
+    const prop = parts[i];
+    const value = translateProp(current, prop, properties, autoCreate);
+    if (value === undefined) {
+      return value;
     }
-    if (prop === VALUES) {
-      return Object.values(current);
-    }
-    if (current[prop] === undefined) {
-      if (autoCreate) {
-        current[prop] = {};
-      } else {
-        return;
-      }
-    }
-    current = current[prop];
+    current = value;
   }
   return current;
+}
+var REGEX = /~\{([^}]+)\}/;
+function translateValue(value, properties) {
+  if (typeof value !== "string") {
+    return value;
+  }
+  if (value.startsWith("~{") && value.endsWith("}")) {
+    switch (value) {
+      default:
+        const group = value.match(REGEX);
+        if (group) {
+          return properties[group[1]];
+        }
+    }
+  }
+  return value;
+}
+function translateProp(obj, prop, properties, autoCreate) {
+  let value;
+  if (typeof prop !== "string") {
+    value = obj[prop];
+  } else if (prop.startsWith("~{") && prop.endsWith("}")) {
+    switch (prop) {
+      case KEYS:
+        return Object.keys(obj ?? {});
+      case VALUES:
+        return Object.values(obj ?? {});
+      default:
+        const group = prop.match(REGEX);
+        if (group) {
+          value = properties[group[1]];
+        } else {
+          value = obj[prop];
+        }
+    }
+  } else {
+    value = obj[prop];
+  }
+  if (value === undefined && autoCreate) {
+    value = obj[prop] = {};
+  }
+  return value;
 }
 function markUpdateConfirmed(update, now) {
   if (!update.confirmed) {
     update.confirmed = now;
-  }
-  switch (update.value) {
-    case NOW:
-      update.value = now;
-      break;
   }
 }
 
@@ -23893,7 +23932,8 @@ function addMessageReceiver(socket, payloadReceived) {
 function removeRestrictedData(state, clientId) {
   const newState = {
     ...state,
-    peer: { ...state.peer }
+    peer: { ...state.peer },
+    updates: undefined
   };
   for (const key in newState.peer) {
     const clients = key.split(":");
@@ -25430,27 +25470,27 @@ var JJ = 5000;
 class SyncRoom {
   room;
   #sockets = new Map;
-  #state;
+  state;
   #onRoomChange = new Set;
-  #updates = [];
   static nextClientId = 1;
   constructor(room) {
     this.room = room;
-    this.#state = {};
+    this.state = {};
+    this.state.updates = [];
   }
   addRoomChangeListener(callback) {
     this.#onRoomChange.add(callback);
   }
   #setBlob(key, blob) {
     if (blob) {
-      if (!this.#state.blobs) {
-        this.#state.blobs = {};
+      if (!this.state.blobs) {
+        this.state.blobs = {};
       }
-      this.#state.blobs[key] = blob;
-    } else if (this.#state.blobs) {
-      delete this.#state.blobs[key];
-      if (!Object.keys(this.#state.blobs).length) {
-        delete this.#state.blobs;
+      this.state.blobs[key] = blob;
+    } else if (this.state.blobs) {
+      delete this.state.blobs[key];
+      if (!Object.keys(this.state.blobs).length) {
+        delete this.state.blobs;
       }
     }
   }
@@ -25478,8 +25518,8 @@ class SyncRoom {
       payload.updates?.forEach((update) => {
         const blobs2 = update.blobs ?? {};
         Object.keys(blobs2).forEach((key) => {
-          if (this.#state.blobs?.[key]) {
-            blobs2[key] = this.#state.blobs[key];
+          if (this.state.blobs?.[key]) {
+            blobs2[key] = this.state.blobs[key];
           }
         });
       });
@@ -25496,26 +25536,25 @@ class SyncRoom {
         blobs: {}
       }]);
       console.log(`client ${clientId} disconnected from room ${this.room}`);
-      this.#onRoomChange.forEach((callback) => callback(this.#state));
+      this.#onRoomChange.forEach((callback) => callback(this.state));
     });
-    commitUpdates(this.#state, this.#updates);
-    this.#updates = this.#updates.filter((update) => !update.confirmed);
+    commitUpdates(this.state, {
+      now
+    });
     const welcomeBlobBuilder = A.payload("payload", {
       myClientId: clientId,
-      state: removeRestrictedData({ ...this.#state }, clientId),
-      updates: this.#updates,
+      state: removeRestrictedData({ ...this.state }, clientId),
       serverTime: now,
       secret
     });
-    Object.entries(this.#state.blobs ?? {}).forEach(([key, blob]) => welcomeBlobBuilder.blob(key, blob));
-    this.#updates.forEach((update) => Object.entries(update.blobs ?? {}).forEach(([key, blob]) => welcomeBlobBuilder.blob(key, blob)));
+    Object.entries(this.state.blobs ?? {}).forEach(([key, blob]) => welcomeBlobBuilder.blob(key, blob));
     client.send(await welcomeBlobBuilder.build().arrayBuffer());
     return { clientId };
   }
   #cleanupPeers() {
-    for (let k in this.#state.peer) {
+    for (let k in this.state.peer) {
       const clients = k.split(":");
-      if (clients.length < 2 || !this.#state.clients?.[clients[0]] && !this.#state.clients?.[clients[1]]) {
+      if (clients.length < 2 || !this.state.clients?.[clients[0]] && !this.state.clients?.[clients[1]]) {
         this.#shareUpdates([{
           path: `peer/${k}`,
           value: undefined,
@@ -25533,14 +25572,18 @@ class SyncRoom {
     const now = Date.now();
     newUpdates.forEach((update) => markUpdateConfirmed(update, now));
     this.#pushUpdates(newUpdates);
-    commitUpdates(this.#state, this.#updates);
-    this.#updates = this.#updates.filter((update) => !update.confirmed);
+    commitUpdates(this.state, {
+      now: Date.now()
+    });
     this.#broadcastUpdates(newUpdates, (client) => client !== sender);
     this.#broadcastUpdates(updatesForSender, (client) => client === sender);
     this.#cleanupPeers();
   }
   #pushUpdates(newUpdates) {
-    newUpdates?.forEach((update) => this.#updates.push(update));
+    if (!this.state.updates) {
+      this.state.updates = [];
+    }
+    newUpdates?.forEach((update) => this.state.updates?.push(update));
   }
   #broadcastUpdates(newUpdates, senderFilter) {
     if (!newUpdates?.length) {
@@ -25559,8 +25602,8 @@ class SyncRoom {
     });
   }
   #cleanupBlobs() {
-    const blobSet = new Set(Object.keys(this.#state.blobs ?? {}));
-    this.#findUsedBlobs(this.#state, blobSet);
+    const blobSet = new Set(Object.keys(this.state.blobs ?? {}));
+    this.#findUsedBlobs(this.state, blobSet);
     if (blobSet.size) {
       const updates = [];
       const now = Date.now();
@@ -25641,16 +25684,11 @@ class Observer {
     this.paths = paths;
     this.observerManagger = observerManagger;
     this.#partsArrays = paths.map((p) => p === undefined ? [] : p.split("/"));
-    this.#observations = paths.map(() => {
-      const observation = {
-        previous: undefined,
-        value: undefined
-      };
-      return observation;
-    });
-    requestAnimationFrame(() => {
-      this.triggerIfChanged();
-    });
+    this.#observations = paths.map(() => ({
+      previous: undefined,
+      value: undefined
+    }));
+    requestAnimationFrame(() => this.triggerIfChanged());
   }
   onChange(callback) {
     this.#changeCallbacks.add(callback);
@@ -25665,7 +25703,7 @@ class Observer {
     return this;
   }
   #updatedObservations() {
-    const newValues = this.#partsArrays.map((parts) => getLeafObject(this.socketClient.state, parts, 0, false, this.socketClient.clientId));
+    const newValues = this.#partsArrays.map((parts) => getLeafObject(this.socketClient.state, parts, 0, false, { self: this.socketClient.clientId }));
     if (this.#observations.length && this.#observations.every((ob, index) => {
       const newValue = newValues[index];
       if (ob.value === newValue) {
@@ -25760,7 +25798,7 @@ class ClientData {
     this.#observerManager = new ObserverManager(socketClient);
   }
   #getAbsolutePath(path) {
-    return path ? `clients/{self}/${path}` : "clients/{self}";
+    return path ? `clients/~{self}/${path}` : "clients/~{self}";
   }
   observe(...paths) {
     const updatedPaths = paths.map((path) => this.#getAbsolutePath(path));
@@ -25803,7 +25841,9 @@ class SubData {
     return this.socketClient.setData(this.#getAbsolutePath(path), value, options);
   }
   get state() {
-    return getLeafObject(this.socketClient.state, this.#parts, 0, false) ?? {};
+    return getLeafObject(this.socketClient.state, this.#parts, 0, false, {
+      self: this.socketClient.clientId
+    }) ?? {};
   }
   close() {
     this.#observerManager.close();
@@ -25908,7 +25948,7 @@ function checkPeerConnections(socketClient) {
           socketClient.peerManagers[clients[1]].acceptAnswer(socketClient.state.peer[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[1]]?.answer).then(() => {
             console.log("Peer connected");
           });
-          socketClient.observe(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[1]}/ice/{keys}`).onElementsAdded((candidates) => {
+          socketClient.observe(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[1]}/ice/~{keys}`).onElementsAdded((candidates) => {
             candidates?.forEach((candidateName) => {
               const candidate = socketClient.state.peer?.[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[1]]?.ice?.[candidateName];
               socketClient.peerManagers[clients[1]].addIceCandidate(candidate);
@@ -25924,7 +25964,7 @@ function checkPeerConnections(socketClient) {
           createPeerManager(socketClient, `${clients[0]}:${clients[1]}`, clients[0]);
           socketClient.peerManagers[clients[0]].acceptOffer(socketClient.state.peer[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[0]]?.offer).then((answer) => {
             socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[1]}/answer`, answer, PEER_OPTIONS);
-            socketClient.observe(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[0]}/ice/{keys}`).onElementsAdded((candidates) => {
+            socketClient.observe(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[0]}/ice/~{keys}`).onElementsAdded((candidates) => {
               candidates?.forEach((candidateName) => {
                 const candidate = socketClient.state.peer?.[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[0]]?.ice?.[candidateName];
                 socketClient.peerManagers[clients[0]].addIceCandidate(candidate);
@@ -25967,7 +26007,6 @@ class SocketClient {
   #connectionPromise;
   #connectionUrl;
   #outgoingUpdates = [];
-  #incomingUpdates = [];
   #selfData = new ClientData(this);
   #observerManager = new ObserverManager(this);
   peerManagers = {};
@@ -25976,6 +26015,7 @@ class SocketClient {
   #secret;
   constructor(host, room, initialState = {}) {
     this.state = initialState;
+    this.state.updates = [];
     const prefix = host.startsWith("ws://") || host.startsWith("wss://") ? "" : globalThis.location.protocol === "https:" ? "wss://" : "ws://";
     this.#connectionUrl = `${prefix}${host}${room ? `?room=${room}` : ""}`;
     this.#connect();
@@ -25989,11 +26029,13 @@ class SocketClient {
         }
       }
     });
-    this.#children.set(`clients/{self}`, this.#selfData);
+    this.#children.set(`clients/~{self}`, this.#selfData);
   }
   #fixPath(path) {
     const split = path.split("/");
-    return split.map((part) => part === "{self}" ? this.#selfData.id : part).join("/");
+    return split.map((part) => translateValue(part, {
+      self: this.#selfData.id
+    })).join("/");
   }
   #usefulUpdate(update) {
     const currentValue = this.getData(update.path);
@@ -26001,7 +26043,7 @@ class SocketClient {
   }
   getData(path) {
     const parts = path.split("/");
-    return getLeafObject(this.state, parts, 0, false, this.#selfData.id);
+    return getLeafObject(this.state, parts, 0, false, { self: this.#selfData.id });
   }
   async actions(path, actions, options = {}) {
     await this.applyUpdate({
@@ -26147,7 +26189,7 @@ class SocketClient {
   }
   #processNextFrame() {
     this.#nextFrameInProcess = false;
-    if (this.#incomingUpdates.length) {
+    if (this.state.updates?.length) {
       this.#applyUpdates();
     }
     if (this.#outgoingUpdates.length) {
@@ -26160,7 +26202,10 @@ class SocketClient {
   }
   #queueIncomingUpdates(...updates) {
     this.#prepareNextFrame();
-    this.#incomingUpdates.push(...updates);
+    if (!this.state.updates) {
+      this.state.updates = [];
+    }
+    this.state.updates.push(...updates);
   }
   async#broadcastUpdates() {
     this.#outgoingUpdates.forEach((update, index) => {
@@ -26199,15 +26244,16 @@ class SocketClient {
     return blobBuilder.build();
   }
   #saveBlobsFromUpdates(updates) {
-    updates.forEach((update) => Object.entries(update.blobs ?? {}).forEach(([key, blob]) => {
+    updates?.forEach((update) => Object.entries(update.blobs ?? {}).forEach(([key, blob]) => {
       const blobs = this.state.blobs ?? (this.state.blobs = {});
       blobs[key] = blob;
     }));
   }
   #applyUpdates() {
-    this.#saveBlobsFromUpdates(this.#incomingUpdates);
-    commitUpdates(this.state, this.#incomingUpdates);
-    this.#incomingUpdates.length = 0;
+    this.#saveBlobsFromUpdates(this.state.updates);
+    commitUpdates(this.state, {
+      now: this.now
+    });
     this.triggerObservers();
     checkPeerConnections(this);
   }
@@ -26611,7 +26657,7 @@ async function displayIsoUI(path) {
     }
   });
   function trackIsoWorldObserver() {
-    socketClient.observe("iso/world/{keys}").onElementsAdded((keys) => {
+    socketClient.observe("iso/world/~{keys}").onElementsAdded((keys) => {
       keys?.forEach((uid) => {
         const { type, x, y: y2 } = socketClient.state.iso.world[uid];
         const sprite = spriteSheet.getTaggedSprite(type) ?? spriteSheet.getSprite(type);
@@ -26831,7 +26877,7 @@ async function getSpriteSheet(path) {
   return new u(spritesheetDefinition);
 }
 function introduceName() {
-  socketClient.observe("clients/{self}").onChange(() => {
+  socketClient.observe("clients/~{self}").onChange(() => {
     socketClient.self.setData("name", randomName());
     socketClient.self.setData("emoji", randomEmoji());
   });
@@ -26875,7 +26921,7 @@ function trackCursor({ exclude = [] } = {}) {
   });
 }
 function handleUsersChanged(onUserAdded, onUserRemoved) {
-  return socketClient.observe("clients/{keys}").onElementsAdded((clientIds) => {
+  return socketClient.observe("clients/~{keys}").onElementsAdded((clientIds) => {
     clientIds?.forEach((clientId) => {
       const isSelf = clientId === socketClient.clientId;
       const observers = new Set;
@@ -26930,4 +26976,4 @@ export {
   SocketClient
 };
 
-//# debugId=31288CA6A119FD0464756E2164756E21
+//# debugId=9987972178296F4E64756E2164756E21

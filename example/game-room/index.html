@@ -25,7 +25,7 @@
 
       const keys = {};
 
-      socketClient.observe("clients/{self}").onChange(() => {
+      socketClient.observe("clients/~{self}").onChange(() => {
         const randomColor = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
         socketClient.self.setData("color", randomColor);
         socketClient.self.setData("x", Math.random() * 200);

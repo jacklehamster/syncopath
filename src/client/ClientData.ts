@@ -13,7 +13,7 @@ export class ClientData implements ISharedData {
   }
 
   #getAbsolutePath(path: Update["path"]): string {
-    return path ? `clients/{self}/${path}` : "clients/{self}";
+    return path ? `clients/~{self}/${path}` : "clients/~{self}";
   }
 
   observe(...paths: Update["path"][]): Observer {

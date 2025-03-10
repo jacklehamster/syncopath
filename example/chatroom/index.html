@@ -77,7 +77,7 @@
       const chatBox = document.querySelector(".chat-box");
       chatBox.addEventListener("input", () => {
         socketClient.setData(
-          "chatting/{self}",
+          "chatting/~{self}",
           chatBox.textContent.length > 0 ? true : undefined
         );
       });
@@ -91,13 +91,13 @@
             emoji: socketClient.self.state.emoji,
             name: socketClient.self.state.name,
           });
-          socketClient.setData("chatting/{self}", undefined);
+          socketClient.setData("chatting/~{self}", undefined);
           e.preventDefault();
         }
       });
 
       const clients = socketClient.access("clients");
-      socketClient.observe("chatting/{keys}").onChange((chattingClients) => {
+      socketClient.observe("chatting/~{keys}").onChange((chattingClients) => {
         const chatting = document.querySelector(".chatting");
         const otherClientsTyping = chattingClients.value
           ?.filter(
