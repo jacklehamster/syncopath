@@ -15,16 +15,16 @@
     "sha": "a8f7b2aa31c69081e16f711724e1214506f46d9d"
   },
   "chatroom/index.html": {
-    "sha": "4753c93f72152da3aa8752682412d165a29b28ab"
+    "sha": "84491d2d3a393564205d4bd75955d63f115d85c7"
   },
   "config.json": {
     "sha": "98387d623bcf6077316ad093fd89f762c23f9a4f"
   },
   "dist/index.js": {
-    "sha": "084aa8104cb6e85a296afed099092816d8cc02f5"
+    "sha": "59ec7c6bc2b003a4f87e3068d66858b48cb1a97c"
   },
   "dist/index.js.map": {
-    "sha": "865feb356ea965da155a6cbc58ebc29dc65f8dae"
+    "sha": "32348f5ff6feabe8a77cede9e3c70d400278986d"
   },
   "dist/styles-da87zv4s.css": {
     "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
@@ -63,7 +63,7 @@
     "sha": "26617507b9baf000bd97c82ce45d831811b1e8a7"
   },
   "game-room/index.html": {
-    "sha": "280ac96d1402473de4569d792e1221a54236a00d"
+    "sha": "034bb315de798b507875846db049affe8f4631bd"
   },
   "image-test/index.html": {
     "sha": "a24f52a899f55f74b31e9d917f0472bfb8b5211c"
@@ -86,7 +86,7 @@
   "json-test/index.html": {
     "sha": "9ec0f95dcdc56365093036252745434e014fdd8a"
   },
-  "md5": "91c92f0f1bf8fda9d802bbd495b4eb23",
+  "md5": "86e7d6b9ecae25f31e3baef50f658234",
   "mobile/index.html": {
     "sha": "7ba58bb88f82fd8d8cd99ff5699c965ad1177771"
   },
@@ -109,10 +109,10 @@
     "sha": "6fbb9a4b896f5da99b5f205b580d6a2f71f697b9"
   },
   "src/index.ts": {
-    "sha": "d1159d5cda2890245af330da6d91e42ed1fe4ae5"
+    "sha": "be489edbdc7c23c1e5b9a14220c0b4e90c9b0840"
   },
   "src/iso-test/iso-utils.ts": {
-    "sha": "7c965b9f650465ae310cacd812584611a28e9a7a"
+    "sha": "6e30bb0107d843bc512e29b82f7aad0579c716ab"
   },
   "src/react/component.tsx": {
     "sha": "8b6ea4af4538d0b028152362a99c84d6439c15bd"

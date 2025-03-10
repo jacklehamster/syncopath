@@ -1,6 +1,6 @@
 {
   "client/ClientData.ts": {
-    "sha": "d42242690fa4f27d66c2bcc6e1237cbbb7f5d572"
+    "sha": "9bbc31d5562aff79bdba0613f8911118a5a378b9"
   },
   "client/IObservable.ts": {
     "sha": "8dce059249b75c2ddc823fa73e3bc208ca0a8dc8"
@@ -9,33 +9,33 @@
     "sha": "7f4867ce2f8638d70e38823797225ea99a97432e"
   },
   "client/Observer.ts": {
-    "sha": "5960def41d9f510fbf32034a06c7afaccc2ffaeb"
+    "sha": "9604c222a03badb9ef8f4492edc42ec1151494cb"
   },
   "client/ObserverManager.ts": {
     "sha": "923fcb3f529212593b63fccd5f15595fc7fcd002"
   },
   "client/SocketClient.ts": {
-    "sha": "2a0b53dc23388335078c6ec4b41f33e01c81a800"
+    "sha": "95775bdecbbb3acad7bd9c2a350d7dd340eb5154"
   },
   "client/SubData.ts": {
-    "sha": "521e518ff533a5b9ffc6416357ac6ca15687fe69"
+    "sha": "f646614b1667b6af72a265e48792c1ff4aef59a4"
   },
   "client/peer/PeerManager.ts": {
     "sha": "00af3c5abb1582f18bc9990e3980b5c86a08c9b6"
   },
   "client/peer/check-peer.ts": {
-    "sha": "c465c705d9460429f7178822e7f6693a5aade113"
+    "sha": "8817abae226abb79742bddc0cadb29740adf30c6"
   },
   "data/data-update.test.ts": {
-    "sha": "b143a1364dca0e14f94bdf8f0911c5773cdfa4e8"
+    "sha": "020a96b83479d8bc8daf6e9ee9def81482bc7bb0"
   },
   "data/data-update.ts": {
-    "sha": "c8b61584639cf77a82b370028884f8ef084cc48b"
+    "sha": "5fb23a3ac79ca7e637d46a8c088e78e5a7fa3411"
   },
   "index.ts": {
     "sha": "267d6ea1ddf2bf9961149ae3e3f57f2670a31db3"
   },
-  "md5": "1b0727be91695eabb843061d0834ae45",
+  "md5": "bed3c5e891d99a267830067d390df69e",
   "server/SocketEventHandler.ts": {
     "sha": "aecf58955629f4178e2d85904d0c1121a1fc23dc"
   },
@@ -43,7 +43,7 @@
     "sha": "6b47c507f94ff4cb71a8f25b4b73c74bf9708555"
   },
   "server/SyncRoom.ts": {
-    "sha": "7625344cdfc8acb19b5984ad164e7ac1a6451345"
+    "sha": "71ee371dd48a0b4482159281501f7f8e10c2aea3"
   },
   "server/SyncSocket.ts": {
     "sha": "14f756b15a966c79b97a1c50dd4c04a4420d40af"
@@ -52,7 +52,7 @@
     "sha": "5895904b11307ff78f1ba09530efa40274864655"
   },
   "server/peer-utils.ts": {
-    "sha": "eeb9184fbca56566711e28912c370ff3ce90ba63"
+    "sha": "759c47ff72da97d14d4ceb7e87105163cdc90198"
   },
   "types/Action.ts": {
     "sha": "81594cbe9058b15543d99e96a11fb2d3e37b56ab"
@@ -60,11 +60,8 @@
   "types/ClientState.ts": {
     "sha": "9e6c1fdea2ce7724f9f2488ee9036e8a44129228"
   },
-  "types/DataObject.ts": {
-    "sha": "ba747a6f38117b0f2cf5791957d0e208ba019bb4"
-  },
   "types/RoomState.ts": {
-    "sha": "3957344fe7ebd38a2b94e3dbf1ac36aee8f39f77"
+    "sha": "432977192f60b6b89865e588ebaa6897d906ce31"
   },
   "types/Update.ts": {
     "sha": "f28e6d2cd3849978a4142588dfd2e8c7f79702ec"

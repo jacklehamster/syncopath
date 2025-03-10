@@ -1,6 +1,6 @@
 {
   "ClientData.ts": {
-    "sha": "d42242690fa4f27d66c2bcc6e1237cbbb7f5d572"
+    "sha": "9bbc31d5562aff79bdba0613f8911118a5a378b9"
   },
   "IObservable.ts": {
     "sha": "8dce059249b75c2ddc823fa73e3bc208ca0a8dc8"
@@ -9,22 +9,22 @@
     "sha": "7f4867ce2f8638d70e38823797225ea99a97432e"
   },
   "Observer.ts": {
-    "sha": "5960def41d9f510fbf32034a06c7afaccc2ffaeb"
+    "sha": "9604c222a03badb9ef8f4492edc42ec1151494cb"
   },
   "ObserverManager.ts": {
     "sha": "923fcb3f529212593b63fccd5f15595fc7fcd002"
   },
   "SocketClient.ts": {
-    "sha": "2a0b53dc23388335078c6ec4b41f33e01c81a800"
+    "sha": "95775bdecbbb3acad7bd9c2a350d7dd340eb5154"
   },
   "SubData.ts": {
-    "sha": "521e518ff533a5b9ffc6416357ac6ca15687fe69"
+    "sha": "f646614b1667b6af72a265e48792c1ff4aef59a4"
   },
-  "md5": "0f19a498e16c37d6acc0ed74c143bcdb",
+  "md5": "358a826d564ea1e3f9350c0055a12f94",
   "peer/PeerManager.ts": {
     "sha": "00af3c5abb1582f18bc9990e3980b5c86a08c9b6"
   },
   "peer/check-peer.ts": {
-    "sha": "c465c705d9460429f7178822e7f6693a5aade113"
+    "sha": "8817abae226abb79742bddc0cadb29740adf30c6"
   }
 }

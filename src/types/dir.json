@@ -5,14 +5,11 @@
   "ClientState.ts": {
     "sha": "9e6c1fdea2ce7724f9f2488ee9036e8a44129228"
   },
-  "DataObject.ts": {
-    "sha": "ba747a6f38117b0f2cf5791957d0e208ba019bb4"
-  },
   "RoomState.ts": {
-    "sha": "3957344fe7ebd38a2b94e3dbf1ac36aee8f39f77"
+    "sha": "432977192f60b6b89865e588ebaa6897d906ce31"
   },
   "Update.ts": {
     "sha": "f28e6d2cd3849978a4142588dfd2e8c7f79702ec"
   },
-  "md5": "82477ae5e2fbaa634cef12dee08c6bdb"
+  "md5": "5af9afd924e1087074d6059a7de5055e"
 }
