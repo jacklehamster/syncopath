@@ -17,18 +17,6 @@ export function commitUpdates(root: RoomState, properties: Record<string, any>) 
     const parts = update.path.split("/");
     const leaf: any = getLeafObject(root, parts, 1, true);
     const prop = parts[parts.length - 1];
-    if (update.actions) {
-      const root = leaf[prop];
-      for (let action of update.actions) {
-        const { name, args } = action;
-        if (typeof (root[name]) !== "function") {
-          break;
-        }
-        root[name](...(args ?? []));
-      }
-      return;
-    }
-
     const value = translateValue(update.value, properties);
     if (update.append) {
       if (!Array.isArray(leaf[prop])) {

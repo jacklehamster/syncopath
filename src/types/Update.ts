@@ -1,4 +1,3 @@
-import { Action } from "./Action";
 
 export interface Update {
   path: string;
@@ -7,7 +6,6 @@ export interface Update {
   insert?: number;
   delete?: number;
   confirmed?: number;
-  actions?: Action[];
   blobs?: { [key: string]: Blob };
   signature?: string;
 }

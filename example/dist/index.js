@@ -23694,17 +23694,6 @@ function commitUpdates(root, properties) {
     const parts = update.path.split("/");
     const leaf = getLeafObject(root, parts, 1, true);
     const prop = parts[parts.length - 1];
-    if (update.actions) {
-      const root2 = leaf[prop];
-      for (let action of update.actions) {
-        const { name, args } = action;
-        if (typeof root2[name] !== "function") {
-          break;
-        }
-        root2[name](...args ?? []);
-      }
-      return;
-    }
     const value = translateValue(update.value, properties);
     if (update.append) {
       if (!Array.isArray(leaf[prop])) {
@@ -25836,7 +25825,6 @@ class SubData {
     const multi = Array.isArray(paths);
     const pathArray = paths === undefined ? [] : multi ? paths : [paths];
     const updatedPaths = pathArray.map((path) => this.#getAbsolutePath(path));
-    console.log(">>", updatedPaths, multi);
     return this.#observerManager.observe(updatedPaths, multi);
   }
   triggerObservers() {
@@ -26048,12 +26036,6 @@ class SocketClient {
   getData(path) {
     const parts = path.split("/");
     return getLeafObject(this.state, parts, 0, false, { self: this.#selfData.id });
-  }
-  async actions(path, actions, options = {}) {
-    await this.applyUpdate({
-      path,
-      actions
-    }, options);
   }
   async#convertValue(path, value) {
     if (typeof value === "function") {
@@ -26989,4 +26971,4 @@ export {
   SocketClient
 };
 
-//# debugId=5F6166026FE14CB864756E2164756E21
+//# debugId=14637DDA0895497C64756E2164756E21

@@ -123,14 +123,10 @@
             if (event.alpha === null) {
               return;
             }
-            const acceleration = {
+            peerData.setData("acceleration", {
               x: event.alpha,
               y: event.beta,
               z: event.gamma,
-            };
-            peerData.setData("acceleration", acceleration);
-            peerData.observe(undefined).onChange(() => {
-              console.log(peerData.state);
             });
           });
           //  detect tap

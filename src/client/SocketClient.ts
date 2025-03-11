@@ -4,7 +4,6 @@
 
 import { commitUpdates, getLeafObject, markUpdateConfirmed, translateValue } from "@/data/data-update";
 import { Update } from "@/types/Update";
-import { Action } from "@/types/Action";
 import { ISharedData, SetDataOptions, UpdateOptions } from "./ISharedData";
 import { ClientData } from "./ClientData";
 import { SubData } from "./SubData";
@@ -65,13 +64,6 @@ export class SocketClient implements ISharedData, IObservable {
   getData(path: Update["path"]) {
     const parts = path.split("/");
     return getLeafObject(this.state, parts, 0, false, { self: this.#selfData.id }) as any;
-  }
-
-  async actions(path: Update["path"], actions: Action[], options: UpdateOptions = {}) {
-    await this.applyUpdate({
-      path,
-      actions,
-    }, options);
   }
 
   async #convertValue(path: Update["path"], value: any) {
