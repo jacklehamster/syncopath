@@ -1,16 +1,15 @@
 import { Update } from "@/types/Update";
 import { Observer } from "./Observer";
 import { SocketClient } from "./SocketClient";
-import { IObservable } from "./IObservable";
 
-export class ObserverManager implements IObservable {
+export class ObserverManager {
   readonly #observers: Set<Observer> = new Set();
 
   constructor(private readonly socketClient: SocketClient) {
   }
 
-  observe(...paths: Update["path"][]): Observer {
-    const observer = new Observer(this.socketClient, paths, this);
+  observe(paths: Update["path"][], multi: boolean): Observer {
+    const observer = new Observer(this.socketClient, paths, this, multi);
     this.#observers.add(observer);
     return observer;
   }

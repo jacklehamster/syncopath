@@ -90,7 +90,7 @@
           const peerData = socketClient.peerData(clientId);
           observers.add(
             peerData.observe("tap").onChange((tap) => {
-              if (tap.value) {
+              if (tap) {
                 clientDiv.style.display = "";
                 tapBox.style.backgroundColor = "red";
               } else {
@@ -101,9 +101,9 @@
 
           observers.add(
             peerData.observe("acceleration").onChange((acceleration) => {
-              if (acceleration.value) {
+              if (acceleration) {
                 clientDiv.style.display = "";
-                const { x, y, z } = acceleration.value;
+                const { x, y, z } = acceleration;
                 const xVal = Math.round((x ?? 0) * 100) / 100;
                 const yVal = Math.round((y ?? 0) * 100) / 100;
                 const zVal = Math.round((z ?? 0) * 100) / 100;

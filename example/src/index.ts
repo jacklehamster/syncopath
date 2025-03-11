@@ -70,11 +70,12 @@ export function displayUsers(userDiv: HTMLDivElement) {
     observers.add(
       socketClient
         .observe(
-          `clients/${clientId}/name`,
-          `clients/${clientId}/emoji`
+          [`clients/${clientId}/name`,
+          `clients/${clientId}/emoji`]
         )
-        .onChange((name, emoji) => {
-          client.textContent = `${emoji.value} ${name.value}`;
+        .onChange((values) => {
+          const [name, emoji] = values;
+          client.textContent = `${emoji} ${name}`;
         })
     );
 
@@ -117,21 +118,21 @@ export function trackCursor({ exclude = [] }: { exclude?: string[] } = {}) {
 export function handleUsersChanged(onUserAdded: (clientId: string, isSelf: boolean, observers: Set<Observer>) => void, onUserRemoved?: (clientId: string) => void) {
   return socketClient
     .observe("clients/~{keys}")
-    .onElementsAdded((clientIds) => {
+    .onElementsAdded((clientIds: string[]) => {
       clientIds?.forEach((clientId) => {
         const isSelf = clientId === socketClient.clientId;
         const observers = new Set<Observer>();
         onUserAdded(clientId, isSelf, observers);
         observers.add(
           socketClient.observe(`clients/${clientId}`).onChange((client) => {
-            if (client.value === undefined) {
+            if (client === undefined) {
               observers.forEach((observer) => observer.close());
             }
           })
         );
       });
     })
-    .onElementsDeleted((clientIds) => {
+    .onElementsDeleted((clientIds: string[]) => {
       clientIds?.forEach((clientId) => onUserRemoved?.(clientId));
     });
 }
@@ -139,26 +140,29 @@ export function handleUsersChanged(onUserAdded: (clientId: string, isSelf: boole
 export function trackCursorObserver(clientId: string, callback: (cursor?: [number, number], ...extra: any[]) => void, extraObservations: string[] = []) {
   //  cursor observer
   return socketClient
-    .observe(...[`clients/${clientId}/cursor`, ...extraObservations])
-    .onChange((cursor, ...extra) => {
-      if (!cursor.value) {
+    .observe([`clients/${clientId}/cursor`, ...extraObservations])
+    .onChange((values) => {
+      const [cursor, ...extra] = values ?? [];
+      if (!cursor) {
         callback();
         return;
       }
-      callback(cursor.value, ...extra.map((e) => e.value));
+      callback(cursor, ...extra);
     })
 }
 
 export function trackIsoCursorObserver(clientId: string, callback: (cursor?: [number, number], ...extra: any[]) => void, extraObservations: string[] = []) {
   //  cursor observer
   return socketClient
-    .observe(...[`clients/${clientId}/isoCursor`, ...extraObservations])
-    .onChange((cursor, ...extra) => {
-      if (!cursor.value) {
+    .observe([`clients/${clientId}/isoCursor`, ...extraObservations])
+    .onChange((values) => {
+      console.log(values);
+      const [cursor, ...extra] = values ?? [];
+      if (!cursor) {
         callback();
         return;
       }
-      callback(cursor.value, ...extra.map((e) => e.value));
+      callback(cursor, ...extra);
     })
 }
 

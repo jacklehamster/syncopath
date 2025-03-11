@@ -72,18 +72,18 @@ export async function displayIsoUI(path: string) {
       .add(
         socketClient
           .observe(`clients/${clientId}/selected`)
-          .onChange((selected) => {
-            const previousSelected = document.getElementById(`sprite-${selected.previous}`);
+          .onChange((selected, previous) => {
+            const previousSelected = document.getElementById(`sprite-${previous}`);
             if (previousSelected) {
               previousSelected.style.border = "20px solid #00000000";
             }
-            const selectedDiv = document.getElementById(`sprite-${selected.value}`);
+            const selectedDiv = document.getElementById(`sprite-${selected}`);
             if (selectedDiv) {
-              const selectedBySelf = socketClient.self.state.selected === selected.value;
+              const selectedBySelf = socketClient.self.state.selected === selected;
               const color = selectedBySelf ? "red" : "gray";
               const dashed = !selectedBySelf ? "dashed" : "solid";
               selectedDiv.style.border = `20px ${dashed} ${color}`;
-              const sprite = isNaN(selected.value) ? spriteSheet.getTaggedSprite(selected.value)! : spriteSheet.getSprite(parseInt(selected.value));
+              const sprite = isNaN(selected) ? spriteSheet.getTaggedSprite(selected)! : spriteSheet.getSprite(parseInt(selected));
               getDraggedItem(clientId).replaceChildren(sprite.generateDiv());
             }
           })
@@ -122,7 +122,7 @@ export async function displayIsoUI(path: string) {
 
 
   function trackIsoWorldObserver() {
-    socketClient.observe("iso/world/~{keys}").onElementsAdded((keys) => {
+    socketClient.observe("iso/world/~{keys}").onElementsAdded((keys: string[]) => {
       keys?.forEach((uid) => {
         const { type, x, y } = socketClient.state.iso.world[uid];
         const sprite = spriteSheet.getTaggedSprite(type) ?? spriteSheet.getSprite(type);
@@ -142,7 +142,7 @@ export async function displayIsoUI(path: string) {
         });
         document.body.appendChild(div);
       });
-    }).onElementsDeleted((keys) => {
+    }).onElementsDeleted((keys: string[]) => {
       keys?.forEach((uid) => {
         const div = document.getElementById(`elem-${uid}`);
         if (div) {

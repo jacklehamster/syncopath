@@ -16,9 +16,11 @@ export class ClientData implements ISharedData {
     return path ? `clients/~{self}/${path}` : "clients/~{self}";
   }
 
-  observe(...paths: Update["path"][]): Observer {
-    const updatedPaths = paths.map(path => this.#getAbsolutePath(path));
-    return this.#observerManager.observe(...updatedPaths);
+  observe(paths?: (Update["path"][] | Update["path"])): Observer {
+    const multi = Array.isArray(paths);
+    const pathArray = paths === undefined ? [] : multi ? paths : [paths];
+    const updatedPaths = pathArray.map(path => this.#getAbsolutePath(path));
+    return this.#observerManager.observe(updatedPaths, multi);
   }
 
   triggerObservers(): void {

@@ -16,12 +16,14 @@ export class SubData implements ISharedData, IObservable {
   }
 
   #getAbsolutePath(path: Update["path"]): string {
-    return path ? `${this.path}/${path}` : this.path;
+    return path.length ? `${this.path}/${path}` : this.path;
   }
 
-  observe(...paths: Update["path"][]): Observer {
-    const updatedPaths = paths.map(path => this.#getAbsolutePath(path));
-    return this.#observerManager.observe(...updatedPaths);
+  observe(paths?: (Update["path"][] | Update["path"])): Observer {
+    const multi = Array.isArray(paths);
+    const pathArray = paths === undefined ? [] : multi ? paths : [paths];
+    const updatedPaths = pathArray.map(path => this.#getAbsolutePath(path));
+    return this.#observerManager.observe(updatedPaths, multi);
   }
 
   triggerObservers(): void {

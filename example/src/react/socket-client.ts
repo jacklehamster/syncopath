@@ -19,7 +19,7 @@ export function useSocketClient(props: Props & Partial<SocketClientProps>) {
     const [data, setData] = useState<T | null>(null);
 
     useEffect(() => {
-      const observer = socketClient.observe(path).onChange(({ value }) => setData(value));
+      const observer = socketClient.observe(path).onChange((value) => setData(value));
       return () => observer.close();
     }, [path]);
 

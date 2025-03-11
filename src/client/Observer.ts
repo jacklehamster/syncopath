@@ -3,80 +3,76 @@ import { Update } from "@/types/Update";
 import { SocketClient } from "./SocketClient";
 import { ObserverManager } from "./ObserverManager";
 
-interface Observation {
-  previous: any;
-  value: any;
-}
-
 export class Observer {
   readonly #partsArrays: (string | number)[][];
-  readonly #observations: Observation[];
-  readonly #changeCallbacks: Set<(...values: any[]) => void> = new Set();
-  readonly #addedElementsCallback: Set<(...keys: (any[] | undefined)[]) => void> = new Set();
-  readonly #deletedElementsCallback: Set<(...keys: (any[] | undefined)[]) => void> = new Set();
+  // readonly #observations: Observation[];
+  #previousValues: any[] = [];
+  readonly #changeCallbacks: Set<(values: any | any[], previous: any | any[]) => void> = new Set();
+  readonly #addedElementsCallback: Set<(keys: any | (any[] | undefined)[]) => void> = new Set();
+  readonly #deletedElementsCallback: Set<(keys: any | (any[] | undefined)[]) => void> = new Set();
   constructor(
     readonly socketClient: SocketClient,
     readonly paths: Update["path"][],
-    readonly observerManagger: ObserverManager) {
+    readonly observerManagger: ObserverManager,
+    readonly multiValues: boolean = false) {
     this.#partsArrays = paths.map(p => p === undefined ? [] : p.split("/"));
-    this.#observations = paths.map(() => ({
-      previous: undefined,
-      value: undefined,
-    }));
+    this.#previousValues = paths.map(() => undefined);
     requestAnimationFrame(() => this.triggerIfChanged());
   }
 
-  onChange(callback: (...values: Observation[]) => void): Observer {
+  onChange(callback: (values: any | any[], previous: any | any[]) => void): Observer {
     this.#changeCallbacks.add(callback);
     return this;
   }
 
-  onElementsAdded(callback: (...keys: (any[] | undefined)[]) => void): Observer {
+  onElementsAdded(callback: (keys: any | (any[] | undefined)[]) => void): Observer {
     this.#addedElementsCallback.add(callback);
     return this;
   }
 
-  onElementsDeleted(callback: (...keys: (any[] | undefined)[]) => void): Observer {
+  onElementsDeleted(callback: (keys: any | (any[] | undefined)[]) => void): Observer {
     this.#deletedElementsCallback.add(callback);
     return this;
   }
 
-  #updatedObservations() {
+  #valuesChanged() {
     const newValues = this.#partsArrays.map(parts =>
       getLeafObject(this.socketClient.state, parts, 0, false, { self: this.socketClient.clientId })
     );
-    if (this.#observations.length && this.#observations.every((ob, index) => {
+
+    if (this.#previousValues.length && this.#previousValues.every((prev, index) => {
       const newValue = newValues[index];
-      if (ob.value === newValue) {
+      if (prev === newValue) {
         return true;
       }
-      if (Array.isArray(ob.value) && Array.isArray(newValue)
-        && ob.value.length === newValue.length
-        && ob.value.every((elem, idx) => elem === newValue[idx])) {
+      if (Array.isArray(prev) && Array.isArray(newValue)
+        && prev.length === newValue.length
+        && prev.every((elem, idx) => elem === newValue[idx])) {
         return true;
       }
       return false;
     })) {
-      return false;
+      return null;
     }
-    this.#observations.forEach((observation, index) => {
-      observation.previous = observation.value;
-      observation.value = newValues[index];
-    });
-    return true;
+
+    return newValues;
   }
 
   triggerIfChanged() {
-    if (!this.#updatedObservations()) {
+    const newValues = this.#valuesChanged();
+    if (!newValues) {
       return;
     }
-    this.#changeCallbacks.forEach(callback => callback(...this.#observations));
-    if (this.#addedElementsCallback && this.#observations.some((observation) => Array.isArray(observation.value))) {
+    const previousValues = this.#previousValues;
+    this.#previousValues = newValues;
+
+    this.#changeCallbacks.forEach(callback => callback(this.multiValues ? newValues : newValues[0], this.multiValues ? previousValues : previousValues[0]));
+    if (this.#addedElementsCallback && newValues.some((val) => Array.isArray(val))) {
       let hasNewElements = false;
-      const newElementsArray = this.#observations.map((observation) => {
-        if (Array.isArray(observation.value)) {
-          const previousSet = new Set(Array.isArray(observation.previous) ? observation.previous : []);
-          const newElements = observation.value.filter((clientId) => !previousSet.has(clientId));
+      const newElementsArray = newValues.map((val, index) => {
+        if (Array.isArray(val)) {
+          const previousSet = new Set(Array.isArray(previousValues[index]) ? previousValues[index] : []);
+          const newElements = val.filter((clientId) => !previousSet.has(clientId));
           if (newElements.length) {
             hasNewElements = true;
           }
@@ -84,15 +80,15 @@ export class Observer {
         }
       });
       if (hasNewElements) {
-        this.#addedElementsCallback.forEach(callback => callback(...newElementsArray));
+        this.#addedElementsCallback.forEach(callback => callback(this.multiValues ? newElementsArray : newElementsArray[0]));
       }
     }
-    if (this.#deletedElementsCallback && this.#observations.some((observation) => Array.isArray(observation.previous))) {
+    if (this.#deletedElementsCallback && previousValues.some((val) => Array.isArray(val))) {
       let hasDeletedElements = false;
-      const deletedElementsArray = this.#observations.map((observation) => {
-        if (Array.isArray(observation.previous)) {
-          const currentSet = new Set(Array.isArray(observation.value) ? observation.value : []);
-          const deletedElements = observation.previous.filter((clientId) => !currentSet.has(clientId));
+      const deletedElementsArray = previousValues.map((prev, index) => {
+        if (Array.isArray(prev)) {
+          const currentSet = new Set(Array.isArray(newValues[index]) ? newValues[index] : []);
+          const deletedElements = prev.filter((clientId) => !currentSet.has(clientId));
           if (deletedElements.length) {
             hasDeletedElements = true;
           }
@@ -100,7 +96,7 @@ export class Observer {
         }
       });
       if (hasDeletedElements) {
-        this.#deletedElementsCallback.forEach(callback => callback(...deletedElementsArray));
+        this.#deletedElementsCallback.forEach(callback => callback(this.multiValues ? deletedElementsArray : deletedElementsArray[0]));
       }
     }
   }

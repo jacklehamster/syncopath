@@ -34,7 +34,6 @@ export class SocketClient implements ISharedData, IObservable {
 
   constructor(host: string, room?: string, initialState: RoomState = {}) {
     this.state = initialState;
-    this.state.updates = [];
     const prefix = host.startsWith("ws://") || host.startsWith("wss://") ? "" : globalThis.location.protocol === "https:" ? "wss://" : "ws://";
     this.#connectionUrl = `${prefix}${host}${room ? `?room=${room}` : ""}`;
     this.#connect();
@@ -156,8 +155,10 @@ export class SocketClient implements ISharedData, IObservable {
     this.#children.delete(path);
   }
 
-  observe(...paths: Update["path"][]): Observer {
-    return this.#observerManager.observe(...paths);
+  observe(paths?: (Update["path"][] | Update["path"])): Observer {
+    const multi = Array.isArray(paths);
+    const pathArray = paths === undefined ? [] : multi ? paths : [paths];
+    return this.#observerManager.observe(pathArray, multi);
   }
 
   async #waitForConnection() {

@@ -105,12 +105,13 @@
       const dataHook = socketClient.access("data");
       const dataArea = document.querySelector("#data-area");
       dataArea.addEventListener("input", (event) => {
-        dataHook.setData(undefined, event.target.value || undefined, {
+        dataHook.setData("", event.target.value || undefined, {
           active: document.querySelector("#active").checked,
         });
       });
-      dataHook.observe(undefined).onChange((observation) => {
-        dataArea.value = observation.value ?? "";
+      dataHook.observe("").onChange((observation) => {
+        console.log(observation);
+        dataArea.value = observation ?? "";
       });
 
       //  cursor
@@ -192,13 +193,13 @@
             });
             observers.add(
               socketClient
-                .observe(
+                .observe([
                   `clients/${clientId}/emoji`,
-                  `clients/${clientId}/name`
-                )
-                .onChange((emoji, name) => {
-                  emojiDiv.textContent = emoji.value;
-                  nameInput.value = name.value;
+                  `clients/${clientId}/name`,
+                ])
+                .onChange(([emoji, name]) => {
+                  emojiDiv.textContent = emoji;
+                  nameInput.value = name;
                 })
             );
           }
@@ -224,7 +225,7 @@
         observers.add(
           socketClient
             .observe(`clients/${clientId}/emoji`)
-            .onChange((emoji) => (cursorDiv.textContent = emoji.value))
+            .onChange((emoji) => (cursorDiv.textContent = emoji))
         );
 
         observers.add(

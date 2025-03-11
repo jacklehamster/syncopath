@@ -99,7 +99,7 @@
       const clients = socketClient.access("clients");
       socketClient.observe("chatting/~{keys}").onChange((chattingClients) => {
         const chatting = document.querySelector(".chatting");
-        const otherClientsTyping = chattingClients.value
+        const otherClientsTyping = chattingClients
           ?.filter(
             (clientId) =>
               clientId !== socketClient.clientId && clients.state[clientId]

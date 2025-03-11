@@ -116,8 +116,8 @@
         fileElem.click();
       });
       socketClient.observe("image").onChange((image) => {
-        if (image.value) {
-          const blob = socketClient.state.blobs[image.value];
+        if (image) {
+          const blob = socketClient.state.blobs[image];
           if (blob instanceof Blob) {
             const url = URL.createObjectURL(blob);
             dropArea.style.backgroundImage = `url(${url})`;

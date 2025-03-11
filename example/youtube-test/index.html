@@ -98,7 +98,7 @@
         observers.add(
           socketClient
             .observe(`clients/${clientId}/emoji`)
-            .onChange((emoji) => (cursorDiv.textContent = emoji.value))
+            .onChange((emoji) => (cursorDiv.textContent = emoji))
         );
 
         observers.add(
@@ -134,10 +134,10 @@
       });
 
       socketClient.observe("playhead").onChange((playhead) => {
-        document.querySelector("#playhead").value = playhead.value;
+        document.querySelector("#playhead").value = playhead;
         const player = window.player;
         if (player?.seekTo) {
-          player.seekTo(player.getDuration() * playhead.value, true);
+          player.seekTo(player.getDuration() * playhead, true);
         }
       });
 
@@ -146,10 +146,10 @@
       });
 
       socketClient.observe("muted").onChange((muted) => {
-        document.querySelector("#mute").checked = muted.value;
+        document.querySelector("#mute").checked = muted;
         const player = window.player;
         if (player?.mute) {
-          if (muted.value) {
+          if (muted) {
             player.mute();
           } else {
             player.unMute();

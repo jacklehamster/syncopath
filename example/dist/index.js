@@ -25674,20 +25674,21 @@ class Observer {
   socketClient;
   paths;
   observerManagger;
+  multiValues;
   #partsArrays;
-  #observations;
+  #previousValues = [];
   #changeCallbacks = new Set;
   #addedElementsCallback = new Set;
   #deletedElementsCallback = new Set;
-  constructor(socketClient, paths, observerManagger) {
+  constructor(socketClient, paths, observerManagger, multiValues = false) {
     this.socketClient = socketClient;
     this.paths = paths;
     this.observerManagger = observerManagger;
+    this.multiValues = multiValues;
     this.#partsArrays = paths.map((p) => p === undefined ? [] : p.split("/"));
-    this.#observations = paths.map(() => ({
-      previous: undefined,
-      value: undefined
-    }));
+    this.#previousValues = paths.map(() => {
+      return;
+    });
     requestAnimationFrame(() => this.triggerIfChanged());
   }
   onChange(callback) {
@@ -25702,37 +25703,36 @@ class Observer {
     this.#deletedElementsCallback.add(callback);
     return this;
   }
-  #updatedObservations() {
+  #valuesChanged() {
     const newValues = this.#partsArrays.map((parts) => getLeafObject(this.socketClient.state, parts, 0, false, { self: this.socketClient.clientId }));
-    if (this.#observations.length && this.#observations.every((ob, index) => {
+    if (this.#previousValues.length && this.#previousValues.every((prev, index) => {
       const newValue = newValues[index];
-      if (ob.value === newValue) {
+      if (prev === newValue) {
         return true;
       }
-      if (Array.isArray(ob.value) && Array.isArray(newValue) && ob.value.length === newValue.length && ob.value.every((elem, idx) => elem === newValue[idx])) {
+      if (Array.isArray(prev) && Array.isArray(newValue) && prev.length === newValue.length && prev.every((elem, idx) => elem === newValue[idx])) {
         return true;
       }
       return false;
     })) {
-      return false;
+      return null;
     }
-    this.#observations.forEach((observation, index) => {
-      observation.previous = observation.value;
-      observation.value = newValues[index];
-    });
-    return true;
+    return newValues;
   }
   triggerIfChanged() {
-    if (!this.#updatedObservations()) {
+    const newValues = this.#valuesChanged();
+    if (!newValues) {
       return;
     }
-    this.#changeCallbacks.forEach((callback) => callback(...this.#observations));
-    if (this.#addedElementsCallback && this.#observations.some((observation) => Array.isArray(observation.value))) {
+    const previousValues = this.#previousValues;
+    this.#previousValues = newValues;
+    this.#changeCallbacks.forEach((callback) => callback(this.multiValues ? newValues : newValues[0], this.multiValues ? previousValues : previousValues[0]));
+    if (this.#addedElementsCallback && newValues.some((val) => Array.isArray(val))) {
       let hasNewElements = false;
-      const newElementsArray = this.#observations.map((observation) => {
-        if (Array.isArray(observation.value)) {
-          const previousSet = new Set(Array.isArray(observation.previous) ? observation.previous : []);
-          const newElements = observation.value.filter((clientId) => !previousSet.has(clientId));
+      const newElementsArray = newValues.map((val, index) => {
+        if (Array.isArray(val)) {
+          const previousSet = new Set(Array.isArray(previousValues[index]) ? previousValues[index] : []);
+          const newElements = val.filter((clientId) => !previousSet.has(clientId));
           if (newElements.length) {
             hasNewElements = true;
           }
@@ -25740,15 +25740,15 @@ class Observer {
         }
       });
       if (hasNewElements) {
-        this.#addedElementsCallback.forEach((callback) => callback(...newElementsArray));
+        this.#addedElementsCallback.forEach((callback) => callback(this.multiValues ? newElementsArray : newElementsArray[0]));
       }
     }
-    if (this.#deletedElementsCallback && this.#observations.some((observation) => Array.isArray(observation.previous))) {
+    if (this.#deletedElementsCallback && previousValues.some((val) => Array.isArray(val))) {
       let hasDeletedElements = false;
-      const deletedElementsArray = this.#observations.map((observation) => {
-        if (Array.isArray(observation.previous)) {
-          const currentSet = new Set(Array.isArray(observation.value) ? observation.value : []);
-          const deletedElements = observation.previous.filter((clientId) => !currentSet.has(clientId));
+      const deletedElementsArray = previousValues.map((prev, index) => {
+        if (Array.isArray(prev)) {
+          const currentSet = new Set(Array.isArray(newValues[index]) ? newValues[index] : []);
+          const deletedElements = prev.filter((clientId) => !currentSet.has(clientId));
           if (deletedElements.length) {
             hasDeletedElements = true;
           }
@@ -25756,7 +25756,7 @@ class Observer {
         }
       });
       if (hasDeletedElements) {
-        this.#deletedElementsCallback.forEach((callback) => callback(...deletedElementsArray));
+        this.#deletedElementsCallback.forEach((callback) => callback(this.multiValues ? deletedElementsArray : deletedElementsArray[0]));
       }
     }
   }
@@ -25772,8 +25772,8 @@ class ObserverManager {
   constructor(socketClient) {
     this.socketClient = socketClient;
   }
-  observe(...paths) {
-    const observer = new Observer(this.socketClient, paths, this);
+  observe(paths, multi) {
+    const observer = new Observer(this.socketClient, paths, this, multi);
     this.#observers.add(observer);
     return observer;
   }
@@ -25800,9 +25800,11 @@ class ClientData {
   #getAbsolutePath(path) {
     return path ? `clients/~{self}/${path}` : "clients/~{self}";
   }
-  observe(...paths) {
-    const updatedPaths = paths.map((path) => this.#getAbsolutePath(path));
-    return this.#observerManager.observe(...updatedPaths);
+  observe(paths) {
+    const multi = Array.isArray(paths);
+    const pathArray = paths === undefined ? [] : multi ? paths : [paths];
+    const updatedPaths = pathArray.map((path) => this.#getAbsolutePath(path));
+    return this.#observerManager.observe(updatedPaths, multi);
   }
   triggerObservers() {
     this.#observerManager.triggerObservers();
@@ -25828,11 +25830,14 @@ class SubData {
     this.#observerManager = new ObserverManager(socketClient);
   }
   #getAbsolutePath(path) {
-    return path ? `${this.path}/${path}` : this.path;
+    return path.length ? `${this.path}/${path}` : this.path;
   }
-  observe(...paths) {
-    const updatedPaths = paths.map((path) => this.#getAbsolutePath(path));
-    return this.#observerManager.observe(...updatedPaths);
+  observe(paths) {
+    const multi = Array.isArray(paths);
+    const pathArray = paths === undefined ? [] : multi ? paths : [paths];
+    const updatedPaths = pathArray.map((path) => this.#getAbsolutePath(path));
+    console.log(">>", updatedPaths, multi);
+    return this.#observerManager.observe(updatedPaths, multi);
   }
   triggerObservers() {
     this.#observerManager.triggerObservers();
@@ -26015,7 +26020,6 @@ class SocketClient {
   #secret;
   constructor(host, room, initialState = {}) {
     this.state = initialState;
-    this.state.updates = [];
     const prefix = host.startsWith("ws://") || host.startsWith("wss://") ? "" : globalThis.location.protocol === "https:" ? "wss://" : "ws://";
     this.#connectionUrl = `${prefix}${host}${room ? `?room=${room}` : ""}`;
     this.#connect();
@@ -26118,8 +26122,10 @@ class SocketClient {
   removeChildData(path) {
     this.#children.delete(path);
   }
-  observe(...paths) {
-    return this.#observerManager.observe(...paths);
+  observe(paths) {
+    const multi = Array.isArray(paths);
+    const pathArray = paths === undefined ? [] : multi ? paths : [paths];
+    return this.#observerManager.observe(pathArray, multi);
   }
   async#waitForConnection() {
     if (!this.#socket) {
@@ -26518,7 +26524,7 @@ function useSocketClient(props) {
   const useData = import_react.useCallback((path) => {
     const [data, setData] = import_react.useState(null);
     import_react.useEffect(() => {
-      const observer = socketClient.observe(path).onChange(({ value }) => setData(value));
+      const observer = socketClient.observe(path).onChange((value) => setData(value));
       return () => observer.close();
     }, [path]);
     return [
@@ -26612,18 +26618,18 @@ async function displayIsoUI(path) {
     }
   });
   handleUsersChanged((clientId, _isSelf, observers) => {
-    observers.add(socketClient.observe(`clients/${clientId}/selected`).onChange((selected) => {
-      const previousSelected = document.getElementById(`sprite-${selected.previous}`);
+    observers.add(socketClient.observe(`clients/${clientId}/selected`).onChange((selected, previous) => {
+      const previousSelected = document.getElementById(`sprite-${previous}`);
       if (previousSelected) {
         previousSelected.style.border = "20px solid #00000000";
       }
-      const selectedDiv = document.getElementById(`sprite-${selected.value}`);
+      const selectedDiv = document.getElementById(`sprite-${selected}`);
       if (selectedDiv) {
-        const selectedBySelf = socketClient.self.state.selected === selected.value;
+        const selectedBySelf = socketClient.self.state.selected === selected;
         const color = selectedBySelf ? "red" : "gray";
         const dashed = !selectedBySelf ? "dashed" : "solid";
         selectedDiv.style.border = `20px ${dashed} ${color}`;
-        const sprite = isNaN(selected.value) ? spriteSheet.getTaggedSprite(selected.value) : spriteSheet.getSprite(parseInt(selected.value));
+        const sprite = isNaN(selected) ? spriteSheet.getTaggedSprite(selected) : spriteSheet.getSprite(parseInt(selected));
         getDraggedItem(clientId).replaceChildren(sprite.generateDiv());
       }
     })).add(trackCursorObserver(clientId, (cursor, selected) => {
@@ -26884,8 +26890,12 @@ function introduceName() {
 }
 function displayUsers(userDiv) {
   handleUsersChanged((clientId, isSelf, observers) => {
-    observers.add(socketClient.observe(`clients/${clientId}/name`, `clients/${clientId}/emoji`).onChange((name2, emoji2) => {
-      client.textContent = `${emoji2.value} ${name2.value}`;
+    observers.add(socketClient.observe([
+      `clients/${clientId}/name`,
+      `clients/${clientId}/emoji`
+    ]).onChange((values) => {
+      const [name2, emoji2] = values;
+      client.textContent = `${emoji2} ${name2}`;
     }));
     const client = document.createElement("div");
     client.id = `client-${clientId}`;
@@ -26927,7 +26937,7 @@ function handleUsersChanged(onUserAdded, onUserRemoved) {
       const observers = new Set;
       onUserAdded(clientId, isSelf, observers);
       observers.add(socketClient.observe(`clients/${clientId}`).onChange((client) => {
-        if (client.value === undefined) {
+        if (client === undefined) {
           observers.forEach((observer) => observer.close());
         }
       }));
@@ -26937,21 +26947,24 @@ function handleUsersChanged(onUserAdded, onUserRemoved) {
   });
 }
 function trackCursorObserver(clientId, callback, extraObservations = []) {
-  return socketClient.observe(...[`clients/${clientId}/cursor`, ...extraObservations]).onChange((cursor, ...extra) => {
-    if (!cursor.value) {
+  return socketClient.observe([`clients/${clientId}/cursor`, ...extraObservations]).onChange((values) => {
+    const [cursor, ...extra] = values ?? [];
+    if (!cursor) {
       callback();
       return;
     }
-    callback(cursor.value, ...extra.map((e) => e.value));
+    callback(cursor, ...extra);
   });
 }
 function trackIsoCursorObserver(clientId, callback, extraObservations = []) {
-  return socketClient.observe(...[`clients/${clientId}/isoCursor`, ...extraObservations]).onChange((cursor, ...extra) => {
-    if (!cursor.value) {
+  return socketClient.observe([`clients/${clientId}/isoCursor`, ...extraObservations]).onChange((values) => {
+    console.log(values);
+    const [cursor, ...extra] = values ?? [];
+    if (!cursor) {
       callback();
       return;
     }
-    callback(cursor.value, ...extra.map((e) => e.value));
+    callback(cursor, ...extra);
   });
 }
 function hookDiv(div) {
@@ -26976,4 +26989,4 @@ export {
   SocketClient
 };
 
-//# debugId=9987972178296F4E64756E2164756E21
+//# debugId=5F6166026FE14CB864756E2164756E21
