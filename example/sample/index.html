@@ -109,9 +109,8 @@
           active: document.querySelector("#active").checked,
         });
       });
-      dataHook.observe("").onChange((observation) => {
-        console.log(observation);
-        dataArea.value = observation ?? "";
+      dataHook.observe("").onChange((data) => {
+        dataArea.value = data ?? "";
       });
 
       //  cursor

@@ -5,7 +5,6 @@ import { ObserverManager } from "./ObserverManager";
 
 export class Observer {
   readonly #partsArrays: (string | number)[][];
-  // readonly #observations: Observation[];
   #previousValues: any[] = [];
   readonly #changeCallbacks: Set<(values: any | any[], previous: any | any[]) => void> = new Set();
   readonly #addedElementsCallback: Set<(keys: any | (any[] | undefined)[]) => void> = new Set();
