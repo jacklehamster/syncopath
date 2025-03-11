@@ -117,7 +117,7 @@ export function translateValue(value: any, properties: Record<string, any>) {
   return value;
 }
 
-export function translateProp(obj: any, prop: string | number, properties: Record<string, any>, autoCreate: boolean) {
+function translateProp(obj: any, prop: string | number, properties: Record<string, any>, autoCreate: boolean) {
   let value;
   if (typeof prop !== "string") {
     value = obj[prop];
