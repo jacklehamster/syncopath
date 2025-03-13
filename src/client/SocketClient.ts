@@ -2,7 +2,7 @@
 /// <reference lib="dom" />
 /// <reference lib="dom.iterable" />
 
-import { commitUpdates, getLeafObject, markUpdateConfirmed, translateValue } from "@/data/data-update";
+// import { commitUpdates, getLeafObject, markUpdateConfirmed, translateValue } from "@/data/data-update";
 import { Update } from "@/types/Update";
 import { ISharedData, SetDataOptions, UpdateOptions } from "./ISharedData";
 import { ClientData } from "./ClientData";
@@ -16,6 +16,7 @@ import { PeerManager } from "./peer/PeerManager";
 import { checkPeerConnections } from "./peer/check-peer";
 import { RoomState } from "@/types/RoomState";
 import { signedPayload } from "@dobuki/payload-validator";
+import { commitUpdates, getLeafObject, markUpdateConfirmed, translateValue } from "napl";
 
 export class SocketClient implements ISharedData, IObservable {
   readonly state: RoomState;

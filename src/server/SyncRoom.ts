@@ -1,5 +1,5 @@
 import { WebSocket } from "ws";
-import { commitUpdates, markUpdateConfirmed } from "@/data/data-update";
+import { commitUpdates, markUpdateConfirmed } from "napl";
 import { Update } from "@/types/Update";
 import { addMessageReceiver } from "./SocketEventHandler";
 import { Payload } from "./SocketPayload";

@@ -1,7 +1,7 @@
-import { getLeafObject } from "@/data/data-update";
 import { Update } from "@/types/Update";
 import { SocketClient } from "./SocketClient";
 import { ObserverManager } from "./ObserverManager";
+import { getLeafObject } from "napl";
 
 export class Observer {
   readonly #partsArrays: (string | number)[][];

@@ -23682,15 +23682,19 @@ var require_jsx_dev_runtime = __commonJS((exports, module) => {
   }
 });
 
-// ../src/data/data-update.ts
+// ../node_modules/napl/dist/index.js
 var KEYS = "~{keys}";
 var VALUES = "~{values}";
-function commitUpdates(root, properties) {
+function commitUpdates(root, properties, updatedPaths) {
+  if (!root) {
+    return;
+  }
   sortUpdates(root.updates);
   root.updates?.forEach((update) => {
     if (!update.confirmed) {
       return;
     }
+    saveBlobsFromUpdate(root, update);
     const parts = update.path.split("/");
     const leaf = getLeafObject(root, parts, 1, true);
     const prop = parts[parts.length - 1];
@@ -23715,6 +23719,7 @@ function commitUpdates(root, properties) {
     } else {
       leaf[prop] = value;
     }
+    updatedPaths?.add(update.path);
   });
   if (root.updates) {
     for (let i = root.updates.length - 1;i >= 0; i--) {
@@ -23805,6 +23810,12 @@ function markUpdateConfirmed(update, now) {
   if (!update.confirmed) {
     update.confirmed = now;
   }
+}
+function saveBlobsFromUpdate(data, update) {
+  Object.entries(update.blobs ?? {}).forEach(([key, blob]) => {
+    const blobs = data.blobs ?? (data.blobs = {});
+    blobs[key] = blob;
+  });
 }
 
 // ../node_modules/@dobuki/data-blob/dist/index.js
@@ -26967,8 +26978,7 @@ export {
   getSpriteSheet,
   displayUsers,
   displayIsoUI,
-  commitUpdates,
   SocketClient
 };
 
-//# debugId=14637DDA0895497C64756E2164756E21
+//# debugId=F8801D73BBB157E364756E2164756E21

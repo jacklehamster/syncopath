@@ -1,10 +1,10 @@
 import { Update } from "@/types/Update";
 import { ISharedData, SetDataOptions } from "./ISharedData";
 import { SocketClient } from "./SocketClient";
-import { getLeafObject } from "@/data/data-update";
 import { Observer } from "./Observer";
 import { IObservable } from "./IObservable";
 import { ObserverManager } from "./ObserverManager";
+import { getLeafObject } from "napl";
 
 export class SubData implements ISharedData, IObservable {
   readonly #parts: (string | number)[] = [];
