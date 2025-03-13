@@ -9,18 +9,18 @@
     "sha": "7f4867ce2f8638d70e38823797225ea99a97432e"
   },
   "Observer.ts": {
-    "sha": "b001c23cc1b67c2706a938124aa00066989a5939"
+    "sha": "c9fc36a7d96f9fcd40b0fafd11b5b089f0713ffd"
   },
   "ObserverManager.ts": {
     "sha": "e287320869c6c4abf9cfaaa634f2c1bb911ca452"
   },
   "SocketClient.ts": {
-    "sha": "0cfcdf4c36cdc6ae506122268b6317802d0482a6"
+    "sha": "adee8dd1029569697109fb6088498c9e52e07f5e"
   },
   "SubData.ts": {
-    "sha": "e2bce3fd1d811d0f4b1a77c6b40b884c3c2ec944"
+    "sha": "5ebc2b4781ee6e58ae2ccd2700ccb444f4a4080c"
   },
-  "md5": "53b47dcfa2be47f68b3af3af28f49089",
+  "md5": "e1f3a902cd27352f20f3170deed9ad1d",
   "peer/PeerManager.ts": {
     "sha": "00af3c5abb1582f18bc9990e3980b5c86a08c9b6"
   },
