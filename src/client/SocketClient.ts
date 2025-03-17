@@ -234,9 +234,7 @@ export class SocketClient implements ISharedData, IObservable {
 
   #processNextFrame() {
     this.#nextFrameInProcess = false;
-    if (this.state.updates?.length) {
-      this.#applyUpdates();
-    }
+    this.#applyUpdates();
     if (this.#outgoingUpdates.length) {
       this.#broadcastUpdates();
     }
@@ -273,22 +271,23 @@ export class SocketClient implements ISharedData, IObservable {
       }
     });
 
-    const outUpdates = this.#outgoingUpdates
-      .filter(update => !!update)
-      .map(update => signedPayload(update, { secret: this.#secret }));
+    const outUpdates = this.#outgoingUpdates.filter(update => !!update);
     if (outUpdates.length) {
       await this.#waitForConnection();
-      const blob = this.#packageUpdates(outUpdates);
+      const blob = this.#packageUpdates(outUpdates, this.#secret);
       this.#socket?.send(blob);
     }
     this.#outgoingUpdates.length = 0;
   }
 
-  #packageUpdates(updates: Update[]): Blob {
+  #packageUpdates(updates: Update[], secret?: string): Blob {
+    if (secret) {
+      updates = updates.map(update => signedPayload(update, { secret }));
+    }
     const blobBuilder = BlobBuilder.payload("payload", { updates });
     const addedBlob = new Set<string>();
     updates.forEach(update => {
-      Object.entries(update?.blobs ?? {}).forEach(([key, blob]) => {
+      Object.entries(update.blobs ?? {}).forEach(([key, blob]) => {
         if (!addedBlob.has(key)) {
           blobBuilder.blob(key, blob);
           addedBlob.add(key);
@@ -298,15 +297,17 @@ export class SocketClient implements ISharedData, IObservable {
     return blobBuilder.build();
   }
 
-  #saveBlobsFromUpdates(updates?: Update[]) {
-    updates?.forEach(update => Object.entries(update.blobs ?? {}).forEach(([key, blob]) => {
-      const blobs = this.state.blobs ?? (this.state.blobs = {});
+  #saveBlobsFromUpdates(updates: Update[], blobs: Record<string, Blob>) {
+    updates.forEach(update => Object.entries(update.blobs ?? {}).forEach(([key, blob]) => {
       blobs[key] = blob;
     }));
   }
 
   #applyUpdates() {
-    this.#saveBlobsFromUpdates(this.state.updates);
+    if (!this.state.updates?.length) {
+      return;
+    }
+    this.#saveBlobsFromUpdates(this.state.updates, this.state.blobs ?? (this.state.blobs = {}));
     const updates: Record<string, any> = {};
     commitUpdates(this.state, {
       now: this.now,
