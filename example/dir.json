@@ -21,10 +21,10 @@
     "sha": "98387d623bcf6077316ad093fd89f762c23f9a4f"
   },
   "dist/index.js": {
-    "sha": "028a4a1ca9340e5a624616b83ea24bbb414a9551"
+    "sha": "1d573743dbc17c3dac69dfc7f58dd05b3ffcba17"
   },
   "dist/index.js.map": {
-    "sha": "285860019db8b479e6a7ad64f6d558b765a50268"
+    "sha": "93046da439292f4a535ba1706ce49a14e666a716"
   },
   "dist/styles-da87zv4s.css": {
     "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
@@ -86,7 +86,7 @@
   "json-test/index.html": {
     "sha": "9ec0f95dcdc56365093036252745434e014fdd8a"
   },
-  "md5": "c8976457b8c558172b037a5671390cfb",
+  "md5": "2c0835832d566afb69454d89e206375a",
   "mobile/index.html": {
     "sha": "7a151c04dec14f3d48550ac76599c37e9f15d361"
   },
@@ -109,7 +109,7 @@
     "sha": "85e6747c327b0844e95797088ad126f9d7a42d37"
   },
   "src/index.ts": {
-    "sha": "cbfe3ce9b8176e15ec2ef819a4250cb4c6712a10"
+    "sha": "408939cdaa52a2a05c758ee2b75b9b24534e01ee"
   },
   "src/iso-test/iso-utils.ts": {
     "sha": "ba1336af22c4389a058e0cd900f415402187505d"
