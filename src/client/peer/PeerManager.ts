@@ -1,5 +1,12 @@
 //  Share peer information using WebRTC
 
+interface Config {
+  onData: (data: any) => void;
+  onIce: (ice: any) => void;
+  onClose: () => void;
+  onReady: () => void;
+}
+
 export class PeerManager {
   #peerConnection: RTCPeerConnection;
   #dataChannel?: RTCDataChannel;
@@ -9,7 +16,7 @@ export class PeerManager {
   connected = false;
   ready = false;
 
-  constructor(private peerId: string, onData: (data: any) => void, onIce: (ice: any) => void, onClose: () => void, onReady: () => void) {
+  constructor({ onData, onIce, onClose, onReady }: Config) {
     this.#onData = onData;
     this.#onClose = onClose;
     this.#onReady = onReady;
@@ -84,4 +91,6 @@ export class PeerManager {
 
     this.#dataChannel.onclose = this.#onClose;
   }
+
+
 }

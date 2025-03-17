@@ -1,15 +1,12 @@
 import { ClientState } from "@/types/ClientState";
-import { Update } from "./Update";
+import { Data } from "napl";
 
-export interface RoomState {
+export interface RoomState extends Data {
   clients?: Record<string, ClientState>;
-  blobs?: Record<string, Blob>;
   peer?: Record<string, any>;
   config?: {
     autoReconnect?: boolean;
     peerOnly?: boolean;
     activeUpdates?: boolean;
   };
-  updates?: Update[];
-  [key: string]: any;
 }

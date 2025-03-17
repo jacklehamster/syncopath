@@ -60,26 +60,26 @@ export function checkPeerConnections(socketClient: SocketClient) {
 
 function createPeerManager(socketClient: SocketClient, tag: string, peerId: string) {
   console.log("Creating peer manager");
-  socketClient.peerManagers[peerId] = new PeerManager(socketClient.clientId,
-    (data) => {
+  socketClient.peerManagers[peerId] = new PeerManager({
+    onData(data) {
       if (data instanceof Blob) {
-        socketClient.processDataBlob(data);
+        socketClient.onMessageBlob(data, undefined, true);
       }
     },
-    (ice) => {
+    onIce(ice) {
       const candidate = ice.candidate.split(" ")[0];
       socketClient.setData(`peer/${tag}:webRTC/${socketClient.clientId}/ice/${candidate}`, ice, PEER_OPTIONS);
     },
-    () => {
+    onClose() {
       delete socketClient.peerManagers[peerId];
       console.log("Peer closed");
     },
-    () => {
+    onReady() {
       if (socketClient.state.config?.peerOnly) {
         setTimeout(() => {
           socketClient.closeSocket();
         }, DELAY_TO_DISCONNECT_WEBSOCKET_AFTER_PEER);
       }
     },
-  );
+  });
 }

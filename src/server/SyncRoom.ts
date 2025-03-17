@@ -1,5 +1,5 @@
 import { WebSocket } from "ws";
-import { clearUpdates, commitUpdates, markUpdateConfirmed } from "napl";
+import { generateCleanBlobUpdates, clearUpdates, commitUpdates, markUpdateConfirmed, packageUpdates, pushUpdate } from "napl";
 import { Update } from "@/types/Update";
 import { addMessageReceiver } from "./SocketEventHandler";
 import { Payload } from "./SocketPayload";
@@ -10,15 +10,18 @@ import { removeRestrictedData, removeRestrictedPeersFromUpdates } from "./peer-u
 import { restrictedPath } from "./path-utils";
 import { validatePayload } from "@dobuki/payload-validator";
 
+let nextClientId = 1;
+
+const BLOB_CLEANUP_TIMEOUT = 100;
+
 export class SyncRoom {
   readonly #sockets: Map<WebSocket, string> = new Map();
-  readonly state: RoomState;
+  readonly state: RoomState = {};
   readonly #onRoomChange = new Set<(roomState: RoomState) => void>();
-  static nextClientId = 1;
+  readonly #secret = crypto.randomUUID();
+  private blobCleanupTimeout?: Timer;
 
   constructor(private room: string) {
-    this.state = {};
-    this.state.updates = [];
   }
 
   addRoomChangeListener(callback: (roomState: RoomState) => void) {
@@ -41,10 +44,9 @@ export class SyncRoom {
 
   async welcomeClient(client: WebSocket) {
     const now = Date.now();
-    const secret = crypto.randomUUID();
 
     //  initialize client state
-    const clientId = `client-${SyncRoom.nextClientId++}`;
+    const clientId = `client-${nextClientId++}`;
     const clientPath = `clients/${clientId}`;
     const clientState: ClientState = {
       joined: now,
@@ -62,7 +64,7 @@ export class SyncRoom {
     //  setup events
     addMessageReceiver(client, (payload, blobs) => {
       Object.entries(blobs).forEach(([key, blob]) => this.#setBlob(key, blob));
-      if (!payload.updates?.every(update => validatePayload(update, { secret }))) {
+      if (!payload.updates?.every(update => validatePayload(update, { secret: this.#secret }))) {
         console.warn("Invalid payload received from ", clientId);
         return;
       }
@@ -80,7 +82,7 @@ export class SyncRoom {
       payload.updates = payload.updates?.filter(update => !restrictedPath(update.path, clientId));
 
       this.#shareUpdates(payload.updates, client);
-      setImmediate(() => this.#cleanupBlobs());
+      this.#prepareBlobCleanup();
     });
 
     client.on("close", () => {
@@ -108,12 +110,24 @@ export class SyncRoom {
       myClientId: clientId,
       state: removeRestrictedData({ ...this.state }, clientId),
       serverTime: now,
-      secret,
+      secret: this.#secret,
     });
     Object.entries(this.state.blobs ?? {}).forEach(([key, blob]) => welcomeBlobBuilder.blob(key, blob));
 
     client.send(await welcomeBlobBuilder.build().arrayBuffer());
     return { clientId };
+  }
+
+  #prepareBlobCleanup() {
+    if (!this.blobCleanupTimeout) {
+      this.blobCleanupTimeout = setTimeout(() => {
+        const updates = generateCleanBlobUpdates(this.state);
+        if (updates.length) {
+          this.#shareUpdates(updates);
+        }
+        delete this.blobCleanupTimeout;
+      }, BLOB_CLEANUP_TIMEOUT);
+    }
   }
 
   #cleanupPeers() {
@@ -149,10 +163,7 @@ export class SyncRoom {
   }
 
   #pushUpdates(newUpdates: Update[] | undefined) {
-    if (!this.state.updates) {
-      this.state.updates = [];
-    }
-    newUpdates?.forEach((update) => this.state.updates?.push(update));
+    pushUpdate(this.state, ...newUpdates ?? []);
   }
 
   #broadcastUpdates(newUpdates: Update[] | undefined, senderFilter?: (sender: WebSocket) => boolean) {
@@ -160,47 +171,14 @@ export class SyncRoom {
       return;
     }
     this.#sockets.entries().forEach(async ([client, clientId]) => {
-      const blobBuilder = BlobBuilder.payload("payload", {
-        updates: removeRestrictedPeersFromUpdates(newUpdates, clientId),
-      });
-      newUpdates.forEach(update => Object.entries(update.blobs ?? {})
-        .forEach(([key, blob]) => blobBuilder.blob(key, blob)));
-      const buffer = await blobBuilder.build().arrayBuffer();
-
       if (senderFilter && !senderFilter(client)) {
         return;
       }
+      const clientUpdates = removeRestrictedPeersFromUpdates(newUpdates, clientId);
+      const blob = packageUpdates(clientUpdates, this.#secret);
+      const buffer = await blob.arrayBuffer();
+
       client.send(buffer);
     });
-  }
-
-  #cleanupBlobs() {
-    const blobSet = new Set(Object.keys(this.state.blobs ?? {}));
-    this.#findUsedBlobs(this.state, blobSet);
-    if (blobSet.size) {
-      // Remove blobs
-      const updates: Update[] = [];
-      const now = Date.now();
-      blobSet.forEach(key => {
-        updates.push({
-          path: `blobs/${key}`,
-          value: undefined,
-          confirmed: now,
-        });
-      });
-      this.#shareUpdates(updates);
-    }
-  }
-
-  #findUsedBlobs(root: any, blobSet: Set<string>) {
-    if (typeof root === "string") {
-      if (blobSet.has(root)) {
-        blobSet.delete(root);
-      }
-    } else if (Array.isArray(root)) {
-      root.forEach(value => this.#findUsedBlobs(value, blobSet));
-    } else if (root && typeof root === "object") {
-      Object.values(root).forEach(value => this.#findUsedBlobs(value, blobSet));
-    }
   }
 }
