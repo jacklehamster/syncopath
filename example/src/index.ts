@@ -2,7 +2,7 @@
 /// <reference lib="dom" />
 /// <reference lib="dom.iterable" />
 
-export { commitUpdates, SocketClient } from "@dobuki/syncopath";
+export { SocketClient } from "@dobuki/syncopath";
 import stringify from "json-stringify-pretty-compact";
 import { SocketClient, Observer } from "@dobuki/syncopath";
 import { SpriteSheet, loadSpriteSheet } from "aseprite-sheet";

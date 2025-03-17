@@ -26,8 +26,8 @@ export class SubData implements ISharedData, IObservable {
     return this.#observerManager.observe(updatedPaths, multi);
   }
 
-  triggerObservers(): void {
-    this.#observerManager.triggerObservers();
+  triggerObservers(updates: Record<string, any>): void {
+    this.#observerManager.triggerObservers(updates);
   }
 
   async setData(path: Update["path"], value: any, options?: SetDataOptions): Promise<void> {

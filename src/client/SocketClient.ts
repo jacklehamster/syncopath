@@ -16,7 +16,7 @@ import { PeerManager } from "./peer/PeerManager";
 import { checkPeerConnections } from "./peer/check-peer";
 import { RoomState } from "@/types/RoomState";
 import { signedPayload } from "@dobuki/payload-validator";
-import { commitUpdates, getLeafObject, markUpdateConfirmed, translateValue } from "napl";
+import { clearUpdates, commitUpdates, getLeafObject, markUpdateConfirmed, translateValue } from "napl";
 
 export class SocketClient implements ISharedData, IObservable {
   readonly state: RoomState;
@@ -189,6 +189,7 @@ export class SocketClient implements ISharedData, IObservable {
 
   async processDataBlob(blob: Blob, onClientIdConfirmed?: () => void) {
     const { payload, ...blobs } = await extractPayload(blob);
+    const blobEntries = Object.entries(blobs);
 
     if (payload?.secret) {
       this.#secret = payload.secret;
@@ -206,7 +207,7 @@ export class SocketClient implements ISharedData, IObservable {
       for (const key in payload.state) {
         this.state[key] = payload.state[key];
       }
-      if (Object.keys(blobs).length) {
+      if (blobEntries.length) {
         this.state.blobs = blobs;
       }
     }
@@ -214,11 +215,13 @@ export class SocketClient implements ISharedData, IObservable {
       const updates: Update[] = payload.updates;
       updates.forEach(update => {
         const updateBlobs = update.blobs ?? {};
-        Object.keys(updateBlobs).forEach(key => updateBlobs[key] = blobs[key]);
+        blobEntries.forEach(([key, value]) => updateBlobs[key] = value);
       });
       this.#queueIncomingUpdates(...payload.updates);
     }
-    this.#observerManager.triggerObservers();
+    if (payload?.state && !payload?.updates?.length) {
+      this.triggerObservers({});
+    }
   }
 
   #prepareNextFrame() {
@@ -304,10 +307,13 @@ export class SocketClient implements ISharedData, IObservable {
 
   #applyUpdates() {
     this.#saveBlobsFromUpdates(this.state.updates);
+    const updates: Record<string, any> = {};
     commitUpdates(this.state, {
       now: this.now,
-    });
-    this.triggerObservers();
+      self: this.clientId,
+    }, updates);
+    clearUpdates(this.state, updates);
+    this.triggerObservers(updates);
     checkPeerConnections(this);
   }
 
@@ -320,9 +326,9 @@ export class SocketClient implements ISharedData, IObservable {
     return false;
   }
 
-  triggerObservers(): void {
-    this.#observerManager.triggerObservers();
-    this.#children.forEach(child => child.triggerObservers());
+  triggerObservers(updates: Record<string, any>): void {
+    this.#observerManager.triggerObservers(updates);
+    this.#children.forEach(child => child.triggerObservers(updates));
   }
 
   removeObserver(observer: Observer) {

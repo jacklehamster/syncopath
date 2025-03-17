@@ -13,5 +13,5 @@ export interface SetDataOptions extends UpdateOptions {
 export interface ISharedData {
   setData(path: Update["path"], value: any, options?: SetDataOptions): Promise<void>;
   state: Record<string, any>;
-  triggerObservers(): void;
+  triggerObservers(updates: Record<string, any>): void;
 }

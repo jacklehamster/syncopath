@@ -14,8 +14,8 @@ export class ObserverManager {
     return observer;
   }
 
-  triggerObservers() {
-    this.#observers.forEach(o => o.triggerIfChanged());
+  triggerObservers(updates: Record<string, any>) {
+    this.#observers.forEach(o => o.triggerIfChanged(updates));
   }
 
   removeObserver(observer: Observer) {

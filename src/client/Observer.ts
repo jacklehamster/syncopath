@@ -34,12 +34,14 @@ export class Observer {
     return this;
   }
 
-  #valuesChanged() {
-    const newValues = this.#partsArrays.map(parts =>
-      getLeafObject(this.socketClient.state, parts, 0, false, { self: this.socketClient.clientId })
-    );
+  #valuesChanged(updates?: Record<string, any>) {
+    const newValues =
+      this.paths.map((path, index) =>
+        // (updates && path in updates) ? updates[path] :
+        getLeafObject(this.socketClient.state, this.#partsArrays[index], 0, false, { self: this.socketClient.clientId })
+      );
 
-    if (this.#previousValues.length && this.#previousValues.every((prev, index) => {
+    if (this.#previousValues.every((prev, index) => {
       const newValue = newValues[index];
       if (prev === newValue) {
         return true;
@@ -57,11 +59,12 @@ export class Observer {
     return newValues;
   }
 
-  triggerIfChanged() {
-    const newValues = this.#valuesChanged();
+  triggerIfChanged(updates?: Record<string, any>) {
+    const newValues = !this.paths.length ? [] : this.#valuesChanged(updates);
     if (!newValues) {
       return;
     }
+
     const previousValues = this.#previousValues;
     this.#previousValues = newValues;
 
@@ -82,6 +85,7 @@ export class Observer {
         this.#addedElementsCallback.forEach(callback => callback(this.multiValues ? newElementsArray : newElementsArray[0]));
       }
     }
+
     if (this.#deletedElementsCallback && previousValues.some((val) => Array.isArray(val))) {
       let hasDeletedElements = false;
       const deletedElementsArray = previousValues.map((prev, index) => {

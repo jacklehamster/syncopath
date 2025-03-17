@@ -48,7 +48,7 @@
   "dependencies": {
     "@dobuki/data-blob": "^1.0.12",
     "@dobuki/payload-validator": "^1.0.8",
-    "napl": "^1.0.17"
+    "napl": "^1.0.22"
   },
   "keywords": []
 }

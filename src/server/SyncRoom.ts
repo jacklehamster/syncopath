@@ -1,5 +1,5 @@
 import { WebSocket } from "ws";
-import { commitUpdates, markUpdateConfirmed } from "napl";
+import { clearUpdates, commitUpdates, markUpdateConfirmed } from "napl";
 import { Update } from "@/types/Update";
 import { addMessageReceiver } from "./SocketEventHandler";
 import { Payload } from "./SocketPayload";
@@ -97,9 +97,11 @@ export class SyncRoom {
     });
 
     //  apply updates to clients
+    const updates: Record<string, any> = {};
     commitUpdates(this.state, {
       now,
-    });
+    }, updates);
+    clearUpdates(this.state, updates);
 
     //  update client just connected with state and updates
     const welcomeBlobBuilder = BlobBuilder.payload<Payload>("payload", {
@@ -136,9 +138,11 @@ export class SyncRoom {
     const now = Date.now();
     newUpdates.forEach(update => markUpdateConfirmed(update, now));
     this.#pushUpdates(newUpdates);
+    const updates: Record<string, any> = {};
     commitUpdates(this.state, {
       now: Date.now(),
-    });
+    }, updates);
+    clearUpdates(this.state, updates);
     this.#broadcastUpdates(newUpdates, client => client !== sender);
     this.#broadcastUpdates(updatesForSender, client => client === sender);
     this.#cleanupPeers();
