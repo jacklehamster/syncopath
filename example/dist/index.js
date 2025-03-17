@@ -26185,9 +26185,7 @@ class SocketClient {
   }
   #processNextFrame() {
     this.#nextFrameInProcess = false;
-    if (this.state.updates?.length) {
-      this.#applyUpdates();
-    }
+    this.#applyUpdates();
     if (this.#outgoingUpdates.length) {
       this.#broadcastUpdates();
     }
@@ -26218,19 +26216,22 @@ class SocketClient {
         }
       }
     });
-    const outUpdates = this.#outgoingUpdates.filter((update) => !!update).map((update) => C5(update, { secret: this.#secret }));
+    const outUpdates = this.#outgoingUpdates.filter((update) => !!update);
     if (outUpdates.length) {
       await this.#waitForConnection();
-      const blob = this.#packageUpdates(outUpdates);
+      const blob = this.#packageUpdates(outUpdates, this.#secret);
       this.#socket?.send(blob);
     }
     this.#outgoingUpdates.length = 0;
   }
-  #packageUpdates(updates) {
+  #packageUpdates(updates, secret) {
+    if (secret) {
+      updates = updates.map((update) => C5(update, { secret }));
+    }
     const blobBuilder = A.payload("payload", { updates });
     const addedBlob = new Set;
     updates.forEach((update) => {
-      Object.entries(update?.blobs ?? {}).forEach(([key, blob]) => {
+      Object.entries(update.blobs ?? {}).forEach(([key, blob]) => {
         if (!addedBlob.has(key)) {
           blobBuilder.blob(key, blob);
           addedBlob.add(key);
@@ -26239,14 +26240,17 @@ class SocketClient {
     });
     return blobBuilder.build();
   }
-  #saveBlobsFromUpdates(updates) {
-    updates?.forEach((update) => Object.entries(update.blobs ?? {}).forEach(([key, blob]) => {
-      const blobs = this.state.blobs ?? (this.state.blobs = {});
-      blobs[key] = blob;
+  #saveBlobsFromUpdates(updates, root) {
+    updates.forEach((update) => Object.entries(update.blobs ?? {}).forEach(([key, blob]) => {
+      root.blobs ??= {};
+      root.blobs[key] = blob;
     }));
   }
   #applyUpdates() {
-    this.#saveBlobsFromUpdates(this.state.updates);
+    if (!this.state.updates?.length) {
+      return;
+    }
+    this.#saveBlobsFromUpdates(this.state.updates, this.state);
     const updates = {};
     commitUpdates(this.state, {
       now: this.now,
@@ -26981,4 +26985,4 @@ export {
   SocketClient
 };
 
-//# debugId=307B8AEA4276757664756E2164756E21
+//# debugId=275BB2057390702764756E2164756E21

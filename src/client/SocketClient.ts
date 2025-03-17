@@ -16,7 +16,7 @@ import { PeerManager } from "./peer/PeerManager";
 import { checkPeerConnections } from "./peer/check-peer";
 import { RoomState } from "@/types/RoomState";
 import { signedPayload } from "@dobuki/payload-validator";
-import { clearUpdates, commitUpdates, getLeafObject, markUpdateConfirmed, translateValue } from "napl";
+import { clearUpdates, commitUpdates, Data, getLeafObject, markUpdateConfirmed, translateValue } from "napl";
 
 export class SocketClient implements ISharedData, IObservable {
   readonly state: RoomState;
@@ -297,9 +297,10 @@ export class SocketClient implements ISharedData, IObservable {
     return blobBuilder.build();
   }
 
-  #saveBlobsFromUpdates(updates: Update[], blobs: Record<string, Blob>) {
+  #saveBlobsFromUpdates(updates: Update[], root: Data) {
     updates.forEach(update => Object.entries(update.blobs ?? {}).forEach(([key, blob]) => {
-      blobs[key] = blob;
+      root.blobs ??= {};
+      root.blobs[key] = blob;
     }));
   }
 
@@ -307,7 +308,7 @@ export class SocketClient implements ISharedData, IObservable {
     if (!this.state.updates?.length) {
       return;
     }
-    this.#saveBlobsFromUpdates(this.state.updates, this.state.blobs ?? (this.state.blobs = {}));
+    this.#saveBlobsFromUpdates(this.state.updates, this.state);
     const updates: Record<string, any> = {};
     commitUpdates(this.state, {
       now: this.now,
