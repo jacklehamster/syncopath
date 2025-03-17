@@ -25698,7 +25698,7 @@ class Observer {
     return this;
   }
   #valuesChanged(updates) {
-    const newValues = this.paths.map((path, index) => getLeafObject(this.socketClient.state, this.#partsArrays[index], 0, false, { self: this.socketClient.clientId }));
+    const newValues = this.paths.map((path, index) => updates && (path in updates) ? updates[path] : getLeafObject(this.socketClient.state, this.#partsArrays[index], 0, false, { self: this.socketClient.clientId }));
     if (this.#previousValues.every((prev, index) => {
       const newValue = newValues[index];
       if (prev === newValue) {
@@ -26981,4 +26981,4 @@ export {
   SocketClient
 };
 
-//# debugId=13EFD46DDF7F5B8264756E2164756E21
+//# debugId=307B8AEA4276757664756E2164756E21

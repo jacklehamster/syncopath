@@ -37,8 +37,8 @@ export class Observer {
   #valuesChanged(updates?: Record<string, any>) {
     const newValues =
       this.paths.map((path, index) =>
-        // (updates && path in updates) ? updates[path] :
-        getLeafObject(this.socketClient.state, this.#partsArrays[index], 0, false, { self: this.socketClient.clientId })
+        (updates && path in updates) ? updates[path] :
+          getLeafObject(this.socketClient.state, this.#partsArrays[index], 0, false, { self: this.socketClient.clientId })
       );
 
     if (this.#previousValues.every((prev, index) => {
