@@ -50,7 +50,10 @@ export class SyncRoom {
         return;
       }
       payload.updates?.forEach(update => {
-        update.value = includeBlobsInPayload(update.value, blobs);
+        const newValue = includeBlobsInPayload(update.value, blobs);
+        if (newValue !== undefined) {
+          update.value = newValue;
+        }
       });
 
       //  remove updates that are not allowed
@@ -134,7 +137,11 @@ export class SyncRoom {
         return;
       }
       const clientUpdates = removeRestrictedPeersFromUpdates(newUpdates, clientId);
-      const blob = await packageUpdates(clientUpdates, this.#secret);
+      const blobs: Record<string, Blob> = {};
+      for (let update of clientUpdates) {
+        update.value = await extractBlobsFromPayload(update.value, blobs);
+      }
+      const blob = packageUpdates(clientUpdates, blobs, this.#secret);
       const buffer = await blob.arrayBuffer();
 
       client.send(buffer);

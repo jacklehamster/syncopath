@@ -8,7 +8,7 @@ import { SubData } from "./SubData";
 import { Observer } from "./Observer";
 import { IObservable } from "./IObservable";
 import { ObserverManager } from "./ObserverManager";
-import { extractPayload, includeBlobsInPayload } from "@dobuki/data-blob";
+import { extractBlobsFromPayload, extractPayload, includeBlobsInPayload } from "@dobuki/data-blob";
 import { PeerManager } from "./peer/PeerManager";
 import { checkPeerConnections } from "./peer/check-peer";
 import { RoomState } from "@/types/RoomState";
@@ -257,6 +257,13 @@ export class SocketClient implements ISharedData, IObservable {
   }
 
   async #broadcastUpdates() {
+    const blobs: Record<string, Blob> = {};
+    for (let update of this.#outgoingUpdates) {
+      if (update) {
+        update.value = await extractBlobsFromPayload(update.value, blobs);
+      }
+    }
+
     this.#outgoingUpdates.forEach((update, index) => {
       // skip updates to peers if there's a peerManager ready
       if (update?.path?.startsWith("peer/")) {
@@ -266,7 +273,7 @@ export class SocketClient implements ISharedData, IObservable {
           const peerId = clientIds[0] === this.clientId ? clientIds[1] : clientIds[0];
           if (this.peerManagers[peerId]?.ready) {
             //  Send through peer manager
-            this.peerManagers[peerId].send(packageUpdates([{ ...update }]));
+            this.peerManagers[peerId].send(packageUpdates([{ ...update }], blobs));
             this.#outgoingUpdates[index] = undefined;
             return false;
           }
@@ -275,12 +282,12 @@ export class SocketClient implements ISharedData, IObservable {
     });
 
     const outUpdates = this.#outgoingUpdates.filter(update => !!update);
+    this.#outgoingUpdates.length = 0;
     if (outUpdates.length) {
       await this.#waitForConnection();
-      const blob = await packageUpdates(outUpdates, this.#secret);
+      const blob = packageUpdates(outUpdates, blobs, this.#secret);
       this.#socket?.send(blob);
     }
-    this.#outgoingUpdates.length = 0;
   }
 
   #isPeerUpdate(update: Update) {
