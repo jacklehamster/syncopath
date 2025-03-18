@@ -1,4 +1,3 @@
-import { Update } from "@/types/Update";
 import { SocketClient } from "./SocketClient";
 import { ObserverManager } from "./ObserverManager";
 import { getLeafObject } from "napl";
@@ -11,7 +10,7 @@ export class Observer {
   readonly #deletedElementsCallback: Set<(keys: any | (any[] | undefined)[]) => void> = new Set();
   constructor(
     readonly socketClient: SocketClient,
-    readonly paths: Update["path"][],
+    readonly paths: string[],
     readonly observerManagger: ObserverManager,
     readonly multiValues: boolean = false) {
     this.#partsArrays = paths.map(p => p === undefined ? [] : p.split("/"));

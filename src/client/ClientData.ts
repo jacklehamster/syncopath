@@ -1,8 +1,8 @@
-import { Update } from "@/types/Update";
 import { ISharedData, SetDataOptions } from "./ISharedData";
 import { SocketClient } from "./SocketClient";
 import { Observer } from "./Observer";
 import { ObserverManager } from "./ObserverManager";
+import { Update } from "napl";
 
 export class ClientData implements ISharedData {
   id: string = "";

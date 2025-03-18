@@ -3,7 +3,7 @@
 /// <reference lib="dom.iterable" />
 
 export { SocketClient } from "@dobuki/syncopath";
-import stringify from "json-stringify-pretty-compact";
+import prettyStringify from "json-stringify-pretty-compact";
 import { SocketClient, Observer } from "@dobuki/syncopath";
 import { SpriteSheet, loadSpriteSheet } from "aseprite-sheet";
 import { hookupDiv } from "./react/component";
@@ -51,7 +51,20 @@ function getSocketClient() {
 export const socketClient = getSocketClient();
 (window as any).socketClient = socketClient;
 
-export { stringify };
+function stringify(obj: any) {
+  return prettyStringify(obj, {
+    maxLength: 80, replacer: (key, value) => {
+      if (value instanceof Blob) {
+        return `Blob(${value.size})`;
+      }
+      return value;
+    }
+  });
+}
+
+export {
+  stringify,
+};
 
 export async function getSpriteSheet(path: string) {
   const spritesheetDefinition = await loadSpriteSheet(path);
@@ -156,7 +169,6 @@ export function trackIsoCursorObserver(clientId: string, callback: (cursor?: [nu
   return socketClient
     .observe([`clients/${clientId}/isoCursor`, ...extraObservations])
     .onChange((values) => {
-      console.log(values);
       const [cursor, ...extra] = values ?? [];
       if (!cursor) {
         callback();

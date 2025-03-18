@@ -2,21 +2,18 @@
 /// <reference lib="dom" />
 /// <reference lib="dom.iterable" />
 
-import { Update } from "@/types/Update";
 import { ISharedData, SetDataOptions, UpdateOptions } from "./ISharedData";
 import { ClientData } from "./ClientData";
 import { SubData } from "./SubData";
 import { Observer } from "./Observer";
 import { IObservable } from "./IObservable";
 import { ObserverManager } from "./ObserverManager";
-import { extractBlobsFromPayload } from "@dobuki/data-blob";
+import { extractPayload, includeBlobsInPayload } from "@dobuki/data-blob";
 import { PeerManager } from "./peer/PeerManager";
 import { checkPeerConnections } from "./peer/check-peer";
 import { RoomState } from "@/types/RoomState";
-import { applyUpdates, generateCleanBlobUpdates, getLeafObject, markUpdateConfirmed, packageUpdates, processDataBlob, pushUpdate, translateValue } from "napl";
+import { applyUpdates, getLeafObject, markUpdateConfirmed, packageUpdates, pushUpdate, translateValue, Update } from "napl";
 import { validatePayload } from "@dobuki/payload-validator";
-
-const BLOB_CLEANUP_TIMEOUT = 100;
 
 export class SocketClient implements ISharedData, IObservable {
   readonly state: RoomState;
@@ -31,7 +28,6 @@ export class SocketClient implements ISharedData, IObservable {
   #serverTimeOffset = 0;
   #nextFrameInProcess = false;
   #secret?: string;
-  private blobCleanupTimeout?: Timer;
 
   constructor(host: string, room?: string, initialState: RoomState = {}) {
     this.state = initialState;
@@ -73,31 +69,27 @@ export class SocketClient implements ISharedData, IObservable {
       const updater = value as (prev: any) => any;
       value = updater(this.getData(path));
     }
-    const payloadBlobs: Record<string, Blob> = {};
-    value = await extractBlobsFromPayload(value, payloadBlobs);
-    return [value, payloadBlobs];
+    return value;
   }
 
   async pushData(path: Update["path"], value: any, options: UpdateOptions = {}) {
-    const [val, payloadBlobs] = await this.#convertValue(path, value);
+    const val = await this.#convertValue(path, value);
 
     await this.applyUpdate({
       path: this.#fixPath(path),
       value: val,
       append: true,
-      blobs: payloadBlobs,
     }, options);
   }
 
   async setData(path: Update["path"], value: any, options: SetDataOptions = {}) {
-    const [val, payloadBlobs] = await this.#convertValue(path, value);
+    const val = await this.#convertValue(path, value);
 
     await this.applyUpdate({
       path: this.#fixPath(path),
       value: options.delete ? undefined : val,
       append: options.append,
       insert: options.insert,
-      blobs: payloadBlobs,
     }, options);
   }
 
@@ -189,7 +181,8 @@ export class SocketClient implements ISharedData, IObservable {
   }
 
   async onMessageBlob(blob: Blob, onClientIdConfirmed?: () => void, skipValidation: boolean = false) {
-    const { payload, blobs } = await processDataBlob(blob);
+    const { payload, ...blobs } = await extractPayload(blob);
+    const hasBlobs = Object.keys(blobs).length > 0;
 
     if (payload?.secret) {
       this.#secret = payload.secret;
@@ -204,34 +197,29 @@ export class SocketClient implements ISharedData, IObservable {
       onClientIdConfirmed?.();
     }
     if (payload?.state) {
-      for (const key in payload.state) {
-        this.state[key] = payload.state[key];
-      }
-      if (Object.keys(blobs).length) {
-        this.state.blobs = blobs;
+      if (!skipValidation && !validatePayload(payload.state, { secret: this.#secret })) {
+        console.error("Invalid payload received");
+      } else {
+        delete payload.state.signature;
+        for (const key in payload.state) {
+          this.state[key] = hasBlobs ? includeBlobsInPayload(payload.state[key], blobs) : payload.state[key];
+        }
       }
     }
     if (payload?.updates) {
-      if (!skipValidation && !payload.updates?.every((update: Update) => validatePayload(update, { secret: this.#secret }))) {
+      if (!skipValidation && !payload.updates.every((update: Update) => validatePayload(update, { secret: this.#secret }))) {
         console.error("Invalid payload received");
       } else {
+        if (hasBlobs) {
+          payload.updates.forEach((update: Update) => {
+            update.value = includeBlobsInPayload(update.value, blobs);
+          });
+        }
         this.#queueIncomingUpdates(...payload.updates);
       }
     }
     if (payload?.state && !payload?.updates?.length) {
       this.triggerObservers({});
-    }
-  }
-
-  prepareBlobSelfCleanup() {
-    if (!this.blobCleanupTimeout) {
-      this.blobCleanupTimeout = setTimeout(() => {
-        const updates = generateCleanBlobUpdates(this.state);
-        if (updates.length) {
-          this.#queueIncomingUpdates(...updates);
-        }
-        delete this.blobCleanupTimeout;
-      }, BLOB_CLEANUP_TIMEOUT);
     }
   }
 
@@ -252,7 +240,6 @@ export class SocketClient implements ISharedData, IObservable {
     if (updates) {
       this.triggerObservers(updates);
       checkPeerConnections(this);
-      this.prepareBlobSelfCleanup();
     }
     if (this.#outgoingUpdates.length) {
       this.#broadcastUpdates();
@@ -290,7 +277,7 @@ export class SocketClient implements ISharedData, IObservable {
     const outUpdates = this.#outgoingUpdates.filter(update => !!update);
     if (outUpdates.length) {
       await this.#waitForConnection();
-      const blob = packageUpdates(outUpdates, this.#secret);
+      const blob = await packageUpdates(outUpdates, this.#secret);
       this.#socket?.send(blob);
     }
     this.#outgoingUpdates.length = 0;
@@ -317,4 +304,30 @@ export class SocketClient implements ISharedData, IObservable {
   get now() {
     return Date.now() + this.#serverTimeOffset;
   }
+}
+
+
+
+
+
+function restoreBlobIntoData(value: any, blobs?: Record<string, Blob>) {
+  if (!blobs) {
+    return value;
+  }
+  if (typeof value === "string") {
+    if (value in blobs) {
+      return blobs[value];
+    }
+  } else if (value && typeof value === "object") {
+    if (Array.isArray(value)) {
+      for (let i = 0; i < value.length; i++) {
+        value[i] = restoreBlobIntoData(value[i], blobs);
+      }
+    } else {
+      for (let key in value) {
+        value[key] = restoreBlobIntoData(value[key], blobs);
+      }
+    }
+  }
+  return value;
 }

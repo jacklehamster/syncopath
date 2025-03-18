@@ -1,4 +1,4 @@
-import { Update } from "@/types/Update";
+import { Update } from "napl";
 
 export interface Payload {
   myClientId?: string;

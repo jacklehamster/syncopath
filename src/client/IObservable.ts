@@ -1,6 +1,5 @@
-import { Update } from "@/types/Update";
 import { Observer } from "./Observer";
 
 export interface IObservable {
-  observe(paths?: (Update["path"][] | Update["path"])): Observer;
+  observe(paths?: (string[] | string)): Observer;
 }

@@ -1,4 +1,3 @@
-import { Update } from "@/types/Update";
 import { ISharedData, SetDataOptions } from "./ISharedData";
 import { SocketClient } from "./SocketClient";
 import { Observer } from "./Observer";
@@ -10,16 +9,16 @@ export class SubData implements ISharedData, IObservable {
   readonly #parts: (string | number)[] = [];
   readonly #observerManager;
 
-  constructor(readonly path: Update["path"], readonly socketClient: SocketClient) {
+  constructor(readonly path: string, readonly socketClient: SocketClient) {
     this.#parts = path.split("/");
     this.#observerManager = new ObserverManager(socketClient);
   }
 
-  #getAbsolutePath(path: Update["path"]): string {
+  #getAbsolutePath(path: string): string {
     return path.length ? `${this.path}/${path}` : this.path;
   }
 
-  observe(paths?: (Update["path"][] | Update["path"])): Observer {
+  observe(paths?: (string[] | string)): Observer {
     const multi = Array.isArray(paths);
     const pathArray = paths === undefined ? [] : multi ? paths : [paths];
     const updatedPaths = pathArray.map(path => this.#getAbsolutePath(path));
@@ -30,7 +29,7 @@ export class SubData implements ISharedData, IObservable {
     this.#observerManager.triggerObservers(updates);
   }
 
-  async setData(path: Update["path"], value: any, options?: SetDataOptions): Promise<void> {
+  async setData(path: string, value: any, options?: SetDataOptions): Promise<void> {
     return this.socketClient.setData(this.#getAbsolutePath(path), value, options);
   }
 

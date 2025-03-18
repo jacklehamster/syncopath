@@ -1,5 +1,5 @@
 import { RoomState } from "@/types/RoomState";
-import { Update } from "@/types/Update";
+import { Update } from "napl";
 
 export function removeRestrictedData(state: RoomState, clientId: string) {
   const newState: RoomState = {

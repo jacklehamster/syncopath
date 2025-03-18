@@ -36,6 +36,8 @@
         margin: 20px auto;
         transition: border-color 0.3s;
         cursor: pointer;
+        background-size: contain;
+        background-position: center;
       }
       .drop-area.active {
         border-color: #000;
@@ -117,12 +119,9 @@
       });
       socketClient.observe("image").onChange((image) => {
         if (image) {
-          const blob = socketClient.state.blobs[image];
-          if (blob instanceof Blob) {
-            const url = URL.createObjectURL(blob);
+          if (image instanceof Blob) {
+            const url = URL.createObjectURL(image);
             dropArea.style.backgroundImage = `url(${url})`;
-            dropArea.style.backgroundSize = "contain";
-            dropArea.style.backgroundPosition = "center";
           }
         }
       });
@@ -137,9 +136,11 @@
       function sendFile(file) {
         if (file.type.startsWith("image/")) {
           const reader = new FileReader();
-          reader.onload = (e) => {
-            socketClient.setData("image", new Blob([e.target.result]));
-          };
+          reader.addEventListener(
+            "load",
+            (e) => socketClient.setData("image", new Blob([e.target.result])),
+            { once: true }
+          );
           reader.readAsArrayBuffer(file);
         } else {
           alert("Please select an image file.");

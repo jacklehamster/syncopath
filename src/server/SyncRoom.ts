@@ -1,45 +1,27 @@
 import { WebSocket } from "ws";
-import { generateCleanBlobUpdates, clearUpdates, commitUpdates, markUpdateConfirmed, packageUpdates, pushUpdate } from "napl";
-import { Update } from "@/types/Update";
+import { clearUpdates, commitUpdates, markUpdateConfirmed, packageUpdates, pushUpdate, Update } from "napl";
 import { addMessageReceiver } from "./SocketEventHandler";
 import { Payload } from "./SocketPayload";
 import { ClientState } from "@/types/ClientState";
 import { RoomState } from "@/types/RoomState";
-import { BlobBuilder } from "@dobuki/data-blob";
+import { BlobBuilder, extractBlobsFromPayload, includeBlobsInPayload } from "@dobuki/data-blob";
 import { removeRestrictedData, removeRestrictedPeersFromUpdates } from "./peer-utils";
 import { restrictedPath } from "./path-utils";
-import { validatePayload } from "@dobuki/payload-validator";
+import { signedPayload, validatePayload } from "@dobuki/payload-validator";
 
 let nextClientId = 1;
-
-const BLOB_CLEANUP_TIMEOUT = 100;
 
 export class SyncRoom {
   readonly #sockets: Map<WebSocket, string> = new Map();
   readonly state: RoomState = {};
   readonly #onRoomChange = new Set<(roomState: RoomState) => void>();
   readonly #secret = crypto.randomUUID();
-  private blobCleanupTimeout?: Timer;
 
   constructor(private room: string) {
   }
 
   addRoomChangeListener(callback: (roomState: RoomState) => void) {
     this.#onRoomChange.add(callback);
-  }
-
-  #setBlob(key: string, blob?: Blob) {
-    if (blob) {
-      if (!this.state.blobs) {
-        this.state.blobs = {};
-      }
-      this.state.blobs[key] = blob;
-    } else if (this.state.blobs) {
-      delete this.state.blobs[key];
-      if (!Object.keys(this.state.blobs).length) {
-        delete this.state.blobs;
-      }
-    }
   }
 
   async welcomeClient(client: WebSocket) {
@@ -63,18 +45,12 @@ export class SyncRoom {
 
     //  setup events
     addMessageReceiver(client, (payload, blobs) => {
-      Object.entries(blobs).forEach(([key, blob]) => this.#setBlob(key, blob));
       if (!payload.updates?.every(update => validatePayload(update, { secret: this.#secret }))) {
         console.warn("Invalid payload received from ", clientId);
         return;
       }
       payload.updates?.forEach(update => {
-        const blobs = update.blobs ?? {};
-        Object.keys(blobs).forEach(key => {
-          if (this.state.blobs?.[key]) {
-            blobs[key] = this.state.blobs[key];
-          }
-        });
+        update.value = includeBlobsInPayload(update.value, blobs);
       });
 
       //  remove updates that are not allowed
@@ -82,7 +58,6 @@ export class SyncRoom {
       payload.updates = payload.updates?.filter(update => !restrictedPath(update.path, clientId));
 
       this.#shareUpdates(payload.updates, client);
-      this.#prepareBlobCleanup();
     });
 
     client.on("close", () => {
@@ -91,7 +66,6 @@ export class SyncRoom {
         path: clientPath,
         value: undefined,
         confirmed: Date.now(),
-        blobs: {},
       }]);
 
       console.log(`client ${clientId} disconnected from room ${this.room}`);
@@ -105,29 +79,19 @@ export class SyncRoom {
     }, updates);
     clearUpdates(this.state, updates);
 
+    const blobs: Record<string, Blob> = {};
+    const payload = await extractBlobsFromPayload(removeRestrictedData({ ...this.state }, clientId), blobs);
     //  update client just connected with state and updates
     const welcomeBlobBuilder = BlobBuilder.payload<Payload>("payload", {
       myClientId: clientId,
-      state: removeRestrictedData({ ...this.state }, clientId),
+      state: signedPayload(payload, { secret: this.#secret }),
       serverTime: now,
       secret: this.#secret,
     });
-    Object.entries(this.state.blobs ?? {}).forEach(([key, blob]) => welcomeBlobBuilder.blob(key, blob));
+    Object.entries(blobs ?? {}).forEach(([key, blob]) => welcomeBlobBuilder.blob(key, blob));
 
     client.send(await welcomeBlobBuilder.build().arrayBuffer());
     return { clientId };
-  }
-
-  #prepareBlobCleanup() {
-    if (!this.blobCleanupTimeout) {
-      this.blobCleanupTimeout = setTimeout(() => {
-        const updates = generateCleanBlobUpdates(this.state);
-        if (updates.length) {
-          this.#shareUpdates(updates);
-        }
-        delete this.blobCleanupTimeout;
-      }, BLOB_CLEANUP_TIMEOUT);
-    }
   }
 
   #cleanupPeers() {
@@ -138,7 +102,6 @@ export class SyncRoom {
           path: `peer/${k}`,
           value: undefined,
           confirmed: Date.now(),
-          blobs: {},
         }]);
       }
     }
@@ -151,7 +114,7 @@ export class SyncRoom {
     const updatesForSender = newUpdates.filter(update => !update.confirmed);
     const now = Date.now();
     newUpdates.forEach(update => markUpdateConfirmed(update, now));
-    this.#pushUpdates(newUpdates);
+    pushUpdate(this.state, ...newUpdates ?? []);
     const updates: Record<string, any> = {};
     commitUpdates(this.state, {
       now: Date.now(),
@@ -160,10 +123,6 @@ export class SyncRoom {
     this.#broadcastUpdates(newUpdates, client => client !== sender);
     this.#broadcastUpdates(updatesForSender, client => client === sender);
     this.#cleanupPeers();
-  }
-
-  #pushUpdates(newUpdates: Update[] | undefined) {
-    pushUpdate(this.state, ...newUpdates ?? []);
   }
 
   #broadcastUpdates(newUpdates: Update[] | undefined, senderFilter?: (sender: WebSocket) => boolean) {
@@ -175,7 +134,7 @@ export class SyncRoom {
         return;
       }
       const clientUpdates = removeRestrictedPeersFromUpdates(newUpdates, clientId);
-      const blob = packageUpdates(clientUpdates, this.#secret);
+      const blob = await packageUpdates(clientUpdates, this.#secret);
       const buffer = await blob.arrayBuffer();
 
       client.send(buffer);

@@ -101,6 +101,7 @@
 
           observers.add(
             peerData.observe("acceleration").onChange((acceleration) => {
+              console.log(acceleration);
               if (acceleration) {
                 clientDiv.style.display = "";
                 const { x, y, z } = acceleration;

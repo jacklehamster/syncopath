@@ -1,5 +1,3 @@
-import { Update } from "@/types/Update";
-
 export interface UpdateOptions {
   active?: boolean;
 }
@@ -11,7 +9,7 @@ export interface SetDataOptions extends UpdateOptions {
 }
 
 export interface ISharedData {
-  setData(path: Update["path"], value: any, options?: SetDataOptions): Promise<void>;
+  setData(path: string, value: any, options?: SetDataOptions): Promise<void>;
   state: Record<string, any>;
   triggerObservers(updates: Record<string, any>): void;
 }

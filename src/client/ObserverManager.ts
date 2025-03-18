@@ -1,4 +1,3 @@
-import { Update } from "@/types/Update";
 import { Observer } from "./Observer";
 import { SocketClient } from "./SocketClient";
 
@@ -8,7 +7,7 @@ export class ObserverManager {
   constructor(private readonly socketClient: SocketClient) {
   }
 
-  observe(paths: Update["path"][], multi: boolean): Observer {
+  observe(paths: string[], multi: boolean): Observer {
     const observer = new Observer(this.socketClient, paths, this, multi);
     this.#observers.add(observer);
     return observer;
