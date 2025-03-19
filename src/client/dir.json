@@ -15,12 +15,12 @@
     "sha": "4f923799b82eb6a1385b15eee3c1057575f8b173"
   },
   "SocketClient.ts": {
-    "sha": "9c36e76a505a239f76ee95342d13ae1066d7c298"
+    "sha": "eec980f34c0cf19a961cd322efd0c82cbf31029a"
   },
   "SubData.ts": {
     "sha": "55a20edeeb293f7613b7b0ba944e9d72f2ed56b6"
   },
-  "md5": "00ee77dc35fd6c1e1251f35be33f27ad",
+  "md5": "491385cb2375cbc0636f6bc7264c252b",
   "peer/PeerManager.ts": {
     "sha": "f7bc5e2b473b6bb00cd56b2f02f8c418737eacce"
   },
