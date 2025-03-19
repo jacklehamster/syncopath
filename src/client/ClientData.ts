@@ -1,22 +1,21 @@
-import { ISharedData, SetDataOptions } from "./ISharedData";
-import { SocketClient } from "./SocketClient";
+import { ISharedData, SetDataOptions, UpdateOptions } from "./ISharedData";
 import { Observer } from "./Observer";
 import { ObserverManager } from "./ObserverManager";
-import { Update } from "napl";
+import { SyncClient } from "./SyncClient";
 
 export class ClientData implements ISharedData {
-  id: string = "";
+  clientId: string = "";
   readonly #observerManager;
 
-  constructor(readonly socketClient: SocketClient) {
-    this.#observerManager = new ObserverManager(socketClient);
+  constructor(readonly syncClient: SyncClient) {
+    this.#observerManager = new ObserverManager(syncClient);
   }
 
-  #getAbsolutePath(path: Update["path"]): string {
+  #getAbsolutePath(path: string): string {
     return path ? `clients/~{self}/${path}` : "clients/~{self}";
   }
 
-  observe(paths?: (Update["path"][] | Update["path"])): Observer {
+  observe(paths?: (string[] | string)): Observer {
     const multi = Array.isArray(paths);
     const pathArray = paths === undefined ? [] : multi ? paths : [paths];
     const updatedPaths = pathArray.map(path => this.#getAbsolutePath(path));
@@ -27,11 +26,15 @@ export class ClientData implements ISharedData {
     this.#observerManager.triggerObservers(updates);
   }
 
-  async setData(path: Update["path"], value: any, options?: SetDataOptions): Promise<void> {
-    return this.socketClient.setData(this.#getAbsolutePath(path), value, options);
+  async setData(path: string, value: any, options?: SetDataOptions): Promise<void> {
+    return this.syncClient.setData(this.#getAbsolutePath(path), value, options);
+  }
+
+  async pushData(path: string, value: any, options?: UpdateOptions): Promise<void> {
+    return this.syncClient.pushData(this.#getAbsolutePath(path), value, options);
   }
 
   get state() {
-    return this.socketClient.state.clients?.[this.id] ?? {};
+    return this.syncClient.state.clients?.[this.clientId] ?? {};
   }
 }

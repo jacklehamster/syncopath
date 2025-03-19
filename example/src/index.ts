@@ -2,9 +2,8 @@
 /// <reference lib="dom" />
 /// <reference lib="dom.iterable" />
 
-export { SocketClient } from "@dobuki/syncopath";
 import prettyStringify from "json-stringify-pretty-compact";
-import { SocketClient, Observer } from "@dobuki/syncopath";
+import { Observer, provideSocketClient } from "@dobuki/syncopath";
 import { SpriteSheet, loadSpriteSheet } from "aseprite-sheet";
 import { hookupDiv } from "./react/component";
 
@@ -45,7 +44,7 @@ const config = await fetch("../config.json").then((response) =>
 function getSocketClient() {
   const urlVars = new URLSearchParams(location.search);
   const room = urlVars.get("room") ?? undefined;
-  return new SocketClient(config.websocketHost ?? location.host, room);
+  return provideSocketClient(config.websocketHost ?? location.host, room);
 }
 
 export const socketClient = getSocketClient();

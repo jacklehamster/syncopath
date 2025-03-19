@@ -32,7 +32,7 @@ export class PeerManager {
     };
   }
 
-  addIceCandidate(ice: any) {
+  addIceCandidate(ice: RTCIceCandidateInit) {
     this.#peerConnection.addIceCandidate(ice);
   }
 

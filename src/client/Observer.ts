@@ -1,6 +1,6 @@
-import { SocketClient } from "./SocketClient";
 import { ObserverManager } from "./ObserverManager";
 import { getLeafObject } from "napl";
+import { ISharedData } from "./ISharedData";
 
 export class Observer {
   readonly #partsArrays: (string | number)[][];
@@ -9,7 +9,7 @@ export class Observer {
   readonly #addedElementsCallback: Set<(keys: any | (any[] | undefined)[]) => void> = new Set();
   readonly #deletedElementsCallback: Set<(keys: any | (any[] | undefined)[]) => void> = new Set();
   constructor(
-    readonly socketClient: SocketClient,
+    readonly sharedData: ISharedData,
     readonly paths: string[],
     readonly observerManagger: ObserverManager,
     readonly multiValues: boolean = false) {
@@ -37,7 +37,7 @@ export class Observer {
     const newValues =
       this.paths.map((path, index) =>
         (updates && path in updates) ? updates[path] :
-          getLeafObject(this.socketClient.state, this.#partsArrays[index], 0, false, { self: this.socketClient.clientId })
+          getLeafObject(this.sharedData.state, this.#partsArrays[index], 0, false, { self: this.sharedData.clientId })
       );
 
     if (this.#previousValues.every((prev, index) => {

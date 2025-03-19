@@ -23682,6 +23682,70 @@ var require_jsx_dev_runtime = __commonJS((exports, module) => {
   }
 });
 
+// node_modules/json-stringify-pretty-compact/index.js
+var stringOrChar = /("(?:[^\\"]|\\.)*")|[:,]/g;
+function stringify(passedObj, options = {}) {
+  const indent = JSON.stringify([1], undefined, options.indent === undefined ? 2 : options.indent).slice(2, -3);
+  const maxLength = indent === "" ? Infinity : options.maxLength === undefined ? 80 : options.maxLength;
+  let { replacer } = options;
+  return function _stringify(obj, currentIndent, reserved) {
+    if (obj && typeof obj.toJSON === "function") {
+      obj = obj.toJSON();
+    }
+    const string = JSON.stringify(obj, replacer);
+    if (string === undefined) {
+      return string;
+    }
+    const length = maxLength - currentIndent.length - reserved;
+    if (string.length <= length) {
+      const prettified = string.replace(stringOrChar, (match, stringLiteral) => {
+        return stringLiteral || `${match} `;
+      });
+      if (prettified.length <= length) {
+        return prettified;
+      }
+    }
+    if (replacer != null) {
+      obj = JSON.parse(string);
+      replacer = undefined;
+    }
+    if (typeof obj === "object" && obj !== null) {
+      const nextIndent = currentIndent + indent;
+      const items = [];
+      let index = 0;
+      let start;
+      let end;
+      if (Array.isArray(obj)) {
+        start = "[";
+        end = "]";
+        const { length: length2 } = obj;
+        for (;index < length2; index++) {
+          items.push(_stringify(obj[index], nextIndent, index === length2 - 1 ? 0 : 1) || "null");
+        }
+      } else {
+        start = "{";
+        end = "}";
+        const keys = Object.keys(obj);
+        const { length: length2 } = keys;
+        for (;index < length2; index++) {
+          const key = keys[index];
+          const keyPart = `${JSON.stringify(key)}: `;
+          const value = _stringify(obj[key], nextIndent, keyPart.length + (index === length2 - 1 ? 0 : 1));
+          if (value !== undefined) {
+            items.push(keyPart + value);
+          }
+        }
+      }
+      if (items.length > 0) {
+        return [start, indent + items.join(`,
+${nextIndent}`), end].join(`
+${currentIndent}`);
+      }
+    }
+    return string;
+  }(passedObj, "", 0);
+}
+
 // ../node_modules/napl/dist/index.js
 var KEYS = "~{keys}";
 var VALUES = "~{values}";
@@ -27142,7 +27206,7 @@ class SyncSocket {
 }
 // ../src/client/Observer.ts
 class Observer {
-  socketClient;
+  sharedData;
   paths;
   observerManagger;
   multiValues;
@@ -27151,8 +27215,8 @@ class Observer {
   #changeCallbacks = new Set;
   #addedElementsCallback = new Set;
   #deletedElementsCallback = new Set;
-  constructor(socketClient, paths, observerManagger, multiValues = false) {
-    this.socketClient = socketClient;
+  constructor(sharedData, paths, observerManagger, multiValues = false) {
+    this.sharedData = sharedData;
     this.paths = paths;
     this.observerManagger = observerManagger;
     this.multiValues = multiValues;
@@ -27175,7 +27239,7 @@ class Observer {
     return this;
   }
   #valuesChanged(updates) {
-    const newValues = this.paths.map((path, index) => updates && (path in updates) ? updates[path] : getLeafObject(this.socketClient.state, this.#partsArrays[index], 0, false, { self: this.socketClient.clientId }));
+    const newValues = this.paths.map((path, index) => updates && (path in updates) ? updates[path] : getLeafObject(this.sharedData.state, this.#partsArrays[index], 0, false, { self: this.sharedData.clientId }));
     if (this.#previousValues.every((prev, index) => {
       const newValue = newValues[index];
       if (prev === newValue) {
@@ -27238,13 +27302,13 @@ class Observer {
 
 // ../src/client/ObserverManager.ts
 class ObserverManager {
-  socketClient;
+  sharedData;
   #observers = new Set;
-  constructor(socketClient) {
-    this.socketClient = socketClient;
+  constructor(sharedData) {
+    this.sharedData = sharedData;
   }
   observe(paths, multi) {
-    const observer = new Observer(this.socketClient, paths, this, multi);
+    const observer = new Observer(this.sharedData, paths, this, multi);
     this.#observers.add(observer);
     return observer;
   }
@@ -27261,12 +27325,12 @@ class ObserverManager {
 
 // ../src/client/ClientData.ts
 class ClientData {
-  socketClient;
-  id = "";
+  syncClient;
+  clientId = "";
   #observerManager;
-  constructor(socketClient) {
-    this.socketClient = socketClient;
-    this.#observerManager = new ObserverManager(socketClient);
+  constructor(syncClient) {
+    this.syncClient = syncClient;
+    this.#observerManager = new ObserverManager(syncClient);
   }
   #getAbsolutePath(path) {
     return path ? `clients/~{self}/${path}` : "clients/~{self}";
@@ -27281,24 +27345,32 @@ class ClientData {
     this.#observerManager.triggerObservers(updates);
   }
   async setData(path, value, options) {
-    return this.socketClient.setData(this.#getAbsolutePath(path), value, options);
+    return this.syncClient.setData(this.#getAbsolutePath(path), value, options);
+  }
+  async pushData(path, value, options) {
+    return this.syncClient.pushData(this.#getAbsolutePath(path), value, options);
   }
   get state() {
-    return this.socketClient.state.clients?.[this.id] ?? {};
+    return this.syncClient.state.clients?.[this.clientId] ?? {};
   }
 }
 
 // ../src/client/SubData.ts
 class SubData {
   path;
-  socketClient;
+  syncClient;
   #parts = [];
   #observerManager;
-  constructor(path, socketClient) {
+  constructor(path, syncClient) {
     this.path = path;
-    this.socketClient = socketClient;
-    this.#parts = path.split("/");
-    this.#observerManager = new ObserverManager(socketClient);
+    this.syncClient = syncClient;
+    this.#parts = path.split("/").map((v) => {
+      return isNaN(Number(v)) ? v : Number(v);
+    });
+    this.#observerManager = new ObserverManager(syncClient);
+  }
+  get clientId() {
+    return this.syncClient.clientId;
   }
   #getAbsolutePath(path) {
     return path.length ? `${this.path}/${path}` : this.path;
@@ -27313,16 +27385,19 @@ class SubData {
     this.#observerManager.triggerObservers(updates);
   }
   async setData(path, value, options) {
-    return this.socketClient.setData(this.#getAbsolutePath(path), value, options);
+    return this.syncClient.setData(this.#getAbsolutePath(path), value, options);
+  }
+  async pushData(path, value, options) {
+    return this.syncClient.pushData(this.#getAbsolutePath(path), value, options);
   }
   get state() {
-    return getLeafObject(this.socketClient.state, this.#parts, 0, false, {
-      self: this.socketClient.clientId
+    return getLeafObject(this.syncClient.state, this.#parts, 0, false, {
+      self: this.syncClient.clientId
     }) ?? {};
   }
   close() {
     this.#observerManager.close();
-    this.socketClient.removeChildData(this.path);
+    this.syncClient.removeChildData(this.path);
   }
 }
 
@@ -27400,6 +27475,7 @@ class PeerManager {
 }
 
 // ../src/client/peer/check-peer.ts
+var WEB_RTC = "webRTC";
 var DELAY_TO_DISCONNECT_WEBSOCKET_AFTER_PEER = 3000;
 var PEER_OPTIONS = {
   active: true
@@ -27407,45 +27483,46 @@ var PEER_OPTIONS = {
 function checkPeerConnections(socketClient) {
   for (const k in socketClient.state.peer) {
     const clients = k.split(":");
+    const clientTag = `${clients[0]}:${clients[1]}`;
     if (clients[0] === socketClient.clientId) {
-      if (clients.length >= 2 && !socketClient.state.peer[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[0]]?.offer) {
+      if (clients.length >= 2 && !socketClient.state.peer[`${clientTag}:${WEB_RTC}`]?.[clients[0]]?.offer) {
         if (!socketClient.peerManagers[clients[1]]) {
-          createPeerManager(socketClient, `${clients[0]}:${clients[1]}`, clients[1]);
+          createPeerManager(socketClient, clientTag, clients[1]);
           socketClient.peerManagers[clients[1]].createOffer().then((offer) => {
-            socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[0]}/offer`, offer, PEER_OPTIONS);
+            socketClient.setData(`peer/${clientTag}:${WEB_RTC}/${clients[0]}/offer`, offer, PEER_OPTIONS);
           });
         }
       }
-      if (socketClient.state.peer[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[1]]?.answer) {
+      if (socketClient.state.peer[`${clientTag}:${WEB_RTC}`]?.[clients[1]]?.answer) {
         if (!socketClient.peerManagers[clients[1]].connected) {
-          socketClient.peerManagers[clients[1]].acceptAnswer(socketClient.state.peer[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[1]]?.answer).then(() => {
+          socketClient.peerManagers[clients[1]].acceptAnswer(socketClient.state.peer[`${clientTag}:${WEB_RTC}`]?.[clients[1]]?.answer).then(() => {
             console.log("Peer connected");
           });
-          socketClient.observe(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[1]}/ice/~{keys}`).onElementsAdded((candidates) => {
+          socketClient.observe(`peer/${clientTag}:${WEB_RTC}/${clients[1]}/ice/~{keys}`).onElementsAdded((candidates) => {
             candidates?.forEach((candidateName) => {
-              const candidate = socketClient.state.peer?.[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[1]]?.ice?.[candidateName];
+              const candidate = socketClient.state.peer?.[`${clientTag}:${WEB_RTC}`]?.[clients[1]]?.ice?.[candidateName];
               socketClient.peerManagers[clients[1]].addIceCandidate(candidate);
-              socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[1]}/ice/${candidateName}`, undefined, PEER_OPTIONS);
+              socketClient.setData(`peer/${clientTag}:${WEB_RTC}/${clients[1]}/ice/${candidateName}`, undefined, PEER_OPTIONS);
             });
           });
-          socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[1]}/answer`, undefined, PEER_OPTIONS);
+          socketClient.setData(`peer/${clientTag}:${WEB_RTC}/${clients[1]}/answer`, undefined, PEER_OPTIONS);
         }
       }
     } else if (clients[1] === socketClient.clientId) {
-      if (socketClient.state.peer[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[0]]?.offer) {
+      if (socketClient.state.peer[`${clientTag}:${WEB_RTC}`]?.[clients[0]]?.offer) {
         if (!socketClient.peerManagers[clients[0]]) {
-          createPeerManager(socketClient, `${clients[0]}:${clients[1]}`, clients[0]);
-          socketClient.peerManagers[clients[0]].acceptOffer(socketClient.state.peer[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[0]]?.offer).then((answer) => {
-            socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[1]}/answer`, answer, PEER_OPTIONS);
-            socketClient.observe(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[0]}/ice/~{keys}`).onElementsAdded((candidates) => {
+          createPeerManager(socketClient, clientTag, clients[0]);
+          socketClient.peerManagers[clients[0]].acceptOffer(socketClient.state.peer[`${clientTag}:${WEB_RTC}`]?.[clients[0]]?.offer).then((answer) => {
+            socketClient.setData(`peer/${clientTag}:${WEB_RTC}/${clients[1]}/answer`, answer, PEER_OPTIONS);
+            socketClient.observe(`peer/${clientTag}:${WEB_RTC}/${clients[0]}/ice/~{keys}`).onElementsAdded((candidates) => {
               candidates?.forEach((candidateName) => {
-                const candidate = socketClient.state.peer?.[`${clients[0]}:${clients[1]}:webRTC`]?.[clients[0]]?.ice?.[candidateName];
+                const candidate = socketClient.state.peer?.[`${clientTag}:${WEB_RTC}`]?.[clients[0]]?.ice?.[candidateName];
                 socketClient.peerManagers[clients[0]].addIceCandidate(candidate);
-                socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[0]}/ice/${candidateName}`, undefined, PEER_OPTIONS);
+                socketClient.setData(`peer/${clientTag}:${WEB_RTC}/${clients[0]}/ice/${candidateName}`, undefined, PEER_OPTIONS);
               });
             });
           });
-          socketClient.setData(`peer/${clients[0]}:${clients[1]}:webRTC/${clients[0]}/offer`, undefined, PEER_OPTIONS);
+          socketClient.setData(`peer/${clientTag}:${WEB_RTC}/${clients[0]}/offer`, undefined, PEER_OPTIONS);
         }
       }
     }
@@ -27461,7 +27538,7 @@ function createPeerManager(socketClient, tag, peerId) {
     },
     onIce(ice) {
       const candidate = ice.candidate.split(" ")[0];
-      socketClient.setData(`peer/${tag}:webRTC/${socketClient.clientId}/ice/${candidate}`, ice, PEER_OPTIONS);
+      socketClient.setData(`peer/${tag}:${WEB_RTC}/${socketClient.clientId}/ice/${candidate}`, ice, PEER_OPTIONS);
     },
     onClose() {
       delete socketClient.peerManagers[peerId];
@@ -27469,21 +27546,19 @@ function createPeerManager(socketClient, tag, peerId) {
     },
     onReady() {
       if (socketClient.state.config?.peerOnly) {
-        setTimeout(() => {
-          socketClient.closeSocket();
-        }, DELAY_TO_DISCONNECT_WEBSOCKET_AFTER_PEER);
+        setTimeout(() => socketClient.closeSocket(), DELAY_TO_DISCONNECT_WEBSOCKET_AFTER_PEER);
       }
     }
   });
 }
 
-// ../src/client/SocketClient.ts
-class SocketClient {
+// ../src/client/SyncClient.ts
+class SyncClient {
+  socketProvider;
   state;
   #children = new Map;
   #socket;
   #connectionPromise;
-  #connectionUrl;
   #outgoingUpdates = [];
   #selfData = new ClientData(this);
   #observerManager = new ObserverManager(this);
@@ -27491,10 +27566,9 @@ class SocketClient {
   #serverTimeOffset = 0;
   #nextFrameInProcess = false;
   #secret = "";
-  constructor(host, room, initialState = {}) {
+  constructor(socketProvider, initialState = {}) {
+    this.socketProvider = socketProvider;
     this.state = initialState;
-    const prefix = host.startsWith("ws://") || host.startsWith("wss://") ? "" : globalThis.location.protocol === "https:" ? "wss://" : "ws://";
-    this.#connectionUrl = `${prefix}${host}${room ? `?room=${room}` : ""}`;
     this.#connect();
     globalThis.addEventListener("focus", () => {
       if (!this.#socket) {
@@ -27508,19 +27582,26 @@ class SocketClient {
     });
     this.#children.set(`clients/~{self}`, this.#selfData);
   }
-  #fixPath(path) {
-    const split = path.split("/");
-    return split.map((part) => translateValue(part, {
-      self: this.#selfData.id
-    })).join("/");
-  }
-  #usefulUpdate(update) {
-    const currentValue = this.getData(update.path);
-    return update.value !== currentValue;
-  }
   getData(path) {
     const parts = path.split("/");
-    return getLeafObject(this.state, parts, 0, false, { self: this.#selfData.id });
+    return getLeafObject(this.state, parts, 0, false, { self: this.#selfData.clientId });
+  }
+  async pushData(path, value, options = {}) {
+    const val = await this.#convertValue(path, value);
+    await this.#applyUpdate({
+      path: this.#fixPath(path),
+      value: val,
+      append: true
+    }, options);
+  }
+  async setData(path, value, options = {}) {
+    const val = await this.#convertValue(path, value);
+    await this.#applyUpdate({
+      path: this.#fixPath(path),
+      value: options.delete ? undefined : val,
+      append: options.append,
+      insert: options.insert
+    }, options);
   }
   async#convertValue(path, value) {
     if (typeof value === "function") {
@@ -27529,24 +27610,7 @@ class SocketClient {
     }
     return value;
   }
-  async pushData(path, value, options = {}) {
-    const val = await this.#convertValue(path, value);
-    await this.applyUpdate({
-      path: this.#fixPath(path),
-      value: val,
-      append: true
-    }, options);
-  }
-  async setData(path, value, options = {}) {
-    const val = await this.#convertValue(path, value);
-    await this.applyUpdate({
-      path: this.#fixPath(path),
-      value: options.delete ? undefined : val,
-      append: options.append,
-      insert: options.insert
-    }, options);
-  }
-  async applyUpdate(update, options = {}) {
+  async#applyUpdate(update, options = {}) {
     if (!this.#usefulUpdate(update)) {
       return;
     }
@@ -27564,7 +27628,7 @@ class SocketClient {
     this.#queueOutgoingUpdates(update);
   }
   get clientId() {
-    return this.#selfData.id;
+    return this.#selfData.clientId;
   }
   get self() {
     return this.#selfData;
@@ -27597,20 +27661,20 @@ class SocketClient {
     return this.#connectionPromise;
   }
   async#connect() {
-    const socket = this.#socket = new WebSocket(this.#connectionUrl);
+    const socket = this.#socket = this.socketProvider();
     return this.#connectionPromise = new Promise((resolve, reject) => {
       socket.addEventListener("open", () => {
-        console.log("Connected to WebSocket server", this.#connectionUrl);
+        console.log("SyncClient connection opened");
       });
       socket.addEventListener("error", (event) => {
-        console.error("Error connecting to WebSocket server", event);
+        console.error("SyncClient connection error", event);
         reject(event);
       });
       socket.addEventListener("message", async (event) => {
         this.onMessageBlob(event.data, resolve);
       });
       socket.addEventListener("close", () => {
-        console.log("Disconnected from WebSocket server");
+        console.log("Disconnected from SyncClient");
         this.#socket = undefined;
       });
     });
@@ -27633,7 +27697,7 @@ class SocketClient {
       this.#serverTimeOffset = payload.serverTime - Date.now();
     }
     if (payload?.myClientId) {
-      this.#selfData.id = payload.myClientId;
+      this.#selfData.clientId = payload.myClientId;
       this.#connectionPromise = undefined;
       onClientIdConfirmed?.();
     }
@@ -27654,6 +27718,16 @@ class SocketClient {
     if (payload?.state && !payload?.updates?.length) {
       this.triggerObservers({});
     }
+  }
+  triggerObservers(updates) {
+    this.#observerManager.triggerObservers(updates);
+    this.#children.forEach((child) => child.triggerObservers(updates));
+  }
+  removeObserver(observer) {
+    this.#observerManager.removeObserver(observer);
+  }
+  get now() {
+    return Date.now() + this.#serverTimeOffset;
   }
   #prepareNextFrame() {
     if (this.#nextFrameInProcess) {
@@ -27721,81 +27795,24 @@ class SocketClient {
     }
     return false;
   }
-  triggerObservers(updates) {
-    this.#observerManager.triggerObservers(updates);
-    this.#children.forEach((child) => child.triggerObservers(updates));
+  #fixPath(path) {
+    const split = path.split("/");
+    return split.map((part) => translateValue(part, {
+      self: this.#selfData.clientId
+    })).join("/");
   }
-  removeObserver(observer) {
-    this.#observerManager.removeObserver(observer);
-  }
-  get now() {
-    return Date.now() + this.#serverTimeOffset;
+  #usefulUpdate(update) {
+    const currentValue = this.getData(update.path);
+    return update.value !== currentValue;
   }
 }
-// node_modules/json-stringify-pretty-compact/index.js
-var stringOrChar = /("(?:[^\\"]|\\.)*")|[:,]/g;
-function stringify(passedObj, options = {}) {
-  const indent = JSON.stringify([1], undefined, options.indent === undefined ? 2 : options.indent).slice(2, -3);
-  const maxLength = indent === "" ? Infinity : options.maxLength === undefined ? 80 : options.maxLength;
-  let { replacer } = options;
-  return function _stringify(obj, currentIndent, reserved) {
-    if (obj && typeof obj.toJSON === "function") {
-      obj = obj.toJSON();
-    }
-    const string = JSON.stringify(obj, replacer);
-    if (string === undefined) {
-      return string;
-    }
-    const length = maxLength - currentIndent.length - reserved;
-    if (string.length <= length) {
-      const prettified = string.replace(stringOrChar, (match, stringLiteral) => {
-        return stringLiteral || `${match} `;
-      });
-      if (prettified.length <= length) {
-        return prettified;
-      }
-    }
-    if (replacer != null) {
-      obj = JSON.parse(string);
-      replacer = undefined;
-    }
-    if (typeof obj === "object" && obj !== null) {
-      const nextIndent = currentIndent + indent;
-      const items = [];
-      let index = 0;
-      let start;
-      let end;
-      if (Array.isArray(obj)) {
-        start = "[";
-        end = "]";
-        const { length: length2 } = obj;
-        for (;index < length2; index++) {
-          items.push(_stringify(obj[index], nextIndent, index === length2 - 1 ? 0 : 1) || "null");
-        }
-      } else {
-        start = "{";
-        end = "}";
-        const keys = Object.keys(obj);
-        const { length: length2 } = keys;
-        for (;index < length2; index++) {
-          const key = keys[index];
-          const keyPart = `${JSON.stringify(key)}: `;
-          const value = _stringify(obj[key], nextIndent, keyPart.length + (index === length2 - 1 ? 0 : 1));
-          if (value !== undefined) {
-            items.push(keyPart + value);
-          }
-        }
-      }
-      if (items.length > 0) {
-        return [start, indent + items.join(`,
-${nextIndent}`), end].join(`
-${currentIndent}`);
-      }
-    }
-    return string;
-  }(passedObj, "", 0);
+// ../src/client/provide-socket-client.ts
+function provideSocketClient(host, room, state = {}) {
+  const prefix = host.startsWith("ws://") || host.startsWith("wss://") ? "" : globalThis.location.protocol === "https:" ? "wss://" : "ws://";
+  const connectionUrl = `${prefix}${host}${room ? `?room=${room}` : ""}`;
+  const socketProvider = () => new WebSocket(connectionUrl);
+  return new SyncClient(socketProvider, state);
 }
-
 // node_modules/aseprite-sheet/dist/index.js
 class f {
   spriteSheet;
@@ -27965,33 +27982,33 @@ function injectStyle(text) {
 injectStyle(".NWlSQG_shared-text{width:100%;height:500px}");
 var style_module_default = { "shared-text": "NWlSQG_shared-text" };
 
-// src/react/socket-client.ts
+// src/react/sync-client.ts
 var import_react = __toESM(require_react(), 1);
-function useSocketClient(props) {
-  const socketClient = import_react.useMemo(() => {
-    return props.socketClient ?? (props.host ? new SocketClient(props.host, props.room) : undefined);
-  }, [props.socketClient, props.host, props.room]);
+function useSyncClient(props) {
+  const syncClient = import_react.useMemo(() => {
+    return props.syncClient ?? (props.host ? provideSocketClient(props.host, props.room) : undefined);
+  }, [props.syncClient, props.host, props.room]);
   const useData = import_react.useCallback((path) => {
     const [data, setData] = import_react.useState(null);
     import_react.useEffect(() => {
-      const observer = socketClient.observe(path).onChange((value) => setData(value));
+      const observer = syncClient.observe(path).onChange((value) => setData(value));
       return () => observer.close();
     }, [path]);
     return [
       data,
       import_react.useCallback((value) => {
-        socketClient.setData(path, value);
+        syncClient.setData(path, value);
       }, [])
     ];
-  }, [socketClient]);
+  }, [syncClient]);
   return { useData };
 }
 
 // src/react/component.tsx
 var import_client = __toESM(require_client(), 1);
 var jsx_dev_runtime = __toESM(require_jsx_dev_runtime(), 1);
-function SharedText({ socketClient }) {
-  const { useData } = useSocketClient({ socketClient });
+function SharedText({ syncClient }) {
+  const { useData } = useSyncClient({ syncClient });
   const [data, setData] = useData("data");
   return /* @__PURE__ */ jsx_dev_runtime.jsxDEV("textarea", {
     className: style_module_default["shared-text"],
@@ -28003,7 +28020,7 @@ function SharedText({ socketClient }) {
 function hookupDiv(div, socketClient) {
   const root = import_client.default.createRoot(div);
   root.render(/* @__PURE__ */ jsx_dev_runtime.jsxDEV(SharedText, {
-    socketClient
+    syncClient: socketClient
   }, undefined, false, undefined, this));
 }
 
@@ -28324,7 +28341,7 @@ var config = await fetch("../config.json").then((response) => response.json());
 function getSocketClient() {
   const urlVars = new URLSearchParams(location.search);
   const room = urlVars.get("room") ?? undefined;
-  return new SocketClient(config.websocketHost ?? location.host, room);
+  return provideSocketClient(config.websocketHost ?? location.host, room);
 }
 var socketClient = getSocketClient();
 window.socketClient = socketClient;
@@ -28444,8 +28461,7 @@ export {
   handleUsersChanged,
   getSpriteSheet,
   displayUsers,
-  displayIsoUI,
-  SocketClient
+  displayIsoUI
 };
 
-//# debugId=0AAFE7BC0C0B386564756E2164756E21
+//# debugId=1E6613B304ABF8D464756E2164756E21

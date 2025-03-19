@@ -13,13 +13,15 @@ import { PeerManager } from "./peer/PeerManager";
 import { checkPeerConnections } from "./peer/check-peer";
 import { RoomState } from "@/types/RoomState";
 import { applyUpdates, getLeafObject, markUpdateConfirmed, packageUpdates, pushUpdate, translateValue, Update } from "napl";
+import { ISocket } from "./ISocket";
 
-export class SocketClient implements ISharedData, IObservable {
+type socketProvider = () => ISocket;
+
+export class SyncClient implements ISharedData, IObservable {
   readonly state: RoomState;
   readonly #children: Map<string, ISharedData> = new Map();
-  #socket: WebSocket | undefined;
+  #socket: ISocket | undefined;
   #connectionPromise: Promise<void> | undefined;
-  readonly #connectionUrl: string;
   readonly #outgoingUpdates: (Update | undefined)[] = [];
   readonly #selfData: ClientData = new ClientData(this);
   readonly #observerManager = new ObserverManager(this);
@@ -28,10 +30,8 @@ export class SocketClient implements ISharedData, IObservable {
   #nextFrameInProcess = false;
   #secret = "";
 
-  constructor(host: string, room?: string, initialState: RoomState = {}) {
+  constructor(private socketProvider: socketProvider, initialState: RoomState = {}) {
     this.state = initialState;
-    const prefix = host.startsWith("ws://") || host.startsWith("wss://") ? "" : globalThis.location.protocol === "https:" ? "wss://" : "ws://";
-    this.#connectionUrl = `${prefix}${host}${room ? `?room=${room}` : ""}`;
     this.#connect();
     globalThis.addEventListener("focus", () => {
       if (!this.#socket) {
@@ -46,45 +46,25 @@ export class SocketClient implements ISharedData, IObservable {
     this.#children.set(`clients/~{self}`, this.#selfData);
   }
 
-  #fixPath(path: Update["path"]) {
-    const split = path.split("/");
-    return split.map(part => translateValue(part, {
-      self: this.#selfData.id,
-    })).join("/");
-  }
-
-  #usefulUpdate(update: Update) {
-    const currentValue = this.getData(update.path);
-    return update.value !== currentValue;
-  }
-
-  getData(path: Update["path"]) {
+  getData(path: string) {
     const parts = path.split("/");
-    return getLeafObject(this.state, parts, 0, false, { self: this.#selfData.id }) as any;
+    return getLeafObject(this.state, parts, 0, false, { self: this.#selfData.clientId }) as any;
   }
 
-  async #convertValue(path: Update["path"], value: any) {
-    if (typeof value === "function") {
-      const updater = value as (prev: any) => any;
-      value = updater(this.getData(path));
-    }
-    return value;
-  }
-
-  async pushData(path: Update["path"], value: any, options: UpdateOptions = {}) {
+  async pushData(path: string, value: any, options: UpdateOptions = {}) {
     const val = await this.#convertValue(path, value);
 
-    await this.applyUpdate({
+    await this.#applyUpdate({
       path: this.#fixPath(path),
       value: val,
       append: true,
     }, options);
   }
 
-  async setData(path: Update["path"], value: any, options: SetDataOptions = {}) {
+  async setData(path: string, value: any, options: SetDataOptions = {}) {
     const val = await this.#convertValue(path, value);
 
-    await this.applyUpdate({
+    await this.#applyUpdate({
       path: this.#fixPath(path),
       value: options.delete ? undefined : val,
       append: options.append,
@@ -92,7 +72,15 @@ export class SocketClient implements ISharedData, IObservable {
     }, options);
   }
 
-  async applyUpdate(update: Update, options: UpdateOptions = {}) {
+  async #convertValue(path: string, value: any) {
+    if (typeof value === "function") {
+      const updater = value as (prev: any) => any;
+      value = updater(this.getData(path));
+    }
+    return value;
+  }
+
+  async #applyUpdate(update: Update, options: UpdateOptions = {}) {
     if (!this.#usefulUpdate(update)) {
       return;
     }
@@ -114,14 +102,14 @@ export class SocketClient implements ISharedData, IObservable {
   }
 
   get clientId() {
-    return this.#selfData.id;
+    return this.#selfData.clientId;
   }
 
   get self(): ISharedData {
     return this.#selfData;
   }
 
-  access(path: Update["path"]): ISharedData {
+  access(path: string): ISharedData {
     const childData = this.#children.get(path);
     if (childData) {
       return childData;
@@ -140,7 +128,7 @@ export class SocketClient implements ISharedData, IObservable {
     this.#children.delete(path);
   }
 
-  observe(paths?: (Update["path"][] | Update["path"])): Observer {
+  observe(paths?: (string[] | string)): Observer {
     const multi = Array.isArray(paths);
     const pathArray = paths === undefined ? [] : multi ? paths : [paths];
     return this.#observerManager.observe(pathArray, multi);
@@ -154,13 +142,13 @@ export class SocketClient implements ISharedData, IObservable {
   }
 
   async #connect() {
-    const socket = this.#socket = new WebSocket(this.#connectionUrl);
+    const socket = this.#socket = this.socketProvider();
     return this.#connectionPromise = new Promise<void>((resolve, reject) => {
       socket.addEventListener("open", () => {
-        console.log("Connected to WebSocket server", this.#connectionUrl);
+        console.log("SyncClient connection opened");
       });
       socket.addEventListener("error", (event) => {
-        console.error("Error connecting to WebSocket server", event);
+        console.error("SyncClient connection error", event);
         reject(event);
       });
 
@@ -169,7 +157,7 @@ export class SocketClient implements ISharedData, IObservable {
       });
 
       socket.addEventListener("close", () => {
-        console.log("Disconnected from WebSocket server");
+        console.log("Disconnected from SyncClient");
         this.#socket = undefined;
       });
     });
@@ -197,7 +185,7 @@ export class SocketClient implements ISharedData, IObservable {
     }
     if (payload?.myClientId) {
       // client ID confirmed
-      this.#selfData.id = payload.myClientId;
+      this.#selfData.clientId = payload.myClientId;
       this.#connectionPromise = undefined;
       onClientIdConfirmed?.();
     }
@@ -218,6 +206,19 @@ export class SocketClient implements ISharedData, IObservable {
     if (payload?.state && !payload?.updates?.length) {
       this.triggerObservers({});
     }
+  }
+
+  triggerObservers(updates: Record<string, any>): void {
+    this.#observerManager.triggerObservers(updates);
+    this.#children.forEach(child => child.triggerObservers(updates));
+  }
+
+  removeObserver(observer: Observer) {
+    this.#observerManager.removeObserver(observer);
+  }
+
+  get now() {
+    return Date.now() + this.#serverTimeOffset;
   }
 
   #prepareNextFrame() {
@@ -296,42 +297,15 @@ export class SocketClient implements ISharedData, IObservable {
     return false;
   }
 
-  triggerObservers(updates: Record<string, any>): void {
-    this.#observerManager.triggerObservers(updates);
-    this.#children.forEach(child => child.triggerObservers(updates));
+  #fixPath(path: string) {
+    const split = path.split("/");
+    return split.map(part => translateValue(part, {
+      self: this.#selfData.clientId,
+    })).join("/");
   }
 
-  removeObserver(observer: Observer) {
-    this.#observerManager.removeObserver(observer);
+  #usefulUpdate(update: Update) {
+    const currentValue = this.getData(update.path);
+    return update.value !== currentValue;
   }
-
-  get now() {
-    return Date.now() + this.#serverTimeOffset;
-  }
-}
-
-
-
-
-
-function restoreBlobIntoData(value: any, blobs?: Record<string, Blob>) {
-  if (!blobs) {
-    return value;
-  }
-  if (typeof value === "string") {
-    if (value in blobs) {
-      return blobs[value];
-    }
-  } else if (value && typeof value === "object") {
-    if (Array.isArray(value)) {
-      for (let i = 0; i < value.length; i++) {
-        value[i] = restoreBlobIntoData(value[i], blobs);
-      }
-    } else {
-      for (let key in value) {
-        value[key] = restoreBlobIntoData(value[key], blobs);
-      }
-    }
-  }
-  return value;
 }

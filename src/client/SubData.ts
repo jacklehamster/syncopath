@@ -1,17 +1,23 @@
 import { ISharedData, SetDataOptions } from "./ISharedData";
-import { SocketClient } from "./SocketClient";
 import { Observer } from "./Observer";
 import { IObservable } from "./IObservable";
 import { ObserverManager } from "./ObserverManager";
 import { getLeafObject } from "napl";
+import { SyncClient } from "./SyncClient";
 
 export class SubData implements ISharedData, IObservable {
   readonly #parts: (string | number)[] = [];
   readonly #observerManager;
 
-  constructor(readonly path: string, readonly socketClient: SocketClient) {
-    this.#parts = path.split("/");
-    this.#observerManager = new ObserverManager(socketClient);
+  constructor(readonly path: string, readonly syncClient: SyncClient) {
+    this.#parts = path.split("/").map(v => {
+      return isNaN(Number(v)) ? v : Number(v);
+    });
+    this.#observerManager = new ObserverManager(syncClient);
+  }
+
+  get clientId(): string {
+    return this.syncClient.clientId;
   }
 
   #getAbsolutePath(path: string): string {
@@ -30,17 +36,21 @@ export class SubData implements ISharedData, IObservable {
   }
 
   async setData(path: string, value: any, options?: SetDataOptions): Promise<void> {
-    return this.socketClient.setData(this.#getAbsolutePath(path), value, options);
+    return this.syncClient.setData(this.#getAbsolutePath(path), value, options);
+  }
+
+  async pushData(path: string, value: any, options?: SetDataOptions): Promise<void> {
+    return this.syncClient.pushData(this.#getAbsolutePath(path), value, options);
   }
 
   get state(): Record<string, any> {
-    return getLeafObject(this.socketClient.state, this.#parts, 0, false, {
-      self: this.socketClient.clientId,
+    return getLeafObject(this.syncClient.state, this.#parts, 0, false, {
+      self: this.syncClient.clientId,
     }) ?? {};
   }
 
   close() {
     this.#observerManager.close();
-    this.socketClient.removeChildData(this.path);
+    this.syncClient.removeChildData(this.path);
   }
 }

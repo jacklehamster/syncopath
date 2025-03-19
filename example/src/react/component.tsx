@@ -1,14 +1,14 @@
 import styles from "./style.module.css";
-import { SocketClient } from "@dobuki/syncopath";
-import { useSocketClient } from "./socket-client";
+import { SyncClient } from "@dobuki/syncopath";
+import { useSyncClient } from "./sync-client";
 import ReactDOM from 'react-dom/client';
 
 interface Props {
-  socketClient: SocketClient;
+  syncClient: SyncClient;
 }
 
-export function SharedText({ socketClient }: Props) {
-  const { useData } = useSocketClient({ socketClient });
+export function SharedText({ syncClient }: Props) {
+  const { useData } = useSyncClient({ syncClient });
   const [data, setData] = useData<string>("data");
   return <textarea
     className={styles["shared-text"]}
@@ -17,7 +17,7 @@ export function SharedText({ socketClient }: Props) {
     onChange={e => setData(e.target.value)} />;
 }
 
-export function hookupDiv(div: HTMLElement, socketClient: SocketClient) {
+export function hookupDiv(div: HTMLElement, socketClient: SyncClient) {
   const root = ReactDOM.createRoot(div);
-  root.render(<SharedText socketClient={socketClient} />);
+  root.render(<SharedText syncClient={socketClient} />);
 }

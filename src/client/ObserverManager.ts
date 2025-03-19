@@ -1,14 +1,14 @@
+import { ISharedData } from "./ISharedData";
 import { Observer } from "./Observer";
-import { SocketClient } from "./SocketClient";
 
 export class ObserverManager {
   readonly #observers: Set<Observer> = new Set();
 
-  constructor(private readonly socketClient: SocketClient) {
+  constructor(private readonly sharedData: ISharedData) {
   }
 
   observe(paths: string[], multi: boolean): Observer {
-    const observer = new Observer(this.socketClient, paths, this, multi);
+    const observer = new Observer(this.sharedData, paths, this, multi);
     this.#observers.add(observer);
     return observer;
   }
