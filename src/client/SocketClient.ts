@@ -8,12 +8,11 @@ import { SubData } from "./SubData";
 import { Observer } from "./Observer";
 import { IObservable } from "./IObservable";
 import { ObserverManager } from "./ObserverManager";
-import { extractBlobsFromPayload, extractPayload, includeBlobsInPayload } from "@dobuki/data-blob";
+import { checkPayload, extractBlobsFromPayload, extractPayload, includeBlobsInPayload } from "@dobuki/data-blob";
 import { PeerManager } from "./peer/PeerManager";
 import { checkPeerConnections } from "./peer/check-peer";
 import { RoomState } from "@/types/RoomState";
 import { applyUpdates, getLeafObject, markUpdateConfirmed, packageUpdates, pushUpdate, translateValue, Update } from "napl";
-import { validatePayload } from "@dobuki/payload-validator";
 
 export class SocketClient implements ISharedData, IObservable {
   readonly state: RoomState;
@@ -27,7 +26,7 @@ export class SocketClient implements ISharedData, IObservable {
   readonly peerManagers: Record<string, PeerManager> = {};
   #serverTimeOffset = 0;
   #nextFrameInProcess = false;
-  #secret?: string;
+  #secret = "";
 
   constructor(host: string, room?: string, initialState: RoomState = {}) {
     this.state = initialState;
@@ -182,6 +181,12 @@ export class SocketClient implements ISharedData, IObservable {
 
   async onMessageBlob(blob: Blob, onClientIdConfirmed?: () => void, skipValidation: boolean = false) {
     const { payload, ...blobs } = await extractPayload(blob);
+    const secret = payload?.secret ?? this.#secret;
+    if (!skipValidation && !checkPayload(payload, secret)) {
+      console.error("Failed payload validation.");
+      return;
+    }
+
     const hasBlobs = Object.keys(blobs).length > 0;
 
     if (payload?.secret) {
@@ -197,26 +202,18 @@ export class SocketClient implements ISharedData, IObservable {
       onClientIdConfirmed?.();
     }
     if (payload?.state) {
-      if (!skipValidation && !validatePayload(payload.state, { secret: this.#secret })) {
-        console.error("Invalid payload received");
-      } else {
-        delete payload.state.signature;
-        for (const key in payload.state) {
-          this.state[key] = hasBlobs ? includeBlobsInPayload(payload.state[key], blobs) : payload.state[key];
-        }
+      delete payload.state.signature;
+      for (const key in payload.state) {
+        this.state[key] = hasBlobs ? includeBlobsInPayload(payload.state[key], blobs) : payload.state[key];
       }
     }
     if (payload?.updates) {
-      if (!skipValidation && !payload.updates.every((update: Update) => validatePayload(update, { secret: this.#secret }))) {
-        console.error("Invalid payload received");
-      } else {
-        if (hasBlobs) {
-          payload.updates.forEach((update: Update) => {
-            update.value = includeBlobsInPayload(update.value, blobs);
-          });
-        }
-        this.#queueIncomingUpdates(...payload.updates);
+      if (hasBlobs) {
+        payload.updates.forEach((update: Update) => {
+          update.value = includeBlobsInPayload(update.value, blobs);
+        });
       }
+      this.#queueIncomingUpdates(...payload.updates);
     }
     if (payload?.state && !payload?.updates?.length) {
       this.triggerObservers({});

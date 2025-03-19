@@ -4,10 +4,9 @@ import { addMessageReceiver } from "./SocketEventHandler";
 import { Payload } from "./SocketPayload";
 import { ClientState } from "@/types/ClientState";
 import { RoomState } from "@/types/RoomState";
-import { BlobBuilder, extractBlobsFromPayload, includeBlobsInPayload } from "@dobuki/data-blob";
+import { BlobBuilder, checkPayload, extractBlobsFromPayload, includeBlobsInPayload } from "@dobuki/data-blob";
 import { removeRestrictedData, removeRestrictedPeersFromUpdates } from "./peer-utils";
 import { restrictedPath } from "./path-utils";
-import { signedPayload, validatePayload } from "@dobuki/payload-validator";
 
 let nextClientId = 1;
 
@@ -45,10 +44,11 @@ export class SyncRoom {
 
     //  setup events
     addMessageReceiver(client, (payload, blobs) => {
-      if (!payload.updates?.every(update => validatePayload(update, { secret: this.#secret }))) {
-        console.warn("Invalid payload received from ", clientId);
+      if (!checkPayload(payload, this.#secret)) {
+        console.error("Invalid payload received", payload);
         return;
       }
+
       payload.updates?.forEach(update => {
         const newValue = includeBlobsInPayload(update.value, blobs);
         if (newValue !== undefined) {
@@ -87,10 +87,10 @@ export class SyncRoom {
     //  update client just connected with state and updates
     const welcomeBlobBuilder = BlobBuilder.payload<Payload>("payload", {
       myClientId: clientId,
-      state: signedPayload(payload, { secret: this.#secret }),
+      state: payload,
       serverTime: now,
       secret: this.#secret,
-    });
+    }, this.#secret);
     Object.entries(blobs ?? {}).forEach(([key, blob]) => welcomeBlobBuilder.blob(key, blob));
 
     client.send(await welcomeBlobBuilder.build().arrayBuffer());

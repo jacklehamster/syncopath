@@ -46,8 +46,7 @@
   },
   "description": "Synchronize data across clients using WebSocket",
   "dependencies": {
-    "@dobuki/payload-validator": "^1.0.8",
-    "napl": "^1.0.32"
+    "napl": "^1.0.35"
   },
   "keywords": []
 }
