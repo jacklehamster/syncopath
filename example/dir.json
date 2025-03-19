@@ -3,10 +3,10 @@
     "sha": "2509c6de3b86d351a8deba9af4c56b19847cb2a8"
   },
   "app.icns": {
-    "sha": "8c414c12983adc8e19dd67d522fe3f6c894831a8"
+    "sha": "74e1e4e2b255872d89619699a4ec2676df4de88d"
   },
   "app.ico": {
-    "sha": "c58c010b4a3906da7c4ff220162378a7008e3092"
+    "sha": "adb06a3fb1860195cab1400db26694b669d0678b"
   },
   "bun.lockb": {
     "sha": "d8bf2db0ef82b403441b0930d284271664382543"
@@ -21,46 +21,46 @@
     "sha": "98387d623bcf6077316ad093fd89f762c23f9a4f"
   },
   "dist/index.js": {
-    "sha": "2159d2d9e597ee3653a24ecd39f37daf9c5ed051"
+    "sha": "7cca104179f9793f5849a4367c55db5236aa91c9"
   },
   "dist/index.js.map": {
-    "sha": "f292e12534e0b24d76309dc96110051fd678f005"
+    "sha": "b9a74fd5f44622fae80a057347870e10ed1d7758"
   },
   "dist/styles-da87zv4s.css": {
     "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
   },
   "favicon-120.png": {
-    "sha": "69b3e5c9a01fe3ed4195b5c971674d80fc0f4318"
+    "sha": "498ae1f2461cc944f364fe7a8c553e4c52e97ef5"
   },
   "favicon-128.png": {
-    "sha": "39664cbca2a68c306730c5092b7ce34970d0fe07"
+    "sha": "4fc13a7b5726920973b28f2d9df6f3e160d885cc"
   },
   "favicon-144.png": {
-    "sha": "0ef0e9f14eb28c0870d4535808e222d8327ac514"
+    "sha": "ca4c0b5111a7d301523cbbc34cd07b8f77767949"
   },
   "favicon-152.png": {
-    "sha": "f8f60c82c382966252c7b2f207cdb80b62c102b3"
+    "sha": "feee5e5f31baf6f9210554a0e496ca678e4d49bc"
   },
   "favicon-195.png": {
-    "sha": "0bb68d0ab504b9a36e020ff619e86b2f97c1dbcd"
+    "sha": "3ab23ad756db4860865f7f3fbf6481fd6c1ab0d0"
   },
   "favicon-228.png": {
-    "sha": "5b41a3758f28cd5ece1aa1fb7ada351f49d5b023"
+    "sha": "75bad1d75c7630a86646b90785ad66f07d9b4879"
   },
   "favicon-32.png": {
-    "sha": "3df095fc7fb5157149b80ec1eba97fd9d78c8743"
+    "sha": "68b6e0de4a59c6bef0cacc42fb475a87bfa814e6"
   },
   "favicon-57.png": {
-    "sha": "63b2c63b594029095f826df603e88a75ac8785a7"
+    "sha": "215e4df03ef58337a168051096f5db858d42c8d3"
   },
   "favicon-72.png": {
-    "sha": "b132fef29fa67c8653bc8c95fae183005685e99e"
+    "sha": "c027cddffa4fd94314d40b88d45d9e878669c7a8"
   },
   "favicon-96.png": {
-    "sha": "fbdfed1ddbb93f3b45bb49500f26db46f16e41de"
+    "sha": "b89ec9acb7fa23dd60ea600773ed68483487a303"
   },
   "favicon.ico": {
-    "sha": "26617507b9baf000bd97c82ce45d831811b1e8a7"
+    "sha": "3be67a8f1617b1ec7959b7d53ec7a14a3f239fe1"
   },
   "game-room/index.html": {
     "sha": "034bb315de798b507875846db049affe8f4631bd"
@@ -86,7 +86,7 @@
   "json-test/index.html": {
     "sha": "9ec0f95dcdc56365093036252745434e014fdd8a"
   },
-  "md5": "1d33363cc20d56d7ccd1a923b3dfba66",
+  "md5": "b475570842a8b6c850f74f3e52061c30",
   "mobile/index.html": {
     "sha": "072a5a0ce4adb8cd6ebe1f19497c4a97016aabb7"
   },
@@ -109,22 +109,22 @@
     "sha": "85e6747c327b0844e95797088ad126f9d7a42d37"
   },
   "src/index.ts": {
-    "sha": "6c8fd473689e901a172a4d3a3a4d7f22302a2097"
+    "sha": "299cbde241346cdcec21994539239f5f0517557a"
   },
   "src/iso-test/iso-utils.ts": {
     "sha": "ba1336af22c4389a058e0cd900f415402187505d"
   },
   "src/react/component.tsx": {
-    "sha": "8b6ea4af4538d0b028152362a99c84d6439c15bd"
+    "sha": "0d95e1913d7a168f70216b63ae71edbcaafe51d2"
   },
   "src/react/index.d.ts": {
     "sha": "7980ec238c4dd00704399f7d8fe89cf26f194398"
   },
-  "src/react/socket-client.ts": {
-    "sha": "f7182da03de464c0c11b655703226c628ab15092"
-  },
   "src/react/style.module.css": {
     "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
+  },
+  "src/react/sync-client.ts": {
+    "sha": "d0b4176313c7f5601bb60afd55851abfc6407b55"
   },
   "tsconfig.json": {
     "sha": "5d54bba5d6d02edc48c065729f8965af5541693d"

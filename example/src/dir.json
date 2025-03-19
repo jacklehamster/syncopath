@@ -1,21 +1,21 @@
 {
   "index.ts": {
-    "sha": "6c8fd473689e901a172a4d3a3a4d7f22302a2097"
+    "sha": "299cbde241346cdcec21994539239f5f0517557a"
   },
   "iso-test/iso-utils.ts": {
     "sha": "ba1336af22c4389a058e0cd900f415402187505d"
   },
-  "md5": "293c5e435f7aa160c07ac08acadc7008",
+  "md5": "57e7a9e97b9e54001a4f3a4393e267c9",
   "react/component.tsx": {
-    "sha": "8b6ea4af4538d0b028152362a99c84d6439c15bd"
+    "sha": "0d95e1913d7a168f70216b63ae71edbcaafe51d2"
   },
   "react/index.d.ts": {
     "sha": "7980ec238c4dd00704399f7d8fe89cf26f194398"
   },
-  "react/socket-client.ts": {
-    "sha": "f7182da03de464c0c11b655703226c628ab15092"
-  },
   "react/style.module.css": {
     "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
+  },
+  "react/sync-client.ts": {
+    "sha": "d0b4176313c7f5601bb60afd55851abfc6407b55"
   }
 }
