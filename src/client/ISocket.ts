@@ -1,6 +1,12 @@
+import { RoomState } from "@/types/RoomState";
+
 export interface ISocket {
   send(data: string | ArrayBufferLike | Blob | ArrayBufferView): void;
-  addEventListener(event: string, listener: (...args: any[]) => void): void;
-  removeEventListener(event: string, listener: (...args: any[]) => void): void;
+  onMessage(listener: (data: any) => void): void;
+  onError(listener: (event: Event) => void): void;
+  onClose(listener: () => void): void;
   close(): void;
+  stateChanged?(state: RoomState): void;
+  supportBlob?: boolean;
+  serverless?: boolean;
 }

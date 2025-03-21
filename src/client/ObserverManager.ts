@@ -2,7 +2,7 @@ import { ISharedData } from "./ISharedData";
 import { Observer } from "./Observer";
 
 export class ObserverManager {
-  readonly #observers: Set<Observer> = new Set();
+  readonly #observers = new Set<Observer>();
 
   constructor(private readonly sharedData: ISharedData) {
   }

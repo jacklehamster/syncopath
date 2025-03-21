@@ -1,18 +1,22 @@
 import { ISharedData, SetDataOptions, UpdateOptions } from "./ISharedData";
+import { ISyncClient } from "./ISyncClient";
 import { Observer } from "./Observer";
 import { ObserverManager } from "./ObserverManager";
-import { SyncClient } from "./SyncClient";
 
 export class ClientData implements ISharedData {
   clientId: string = "";
   readonly #observerManager;
 
-  constructor(readonly syncClient: SyncClient) {
+  constructor(readonly syncClient: ISyncClient) {
     this.#observerManager = new ObserverManager(syncClient);
   }
 
   #getAbsolutePath(path: string): string {
-    return path ? `clients/~{self}/${path}` : "clients/~{self}";
+    return path.length ? `clients/~{self}/${path}` : "clients/~{self}";
+  }
+
+  getData(path: string) {
+    return this.syncClient.getData(this.#getAbsolutePath(path));
   }
 
   observe(paths?: (string[] | string)): Observer {

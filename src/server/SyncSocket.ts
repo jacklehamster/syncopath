@@ -4,8 +4,10 @@ import { SyncRoom } from "./SyncRoom";
 export class SyncSocket {
   readonly #rooms: Record<string, SyncRoom> = {};
 
-  constructor(server: Server<any>) {
-    this.#hookupSocketServer(server);
+  constructor(server?: Server<any>) {
+    if (server) {
+      this.#hookupSocketServer(server);
+    }
   }
 
   #hookupSocketServer(websocketServer: Server) {
@@ -21,12 +23,15 @@ export class SyncSocket {
 
     websocketServer.on("connection", async (socket: WebSocket, req) => {
       //  extract query params
-      const parameters = new URLSearchParams(req.url?.split("?")[1]);
-      const roomName = parameters.get("room") ?? "default";
-      const room = this.#getRoom(roomName);
-      const { clientId } = await room.welcomeClient(socket);
-      console.log(`client ${clientId} connected in room ${roomName}.`);
+      await this.handleWebSocket(socket, new URLSearchParams(req.url?.split("?")[1]));
     });
+  }
+
+  async handleWebSocket(socket: WebSocket, parameters: URLSearchParams) {
+    const roomName = parameters.get("room") ?? "default";
+    const room = this.#getRoom(roomName);
+    const { clientId } = await room.welcomeClient(socket);
+    console.log(`client ${clientId} connected in room ${roomName}.`);
   }
 
   #getRoom(roomName: string) {

@@ -3,17 +3,21 @@ import { Observer } from "./Observer";
 import { IObservable } from "./IObservable";
 import { ObserverManager } from "./ObserverManager";
 import { getLeafObject } from "napl";
-import { SyncClient } from "./SyncClient";
+import { ISyncClient } from "./ISyncClient";
 
 export class SubData implements ISharedData, IObservable {
   readonly #parts: (string | number)[] = [];
   readonly #observerManager;
 
-  constructor(readonly path: string, readonly syncClient: SyncClient) {
+  constructor(readonly path: string, readonly syncClient: ISyncClient) {
     this.#parts = path.split("/").map(v => {
       return isNaN(Number(v)) ? v : Number(v);
     });
     this.#observerManager = new ObserverManager(syncClient);
+  }
+
+  getData(path: string) {
+    return this.syncClient.getData(this.#getAbsolutePath(path));
   }
 
   get clientId(): string {

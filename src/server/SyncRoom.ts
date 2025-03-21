@@ -1,5 +1,5 @@
 import { WebSocket } from "ws";
-import { clearUpdates, commitUpdates, markUpdateConfirmed, packageUpdates, pushUpdate, Update } from "napl";
+import { commitUpdates, markUpdateConfirmed, packageUpdates, Update } from "napl";
 import { addMessageReceiver } from "./SocketEventHandler";
 import { Payload } from "./SocketPayload";
 import { ClientState } from "@/types/ClientState";
@@ -76,18 +76,27 @@ export class SyncRoom {
     });
 
     //  apply updates to clients
-    const updates: Record<string, any> = {};
     commitUpdates(this.state, {
       now,
-    }, updates);
-    clearUpdates(this.state, updates);
+    });
 
     const blobs: Record<string, Blob> = {};
     const payload = await extractBlobsFromPayload(removeRestrictedData({ ...this.state }, clientId), blobs);
+    console.log("Current state", payload);
     //  update client just connected with state and updates
+    const updates: Update[] = [];
+    for (let key in payload) {
+      updates.push({
+        path: key,
+        value: this.state[key],
+        confirmed: now,
+      });
+    }
+
     const welcomeBlobBuilder = BlobBuilder.payload<Payload>("payload", {
       myClientId: clientId,
-      state: payload,
+      // state: payload,
+      updates,
       serverTime: now,
       secret: this.#secret,
     }, this.#secret);
@@ -117,12 +126,11 @@ export class SyncRoom {
     const updatesForSender = newUpdates.filter(update => !update.confirmed);
     const now = Date.now();
     newUpdates.forEach(update => markUpdateConfirmed(update, now));
-    pushUpdate(this.state, ...newUpdates ?? []);
-    const updates: Record<string, any> = {};
+    this.state.updates = this.state.updates ?? [];
+    this.state.updates.push(...newUpdates);
     commitUpdates(this.state, {
       now: Date.now(),
-    }, updates);
-    clearUpdates(this.state, updates);
+    });
     this.#broadcastUpdates(newUpdates, client => client !== sender);
     this.#broadcastUpdates(updatesForSender, client => client === sender);
     this.#cleanupPeers();

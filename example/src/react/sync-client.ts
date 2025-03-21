@@ -1,5 +1,6 @@
-import { SyncClient, provideSocketClient } from "@dobuki/syncopath";
+import { provideSocketClient } from "@dobuki/syncopath";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { ISyncClient } from "../../../dist/client/ISyncClient";
 
 interface SyncClientProps {
   room?: string;
@@ -7,12 +8,12 @@ interface SyncClientProps {
 }
 
 interface Props {
-  syncClient: SyncClient;
+  syncClient: ISyncClient;
 }
 
 export function useSyncClient(props: Props & Partial<SyncClientProps>) {
   const syncClient = useMemo(() => {
-    return props.syncClient ?? (props.host ? provideSocketClient(props.host, props.room) : undefined);
+    return props.syncClient ?? (props.host ? provideSocketClient({ host: props.host, room: props.room }) : undefined);
   }, [props.syncClient, props.host, props.room]);
 
   const useData = useCallback(<T>(path: string): [T | null, (value: T | ((prev: T | null) => T)) => void] => {

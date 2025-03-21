@@ -8,29 +8,28 @@ import { SubData } from "./SubData";
 import { Observer } from "./Observer";
 import { IObservable } from "./IObservable";
 import { ObserverManager } from "./ObserverManager";
-import { checkPayload, extractBlobsFromPayload, extractPayload, includeBlobsInPayload } from "@dobuki/data-blob";
 import { PeerManager } from "./peer/PeerManager";
-import { checkPeerConnections } from "./peer/check-peer";
 import { RoomState } from "@/types/RoomState";
-import { applyUpdates, getLeafObject, markUpdateConfirmed, packageUpdates, pushUpdate, translateValue, Update } from "napl";
+import { getLeafObject, markUpdateConfirmed, Processor, Update } from "napl";
 import { ISocket } from "./ISocket";
+import { ISyncClient } from "./ISyncClient";
 
-type socketProvider = () => ISocket;
+export type SocketProvider = () => Promise<ISocket>;
 
-export class SyncClient implements ISharedData, IObservable {
+export class SyncClient implements ISharedData, IObservable, ISyncClient {
   readonly state: RoomState;
   readonly #children: Map<string, ISharedData> = new Map();
   #socket: ISocket | undefined;
   #connectionPromise: Promise<void> | undefined;
-  readonly #outgoingUpdates: (Update | undefined)[] = [];
   readonly #selfData: ClientData = new ClientData(this);
   readonly #observerManager = new ObserverManager(this);
   readonly peerManagers: Record<string, PeerManager> = {};
   #serverTimeOffset = 0;
   #nextFrameInProcess = false;
-  #secret = "";
+  #secret?: string;
+  readonly #processor: Processor = new Processor((blob) => this.#socket?.send(blob));
 
-  constructor(private socketProvider: socketProvider, initialState: RoomState = {}) {
+  constructor(private socketProvider: SocketProvider, initialState: RoomState = {}) {
     this.state = initialState;
     this.#connect();
     globalThis.addEventListener("focus", () => {
@@ -52,53 +51,33 @@ export class SyncClient implements ISharedData, IObservable {
   }
 
   async pushData(path: string, value: any, options: UpdateOptions = {}) {
-    const val = await this.#convertValue(path, value);
-
-    await this.#applyUpdate({
-      path: this.#fixPath(path),
-      value: val,
+    await this.#processDataUpdate({
+      path,
+      value,
       append: true,
     }, options);
   }
 
   async setData(path: string, value: any, options: SetDataOptions = {}) {
-    const val = await this.#convertValue(path, value);
-
-    await this.#applyUpdate({
-      path: this.#fixPath(path),
-      value: options.delete ? undefined : val,
+    await this.#processDataUpdate({
+      path,
+      value,
       append: options.append,
       insert: options.insert,
     }, options);
   }
 
-  async #convertValue(path: string, value: any) {
-    if (typeof value === "function") {
-      const updater = value as (prev: any) => any;
-      value = updater(this.getData(path));
-    }
-    return value;
-  }
-
-  async #applyUpdate(update: Update, options: UpdateOptions = {}) {
-    if (!this.#usefulUpdate(update)) {
-      return;
-    }
+  async #processDataUpdate(update: Update, options: UpdateOptions = {}) {
     const isPeerUpdate = this.#isPeerUpdate(update);
     if (!isPeerUpdate) {
       await this.#waitForConnection();
     }
-    const active = options.active ?? this.state.config?.activeUpdates ?? false;
-
-    if (active || isPeerUpdate) {
+    if (options.active ?? this.state.config?.activeUpdates ?? this.#socket?.serverless) {
       markUpdateConfirmed(update, this.now);
     }
-
-    //  commit updates locally
-    if (update.confirmed) {
-      this.#queueIncomingUpdates(update);
-    }
-    this.#queueOutgoingUpdates(update);
+    this.state.outgoingUpdates = this.state.outgoingUpdates ?? [];
+    this.state.outgoingUpdates.push(update);
+    this.#prepareNextFrame();
   }
 
   get clientId() {
@@ -142,71 +121,94 @@ export class SyncClient implements ISharedData, IObservable {
   }
 
   async #connect() {
-    const socket = this.#socket = this.socketProvider();
+    const socket = this.#socket = await this.socketProvider();
     return this.#connectionPromise = new Promise<void>((resolve, reject) => {
-      socket.addEventListener("open", () => {
-        console.log("SyncClient connection opened");
-      });
-      socket.addEventListener("error", (event) => {
+      socket.onError((event) => {
         console.error("SyncClient connection error", event);
         reject(event);
       });
-
-      socket.addEventListener("message", async (event: MessageEvent<Blob>) => {
-        this.onMessageBlob(event.data, resolve);
+      socket.onMessage((data) => {
+        this.onMessageBlob(data, resolve);
       });
-
-      socket.addEventListener("close", () => {
+      socket.onClose(() => {
         console.log("Disconnected from SyncClient");
         this.#socket = undefined;
       });
     });
   }
 
-  closeSocket() {
+  close() {
     this.#socket?.close();
   }
 
-  async onMessageBlob(blob: Blob, onClientIdConfirmed?: () => void, skipValidation: boolean = false) {
-    const { payload, ...blobs } = await extractPayload(blob);
-    const secret = payload?.secret ?? this.#secret;
-    if (!skipValidation && !checkPayload(payload, secret)) {
-      console.error("Failed payload validation.");
-      return;
-    }
+  // onMessageObject(data: any, onClientIdConfirmed?: () => void, skipValidation = false) {
+  //   return this.#onMessage(data, undefined, onClientIdConfirmed, skipValidation);
+  // }
 
-    const hasBlobs = Object.keys(blobs).length > 0;
+  async onMessageBlob(blob: any, onClientIdConfirmed?: () => void, skipValidation: boolean = false) {
+    const context = {
+      root: this.state,
+      secret: this.#secret,
+      clientId: this.clientId,
+      localTimeOffset: this.#serverTimeOffset,
+      properties: {
+        self: this.clientId,
+        now: this.now,
+      },
+      skipValidation,
+    };
+    const preClient = context.clientId;
+    await this.#processor.processBlob(blob, context);
+    this.#serverTimeOffset = context.localTimeOffset;
+    this.#secret = context.secret;
 
-    if (payload?.secret) {
-      this.#secret = payload.secret;
-    }
-    if (payload?.serverTime) {
-      this.#serverTimeOffset = payload.serverTime - Date.now();
-    }
-    if (payload?.myClientId) {
-      // client ID confirmed
-      this.#selfData.clientId = payload.myClientId;
-      this.#connectionPromise = undefined;
+    if (!preClient && context.clientId) {
+      this.#selfData.clientId = context.clientId;
       onClientIdConfirmed?.();
     }
-    if (payload?.state) {
-      delete payload.state.signature;
-      for (const key in payload.state) {
-        this.state[key] = hasBlobs ? includeBlobsInPayload(payload.state[key], blobs) : payload.state[key];
-      }
-    }
-    if (payload?.updates) {
-      if (hasBlobs) {
-        payload.updates.forEach((update: Update) => {
-          update.value = includeBlobsInPayload(update.value, blobs);
-        });
-      }
-      this.#queueIncomingUpdates(...payload.updates);
-    }
-    if (payload?.state && !payload?.updates?.length) {
-      this.triggerObservers({});
-    }
+
+    this.#prepareNextFrame();
   }
+
+  // #onMessage(payload: Payload, blobs?: Record<string, Blob>, onClientIdConfirmed?: () => void, skipValidation: boolean = false) {
+  //   const secret = this.#secret ?? payload?.secret;
+  //   if (!skipValidation && secret && !checkPayload(payload, secret)) {
+  //     console.error("Failed payload validation.");
+  //     return;
+  //   }
+
+  //   const hasBlobs = blobs && Object.keys(blobs).length > 0;
+
+  //   if (payload?.secret) {
+  //     this.#secret = payload.secret;
+  //   }
+  //   if (payload?.serverTime) {
+  //     this.#serverTimeOffset = payload.serverTime - Date.now();
+  //   }
+  //   if (payload?.myClientId) {
+  //     // client ID confirmed
+  //     this.#selfData.clientId = payload.myClientId;
+  //     this.#connectionPromise = undefined;
+  //     onClientIdConfirmed?.();
+  //   }
+  //   if (payload?.state) {
+  //     delete payload.state.signature;
+  //     for (const key in payload.state) {
+  //       this.state[key] = hasBlobs ? includeBlobsInPayload(payload.state[key], blobs) : payload.state[key];
+  //     }
+  //   }
+  //   if (payload?.updates) {
+  //     if (hasBlobs) {
+  //       payload.updates.forEach((update: Update) => {
+  //         update.value = includeBlobsInPayload(update.value, blobs);
+  //       });
+  //     }
+  //     this.#queueIncomingUpdates(...payload.updates);
+  //   }
+  //   if (payload?.state && !payload?.updates?.length) {
+  //     this.triggerObservers({});
+  //   }
+  // }
 
   triggerObservers(updates: Record<string, any>): void {
     this.#observerManager.triggerObservers(updates);
@@ -231,62 +233,56 @@ export class SyncClient implements ISharedData, IObservable {
 
   #processNextFrame() {
     this.#nextFrameInProcess = false;
-    const updates = applyUpdates(this.state, {
-      now: this.now,
-      self: this.clientId,
-    });
-    if (updates) {
-      this.triggerObservers(updates);
-      checkPeerConnections(this);
-    }
-    if (this.#outgoingUpdates.length) {
-      this.#broadcastUpdates();
-    }
+    const context = {
+      root: this.state,
+      secret: this.#secret,
+      clientId: this.clientId,
+      localTimeOffset: this.#serverTimeOffset,
+      properties: {
+        self: this.clientId,
+        now: this.now,
+      },
+    };
+    const updates = this.#processor.performCycle(context);
+    this.#selfData.clientId = context.clientId;
+    this.#serverTimeOffset = context.localTimeOffset;
+    this.#secret = context.secret;
+
+    // if (Object.keys(updates).length) {
+    this.triggerObservers(updates);
+    // checkPeerConnections(this);
+    // }
+    this.#socket?.stateChanged?.(this.state);
   }
 
-  #queueOutgoingUpdates(...updates: Update[]) {
-    this.#prepareNextFrame();
-    this.#outgoingUpdates.push(...updates);
-  }
+  //   this.#outgoingUpdates.forEach((update, index) => {
+  //     // skip updates to peers if there's a peerManager ready
+  //     if (update?.path?.startsWith("peer/")) {
+  //       const tag = update.path.split("/")[1];
+  //       const clientIds = tag.split(":");
+  //       if (clientIds.length === 2) {
+  //         const peerId = clientIds[0] === this.clientId ? clientIds[1] : clientIds[0];
+  //         if (this.peerManagers[peerId]?.ready) {
+  //           //  Send through peer manager
+  //           this.peerManagers[peerId].send(packageUpdates([{ ...update }], blobs));
+  //           this.#outgoingUpdates[index] = undefined;
+  //           return false;
+  //         }
+  //       }
+  //     }
+  //   });
 
-  #queueIncomingUpdates(...updates: Update[]) {
-    this.#prepareNextFrame();
-    pushUpdate(this.state, ...updates);
-  }
-
-  async #broadcastUpdates() {
-    const blobs: Record<string, Blob> = {};
-    for (let update of this.#outgoingUpdates) {
-      if (update) {
-        update.value = await extractBlobsFromPayload(update.value, blobs);
-      }
-    }
-
-    this.#outgoingUpdates.forEach((update, index) => {
-      // skip updates to peers if there's a peerManager ready
-      if (update?.path?.startsWith("peer/")) {
-        const tag = update.path.split("/")[1];
-        const clientIds = tag.split(":");
-        if (clientIds.length === 2) {
-          const peerId = clientIds[0] === this.clientId ? clientIds[1] : clientIds[0];
-          if (this.peerManagers[peerId]?.ready) {
-            //  Send through peer manager
-            this.peerManagers[peerId].send(packageUpdates([{ ...update }], blobs));
-            this.#outgoingUpdates[index] = undefined;
-            return false;
-          }
-        }
-      }
-    });
-
-    const outUpdates = this.#outgoingUpdates.filter(update => !!update);
-    this.#outgoingUpdates.length = 0;
-    if (outUpdates.length) {
-      await this.#waitForConnection();
-      const blob = packageUpdates(outUpdates, blobs, this.#secret);
-      this.#socket?.send(blob);
-    }
-  }
+  //   const outUpdates = this.#outgoingUpdates.filter(update => !!update);
+  //   this.#outgoingUpdates.length = 0;
+  //   if (outUpdates.length) {
+  //     await this.#waitForConnection();
+  //     if (this.#socket?.supportBlob && Object.keys(blobs).length) {
+  //       this.#socket?.send(packageUpdates(outUpdates, blobs, this.#secret));
+  //     } else {
+  //       this.#socket?.send(JSON.stringify(signedPayload({ updates: outUpdates }, { secret: this.#secret })));
+  //     }
+  //   }
+  // }
 
   #isPeerUpdate(update: Update) {
     if (update.path?.startsWith("peer/")) {
@@ -295,17 +291,5 @@ export class SyncClient implements ISharedData, IObservable {
       return clientIds.length === 2 && (clientIds[0] === this.clientId || clientIds[1] === this.clientId);
     }
     return false;
-  }
-
-  #fixPath(path: string) {
-    const split = path.split("/");
-    return split.map(part => translateValue(part, {
-      self: this.#selfData.clientId,
-    })).join("/");
-  }
-
-  #usefulUpdate(update: Update) {
-    const currentValue = this.getData(update.path);
-    return update.value !== currentValue;
   }
 }

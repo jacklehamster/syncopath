@@ -60,25 +60,25 @@ export function checkPeerConnections(socketClient: SyncClient) {
   }
 }
 
-function createPeerManager(socketClient: SyncClient, tag: string, peerId: string) {
+function createPeerManager(syncClient: SyncClient, tag: string, peerId: string) {
   console.log("Creating peer manager");
-  socketClient.peerManagers[peerId] = new PeerManager({
+  syncClient.peerManagers[peerId] = new PeerManager({
     onData(data: any) {
       if (data instanceof Blob) {
-        socketClient.onMessageBlob(data, undefined, true);
+        syncClient.onMessageBlob(data, undefined, true);
       }
     },
     onIce(ice: RTCIceCandidate) {
       const candidate = ice.candidate.split(" ")[0];
-      socketClient.setData(`peer/${tag}:${WEB_RTC}/${socketClient.clientId}/ice/${candidate}`, ice, PEER_OPTIONS);
+      syncClient.setData(`peer/${tag}:${WEB_RTC}/${syncClient.clientId}/ice/${candidate}`, ice, PEER_OPTIONS);
     },
     onClose() {
-      delete socketClient.peerManagers[peerId];
+      delete syncClient.peerManagers[peerId];
       console.log("Peer closed");
     },
     onReady() {
-      if (socketClient.state.config?.peerOnly) {
-        setTimeout(() => socketClient.closeSocket(), DELAY_TO_DISCONNECT_WEBSOCKET_AFTER_PEER);
+      if (syncClient.state.config?.peerOnly) {
+        setTimeout(() => syncClient.close(), DELAY_TO_DISCONNECT_WEBSOCKET_AFTER_PEER);
       }
     },
   });

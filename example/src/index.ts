@@ -3,7 +3,7 @@
 /// <reference lib="dom.iterable" />
 
 import prettyStringify from "json-stringify-pretty-compact";
-import { Observer, provideSocketClient } from "@dobuki/syncopath";
+import { Observer, providePlayroomClient, provideSocketClient } from "@dobuki/syncopath";
 import { SpriteSheet, loadSpriteSheet } from "aseprite-sheet";
 import { hookupDiv } from "./react/component";
 
@@ -44,7 +44,8 @@ const config = await fetch("../config.json").then((response) =>
 function getSocketClient() {
   const urlVars = new URLSearchParams(location.search);
   const room = urlVars.get("room") ?? undefined;
-  return provideSocketClient(config.websocketHost ?? location.host, room);
+  return provideSocketClient({ host: config.websocketHost ?? location.host, room });
+  // return providePlayroomClient({ room });
 }
 
 export const socketClient = getSocketClient();
@@ -81,10 +82,7 @@ export function displayUsers(userDiv: HTMLDivElement) {
   handleUsersChanged((clientId, isSelf, observers) => {
     observers.add(
       socketClient
-        .observe(
-          [`clients/${clientId}/name`,
-          `clients/${clientId}/emoji`]
-        )
+        .observe([`clients/${clientId}/name`, `clients/${clientId}/emoji`])
         .onChange((values) => {
           const [name, emoji] = values;
           client.textContent = `${emoji} ${name}`;
@@ -93,7 +91,7 @@ export function displayUsers(userDiv: HTMLDivElement) {
 
     // new client
     const client = document.createElement("div");
-    client.id = `client-${clientId}`;
+    client.id = `div-${clientId}`;
     client.textContent = clientId;
     if (isSelf) {
       client.style.fontWeight = "bold";
@@ -103,7 +101,7 @@ export function displayUsers(userDiv: HTMLDivElement) {
       userDiv.appendChild(client);
     }
   }, (clientId) => {
-    const client = document.querySelector(`#client-${clientId}`) as HTMLDivElement;
+    const client = document.querySelector(`#div-${clientId}`) as HTMLDivElement;
     if (client) {
       client.style.transition = "opacity 0.3s";
       client.style.opacity = "0";

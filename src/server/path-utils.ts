@@ -6,8 +6,6 @@ export function restrictedPath(path: string, clientId?: string) {
         return false;
       }
       return true;
-    case "blobs":
-      return true;
     case "peer":
       const tag = pathSplit[1];
       const clientIds = tag.split(":");

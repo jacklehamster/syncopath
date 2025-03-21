@@ -1,10 +1,10 @@
 import styles from "./style.module.css";
-import { SyncClient } from "@dobuki/syncopath";
 import { useSyncClient } from "./sync-client";
 import ReactDOM from 'react-dom/client';
+import { ISyncClient } from "../../../dist/client/ISyncClient";
 
 interface Props {
-  syncClient: SyncClient;
+  syncClient: ISyncClient;
 }
 
 export function SharedText({ syncClient }: Props) {
@@ -17,7 +17,7 @@ export function SharedText({ syncClient }: Props) {
     onChange={e => setData(e.target.value)} />;
 }
 
-export function hookupDiv(div: HTMLElement, socketClient: SyncClient) {
+export function hookupDiv(div: HTMLElement, client: ISyncClient) {
   const root = ReactDOM.createRoot(div);
-  root.render(<SharedText syncClient={socketClient} />);
+  root.render(<SharedText syncClient={client} />);
 }
