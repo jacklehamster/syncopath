@@ -156,7 +156,7 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
         self: this.clientId,
         now: this.now,
       },
-      skipValidation,
+      skipValidation: skipValidation || this.state.config?.signPayloads === false,
     };
     await this.#processor.processBlob(blob, context);
     this.#localTimeOffset = context.localTimeOffset;
@@ -210,6 +210,7 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
                 now: this.now,
               },
               outgoingUpdates: [update],
+              skipValidation: true,
             };
             this.peerManagers[peerId].processor.sendUpdateBlob(context);
           }
@@ -228,6 +229,7 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
         now: this.now,
       },
       outgoingUpdates: this.#outgoingUpdates,
+      skipValidation: this.state.config?.signPayloads === false,
     };
     const updates = this.#processor.performCycle(context);
     if (context.clientId) {

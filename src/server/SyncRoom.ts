@@ -43,7 +43,7 @@ export class SyncRoom {
 
     //  setup events
     addMessageReceiver(client, (payload: Payload, blobs) => {
-      if (!checkPayload(payload, this.#secret)) {
+      if (this.#secret && this.state.config?.signPayloads !== false && !checkPayload(payload, this.#secret)) {
         console.error("Invalid payload received", payload);
         return;
       }
@@ -97,7 +97,7 @@ export class SyncRoom {
       globalTime: now,
       secret: this.#secret,
     }, this.#secret);
-    Object.entries(blobs ?? {}).forEach(([key, blob]) => welcomeBlobBuilder.blob(key, blob));
+    Object.entries(blobs).forEach(([key, blob]) => welcomeBlobBuilder.blob(key, blob));
 
     client.send(await welcomeBlobBuilder.build().arrayBuffer());
     return { clientId };

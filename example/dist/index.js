@@ -26973,7 +26973,7 @@ class Processor {
     const blobs = {};
     const outgoingUpdates = context.outgoingUpdates;
     context.outgoingUpdates = [];
-    if (outgoingUpdates) {
+    if (outgoingUpdates?.length) {
       for (let update of outgoingUpdates) {
         update.path = this.#fixPath(update.path, context);
         const previous = getLeafObject(context.root, update.path.split("/"), 0, false);
@@ -26984,7 +26984,7 @@ class Processor {
       for (let update of outgoingUpdates) {
         update.value = await tt(update.value, blobs);
       }
-      if (outgoingUpdates) {
+      if (outgoingUpdates.length) {
         const blob = packageUpdates(outgoingUpdates, blobs, context.secret);
         this.sendUpdate(blob, context);
       }
@@ -28727,7 +28727,7 @@ class SyncRoom {
     }];
     this.#shareUpdates(newUpdates, client);
     addMessageReceiver(client, (payload2, blobs2) => {
-      if (!s8(payload2, this.#secret)) {
+      if (this.#secret && this.state.config?.signPayloads !== false && !s8(payload2, this.#secret)) {
         console.error("Invalid payload received", payload2);
         return;
       }
@@ -28769,7 +28769,7 @@ class SyncRoom {
       globalTime: now,
       secret: this.#secret
     }, this.#secret);
-    Object.entries(blobs ?? {}).forEach(([key, blob]) => welcomeBlobBuilder.blob(key, blob));
+    Object.entries(blobs).forEach(([key, blob]) => welcomeBlobBuilder.blob(key, blob));
     client.send(await welcomeBlobBuilder.build().arrayBuffer());
     return { clientId };
   }
@@ -29347,7 +29347,7 @@ class SyncClient {
         self: this.clientId,
         now: this.now
       },
-      skipValidation
+      skipValidation: skipValidation || this.state.config?.signPayloads === false
     };
     await this.#processor.processBlob(blob, context);
     this.#localTimeOffset = context.localTimeOffset;
@@ -29391,7 +29391,8 @@ class SyncClient {
                 self: this.clientId,
                 now: this.now
               },
-              outgoingUpdates: [update]
+              outgoingUpdates: [update],
+              skipValidation: true
             };
             this.peerManagers[peerId].processor.sendUpdateBlob(context2);
           }
@@ -29408,7 +29409,8 @@ class SyncClient {
         self: this.clientId,
         now: this.now
       },
-      outgoingUpdates: this.#outgoingUpdates
+      outgoingUpdates: this.#outgoingUpdates,
+      skipValidation: this.state.config?.signPayloads === false
     };
     const updates = this.#processor.performCycle(context);
     if (context.clientId) {
@@ -30112,4 +30114,4 @@ export {
   displayIsoUI
 };
 
-//# debugId=E232DC32A9EF75C764756E2164756E21
+//# debugId=735BD551C280CE3964756E2164756E21
