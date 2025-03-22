@@ -11,8 +11,7 @@ export interface ISyncClient extends ISharedData, IObservable {
 
   close(): void;
 
-  // onMessageObject(data: any, onClientIdConfirmed?: () => void, skipValidation?: boolean): void;
-  onMessageBlob(blob: Blob, onClientIdConfirmed?: () => void, skipValidation?: boolean): Promise<void>
+  onMessageBlob(blob: Blob, skipValidation?: boolean): Promise<void>
   triggerObservers(updates: Record<string, any>): void;
   removeObserver(observer: Observer): void;
   readonly now: number;

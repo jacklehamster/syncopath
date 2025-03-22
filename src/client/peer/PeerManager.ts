@@ -1,5 +1,7 @@
 //  Share peer information using WebRTC
 
+import { Processor } from "napl";
+
 interface Config {
   onData: (data: any) => void;
   onIce: (ice: any) => void;
@@ -15,6 +17,7 @@ export class PeerManager {
   #onReady: () => void;
   connected = false;
   ready = false;
+  processor = new Processor((blob) => this.#send(blob));
 
   constructor({ onData, onIce, onClose, onReady }: Config) {
     this.#onData = onData;
@@ -60,7 +63,7 @@ export class PeerManager {
     await this.#peerConnection.setRemoteDescription(answer);
   }
 
-  send(data: any) {
+  #send(data: any) {
     if (data instanceof Blob) {
       this.#dataChannel?.send(data);
     } else {
@@ -72,7 +75,7 @@ export class PeerManager {
     if (!this.#dataChannel) return;
 
     this.#dataChannel.onopen = () => {
-      this.send({ msg: "hello" });
+      this.#send({ msg: "hello" });
     };
 
     this.#dataChannel.onmessage = async (event) => {

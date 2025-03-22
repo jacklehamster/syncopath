@@ -23,11 +23,11 @@ export class SyncSocket {
 
     websocketServer.on("connection", async (socket: WebSocket, req) => {
       //  extract query params
-      await this.handleWebSocket(socket, new URLSearchParams(req.url?.split("?")[1]));
+      await this.#handleWebSocket(socket, new URLSearchParams(req.url?.split("?")[1]));
     });
   }
 
-  async handleWebSocket(socket: WebSocket, parameters: URLSearchParams) {
+  async #handleWebSocket(socket: WebSocket, parameters: URLSearchParams) {
     const roomName = parameters.get("room") ?? "default";
     const room = this.#getRoom(roomName);
     const { clientId } = await room.welcomeClient(socket);

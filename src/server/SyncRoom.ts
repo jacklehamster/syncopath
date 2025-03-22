@@ -1,7 +1,6 @@
 import { WebSocket } from "ws";
-import { commitUpdates, markUpdateConfirmed, packageUpdates, Update } from "napl";
+import { commitUpdates, markUpdateConfirmed, packageUpdates, Payload, Update } from "napl";
 import { addMessageReceiver } from "./SocketEventHandler";
-import { Payload } from "./SocketPayload";
 import { ClientState } from "@/types/ClientState";
 import { RoomState } from "@/types/RoomState";
 import { BlobBuilder, checkPayload, extractBlobsFromPayload, includeBlobsInPayload } from "@dobuki/data-blob";
@@ -43,7 +42,7 @@ export class SyncRoom {
     this.#shareUpdates(newUpdates, client);
 
     //  setup events
-    addMessageReceiver(client, (payload, blobs) => {
+    addMessageReceiver(client, (payload: Payload, blobs) => {
       if (!checkPayload(payload, this.#secret)) {
         console.error("Invalid payload received", payload);
         return;
@@ -82,7 +81,6 @@ export class SyncRoom {
 
     const blobs: Record<string, Blob> = {};
     const payload = await extractBlobsFromPayload(removeRestrictedData({ ...this.state }, clientId), blobs);
-    console.log("Current state", payload);
     //  update client just connected with state and updates
     const updates: Update[] = [];
     for (let key in payload) {
@@ -95,9 +93,8 @@ export class SyncRoom {
 
     const welcomeBlobBuilder = BlobBuilder.payload<Payload>("payload", {
       myClientId: clientId,
-      // state: payload,
       updates,
-      serverTime: now,
+      globalTime: now,
       secret: this.#secret,
     }, this.#secret);
     Object.entries(blobs ?? {}).forEach(([key, blob]) => welcomeBlobBuilder.blob(key, blob));

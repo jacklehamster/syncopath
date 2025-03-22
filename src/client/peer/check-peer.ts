@@ -8,52 +8,52 @@ const PEER_OPTIONS: SetDataOptions = {
   active: true,
 };
 
-export function checkPeerConnections(socketClient: SyncClient) {
-  for (const k in socketClient.state.peer) {
+export function checkPeerConnections(syncClient: SyncClient) {
+  for (const k in syncClient.state.peer) {
     const clients = k.split(":");
     const clientTag = `${clients[0]}:${clients[1]}`;
-    if (clients[0] === socketClient.clientId) {
+    if (clients[0] === syncClient.clientId) {
       // console.log("Checking peer connection", clients);
-      if (clients.length >= 2 && !socketClient.state.peer[`${clientTag}:${WEB_RTC}`]?.[clients[0]]?.offer) {
+      if (clients.length >= 2 && !syncClient.state.peer[`${clientTag}:${WEB_RTC}`]?.[clients[0]]?.offer) {
         //  initiate peer connections
-        if (!socketClient.peerManagers[clients[1]]) {
-          createPeerManager(socketClient, clientTag, clients[1]);
-          socketClient.peerManagers[clients[1]].createOffer().then(offer => {
-            socketClient.setData(`peer/${clientTag}:${WEB_RTC}/${clients[0]}/offer`, offer, PEER_OPTIONS);
+        if (!syncClient.peerManagers[clients[1]]) {
+          createPeerManager(syncClient, clientTag, clients[1]);
+          syncClient.peerManagers[clients[1]].createOffer().then(offer => {
+            syncClient.setData(`peer/${clientTag}:${WEB_RTC}/${clients[0]}/offer`, offer, PEER_OPTIONS);
           });
         }
       }
-      if (socketClient.state.peer[`${clientTag}:${WEB_RTC}`]?.[clients[1]]?.answer) {
-        if (!socketClient.peerManagers[clients[1]].connected) {
-          socketClient.peerManagers[clients[1]].acceptAnswer(socketClient.state.peer[`${clientTag}:${WEB_RTC}`]?.[clients[1]]?.answer).then(() => {
+      if (syncClient.state.peer[`${clientTag}:${WEB_RTC}`]?.[clients[1]]?.answer) {
+        if (!syncClient.peerManagers[clients[1]].connected) {
+          syncClient.peerManagers[clients[1]].acceptAnswer(syncClient.state.peer[`${clientTag}:${WEB_RTC}`]?.[clients[1]]?.answer).then(() => {
             console.log("Peer connected");
           });
-          socketClient.observe(`peer/${clientTag}:${WEB_RTC}/${clients[1]}/ice/~{keys}`).onElementsAdded((candidates: string[]) => {
+          syncClient.observe(`peer/${clientTag}:${WEB_RTC}/${clients[1]}/ice/~{keys}`).onElementsAdded((candidates: string[]) => {
             candidates?.forEach(candidateName => {
-              const candidate = socketClient.state.peer?.[`${clientTag}:${WEB_RTC}`]?.[clients[1]]?.ice?.[candidateName];
-              socketClient.peerManagers[clients[1]].addIceCandidate(candidate);
-              socketClient.setData(`peer/${clientTag}:${WEB_RTC}/${clients[1]}/ice/${candidateName}`, undefined, PEER_OPTIONS);
+              const candidate = syncClient.state.peer?.[`${clientTag}:${WEB_RTC}`]?.[clients[1]]?.ice?.[candidateName];
+              syncClient.peerManagers[clients[1]].addIceCandidate(candidate);
+              syncClient.setData(`peer/${clientTag}:${WEB_RTC}/${clients[1]}/ice/${candidateName}`, undefined, PEER_OPTIONS);
             });
           });
-          socketClient.setData(`peer/${clientTag}:${WEB_RTC}/${clients[1]}/answer`, undefined, PEER_OPTIONS);
+          syncClient.setData(`peer/${clientTag}:${WEB_RTC}/${clients[1]}/answer`, undefined, PEER_OPTIONS);
         }
       }
-    } else if (clients[1] === socketClient.clientId) {
-      if (socketClient.state.peer[`${clientTag}:${WEB_RTC}`]?.[clients[0]]?.offer) {
+    } else if (clients[1] === syncClient.clientId) {
+      if (syncClient.state.peer[`${clientTag}:${WEB_RTC}`]?.[clients[0]]?.offer) {
         //  accept offer
-        if (!socketClient.peerManagers[clients[0]]) {
-          createPeerManager(socketClient, clientTag, clients[0]);
-          socketClient.peerManagers[clients[0]].acceptOffer(socketClient.state.peer[`${clientTag}:${WEB_RTC}`]?.[clients[0]]?.offer).then(answer => {
-            socketClient.setData(`peer/${clientTag}:${WEB_RTC}/${clients[1]}/answer`, answer, PEER_OPTIONS);
-            socketClient.observe(`peer/${clientTag}:${WEB_RTC}/${clients[0]}/ice/~{keys}`).onElementsAdded((candidates: string[]) => {
+        if (!syncClient.peerManagers[clients[0]]) {
+          createPeerManager(syncClient, clientTag, clients[0]);
+          syncClient.peerManagers[clients[0]].acceptOffer(syncClient.state.peer[`${clientTag}:${WEB_RTC}`]?.[clients[0]]?.offer).then(answer => {
+            syncClient.setData(`peer/${clientTag}:${WEB_RTC}/${clients[1]}/answer`, answer, PEER_OPTIONS);
+            syncClient.observe(`peer/${clientTag}:${WEB_RTC}/${clients[0]}/ice/~{keys}`).onElementsAdded((candidates: string[]) => {
               candidates?.forEach(candidateName => {
-                const candidate = socketClient.state.peer?.[`${clientTag}:${WEB_RTC}`]?.[clients[0]]?.ice?.[candidateName];
-                socketClient.peerManagers[clients[0]].addIceCandidate(candidate);
-                socketClient.setData(`peer/${clientTag}:${WEB_RTC}/${clients[0]}/ice/${candidateName}`, undefined, PEER_OPTIONS);
+                const candidate = syncClient.state.peer?.[`${clientTag}:${WEB_RTC}`]?.[clients[0]]?.ice?.[candidateName];
+                syncClient.peerManagers[clients[0]].addIceCandidate(candidate);
+                syncClient.setData(`peer/${clientTag}:${WEB_RTC}/${clients[0]}/ice/${candidateName}`, undefined, PEER_OPTIONS);
               });
             });
           });
-          socketClient.setData(`peer/${clientTag}:${WEB_RTC}/${clients[0]}/offer`, undefined, PEER_OPTIONS);
+          syncClient.setData(`peer/${clientTag}:${WEB_RTC}/${clients[0]}/offer`, undefined, PEER_OPTIONS);
         }
       }
     }
@@ -65,7 +65,7 @@ function createPeerManager(syncClient: SyncClient, tag: string, peerId: string) 
   syncClient.peerManagers[peerId] = new PeerManager({
     onData(data: any) {
       if (data instanceof Blob) {
-        syncClient.onMessageBlob(data, undefined, true);
+        syncClient.onMessageBlob(data, true);
       }
     },
     onIce(ice: RTCIceCandidate) {

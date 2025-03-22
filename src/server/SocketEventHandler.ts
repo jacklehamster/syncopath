@@ -1,6 +1,6 @@
 import { WebSocket } from "ws";
-import { Payload } from "./SocketPayload";
 import { extractPayload } from "@dobuki/data-blob";
+import { Payload } from "napl";
 
 
 export function addMessageReceiver(socket: WebSocket, payloadReceived: (payload: Payload, blobs: Record<string, Blob>) => void) {

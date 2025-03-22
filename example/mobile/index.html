@@ -15,17 +15,18 @@
       <h1>Mobile Room</h1>
       <p>Shake your device to see the acceleration in the console.</p>
       <div id="status"></div>
-      <img
-        id="qrcode"
-        src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data="
-        alt="QR code"
-      />
+      <img id="qrcode" alt="QR code" />
       <div id="client-box"></div>
       <div id="state-div" style="white-space: pre"></div>
-      <script>
+      <script type="module">
+        import QRCode from "https://cdn.skypack.dev/qrcode";
         const qrCode = document.getElementById("qrcode");
         const url = new URL(location.href);
-        qrCode.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+        console.log(QRCode);
+        const code = QRCode.toDataURL(url.href, function (err, url) {
+          console.log(err, url);
+          qrCode.src = url;
+        });
       </script>
     </div>
     <script type="module">
