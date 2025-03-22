@@ -2,8 +2,11 @@
   "ClientState.ts": {
     "sha": "9e6c1fdea2ce7724f9f2488ee9036e8a44129228"
   },
-  "RoomState.ts": {
-    "sha": "9fc00a098f250913d26b7a9ef476264d8610f99f"
+  "Config.ts": {
+    "sha": "ec1f6f0d14bab4910499a855f2f0449fef9a11c5"
   },
-  "md5": "159fc68d987d7b2c0b868c37f76e7423"
+  "RoomState.ts": {
+    "sha": "afa7c8931b4eaac5f40435a76f9b8c608338a4bb"
+  },
+  "md5": "fe2af0e1a48df781b42e3572519b6e3a"
 }
