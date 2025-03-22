@@ -62,10 +62,10 @@
       "sha": "98387d623bcf6077316ad093fd89f762c23f9a4f"
     },
     "dist/index.js": {
-      "sha": "80e9933bb145e521dbd886c98e3f29b2e08aef3b"
+      "sha": "298e8b53203e67a9f10b7cf47571456f41478f04"
     },
     "dist/index.js.map": {
-      "sha": "bb79657f55107314e8a92f188411731017e97f92"
+      "sha": "41cdcaa595d20b6feb105d1fb5a8f031504b8e71"
     },
     "dist/styles-da87zv4s.css": {
       "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
@@ -127,7 +127,7 @@
     "json-test/index.html": {
       "sha": "e1e988ca0511c689742505deed09b09033a2516c"
     },
-    "md5": "c6d14d144a01d323b68912340ac5d748",
+    "md5": "505e7ef75d7797bf1f4fbce2ad387a72",
     "mobile/index.html": {
       "sha": "5e96026a8cb7830f5a87fea729f88e5b8585ce47"
     },
@@ -176,12 +176,12 @@
   },
   "/example/dist/dir.json": {
     "index.js": {
-      "sha": "80e9933bb145e521dbd886c98e3f29b2e08aef3b"
+      "sha": "298e8b53203e67a9f10b7cf47571456f41478f04"
     },
     "index.js.map": {
-      "sha": "bb79657f55107314e8a92f188411731017e97f92"
+      "sha": "41cdcaa595d20b6feb105d1fb5a8f031504b8e71"
     },
-    "md5": "84597053715088f4e9eede53c68956f7",
+    "md5": "d2761c778d9a0f003b91d7e5049f46c7",
     "styles-da87zv4s.css": {
       "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
     }
@@ -1196,7 +1196,7 @@
   },
   "/package.json": {
     "name": "@dobuki/syncopath",
-    "version": "1.0.18",
+    "version": "1.0.19",
     "module": "src/index.ts",
     "type": "module",
     "repository": {
