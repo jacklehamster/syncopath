@@ -26984,8 +26984,10 @@ class Processor {
       for (let update of outgoingUpdates) {
         update.value = await tt(update.value, blobs);
       }
-      const blob = packageUpdates(outgoingUpdates, blobs, context.secret);
-      this.sendUpdate(blob, context);
+      if (outgoingUpdates) {
+        const blob = packageUpdates(outgoingUpdates, blobs, context.secret);
+        this.sendUpdate(blob, context);
+      }
     }
   }
   async processBlob(data, context) {
@@ -29818,7 +29820,7 @@ function insertInIsoWorld(type, x, y5) {
 // src/index.ts
 var name;
 function randomName() {
-  return name ?? (name = "napl-" + Math.random().toString(36).substring(7));
+  return name ?? (name = "guest-" + Math.random().toString(36).substring(8));
 }
 var EMOJIS = [
   "\uD83D\uDC35",
@@ -30110,4 +30112,4 @@ export {
   displayIsoUI
 };
 
-//# debugId=CFBE06C2E7233E4F64756E2164756E21
+//# debugId=E232DC32A9EF75C764756E2164756E21

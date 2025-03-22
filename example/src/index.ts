@@ -3,13 +3,13 @@
 /// <reference lib="dom.iterable" />
 
 import prettyStringify from "json-stringify-pretty-compact";
-import { Observer, providePlayroomClient, provideSocketClient } from "@dobuki/syncopath";
+import { Observer, provideSocketClient } from "@dobuki/syncopath";
 import { SpriteSheet, loadSpriteSheet } from "aseprite-sheet";
 import { hookupDiv } from "./react/component";
 
 let name: string;
 export function randomName() {
-  return name ?? (name = "napl-" + Math.random().toString(36).substring(7));
+  return name ?? (name = "guest-" + Math.random().toString(36).substring(8));
 }
 
 const EMOJIS = [
