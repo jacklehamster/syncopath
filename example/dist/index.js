@@ -28714,7 +28714,7 @@ class SyncRoom {
   }
   async welcomeClient(client) {
     const now = Date.now();
-    const clientId = `sync-client-${nextClientId++}`;
+    const clientId = `user-${nextClientId++}`;
     const clientPath = `clients/${clientId}`;
     const clientState = {
       joined: now
@@ -30334,4 +30334,4 @@ export {
   displayIsoUI
 };
 
-//# debugId=5A9B42266F46708064756E2164756E21
+//# debugId=0D9A45820766EAEA64756E2164756E21
