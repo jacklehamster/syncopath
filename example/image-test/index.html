@@ -60,6 +60,12 @@
       .hidden {
         display: none;
       }
+      .syncousers {
+        position: absolute;
+        right: 5px;
+        top: 5px;
+        z-index: 100;
+      }
     </style>
   </head>
   <body>
@@ -82,12 +88,7 @@
     </div>
 
     <script type="module">
-      import {
-        socketClient,
-        randomEmoji,
-        randomName,
-        stringify,
-      } from "../dist/index.js";
+      import { socketClient, stringify, displayUsers } from "../dist/index.js";
 
       window.socketClient = socketClient;
 
@@ -155,6 +156,8 @@
               socketClient.state
             ))
         );
+
+      displayUsers();
     </script>
   </body>
 </html>

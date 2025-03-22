@@ -69,8 +69,8 @@
       introduceName();
 
       function getOrCreateClientBox(clientId, isSelf) {
-        if (document.querySelector(`#client-${clientId}`)) {
-          return document.querySelector(`#client-${clientId}`);
+        if (document.querySelector(`#video-${clientId}`)) {
+          return document.querySelector(`#video-${clientId}`);
         }
         const clientBox = document.createElement("div");
         clientBox.id = `client-${clientId}`;

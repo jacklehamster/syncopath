@@ -8,7 +8,7 @@
       body {
         background-color: lightgray;
       }
-      .users {
+      .syncousers {
         position: absolute;
         right: 5px;
         top: 5px;
@@ -51,7 +51,6 @@
   </head>
   <body>
     <div class="container">
-      <div class="users"></div>
       <div class="chat-container">
         <div class="chat-log"></div>
         <div class="chatting"></div>
@@ -68,7 +67,6 @@
         socketClient,
         randomEmoji,
         randomName,
-        introduceName,
         displayUsers,
       } from "../dist/index.js";
 
@@ -137,13 +135,11 @@
 
       socketClient.setData("config/signPayloads", false);
 
-      introduceName();
-
-      displayUsers(document.querySelector(".users"));
+      displayUsers();
 
       document.querySelector(".chat-box").focus();
 
-      //      socketClient.observe().onChange(() => console.log(socketClient.state));
+      socketClient.observe().onChange(() => console.log(socketClient.state));
     </script>
   </body>
 </html>

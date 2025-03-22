@@ -21,7 +21,7 @@
     </div>
 
     <script type="module">
-      import { socketClient } from "../dist/index.js";
+      import { socketClient, displayUsers } from "../dist/index.js";
 
       const keys = {};
 
@@ -116,6 +116,8 @@
           loop();
         }
       });
+
+      displayUsers();
     </script>
   </body>
 </html>

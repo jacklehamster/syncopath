@@ -11,13 +11,19 @@
       #state-div {
         white-space: pre;
       }
+      .syncousers {
+        position: absolute;
+        right: 5px;
+        top: 5px;
+        z-index: 100;
+      }
     </style>
   </head>
   <body>
     <div>
       <h1>Peer Room</h1>
       <div id="status"></div>
-      <div id="client-box"></div>
+      <div id="peers-box"></div>
       <div id="state-div"></div>
     </div>
     <script type="module">
@@ -25,9 +31,10 @@
         socketClient,
         handleUsersChanged,
         stringify,
+        displayUsers,
       } from "../dist/index.js";
 
-      const clientBox = document.getElementById("client-box");
+      const clientBox = document.getElementById("peers-box");
       handleUsersChanged(
         (clientId, isSelf, observers) => {
           const clientDiv = clientBox.appendChild(
@@ -35,7 +42,7 @@
           );
           clientDiv.style.border = "1px solid black";
           clientDiv.style.padding = "10px";
-          clientDiv.id = `client-${clientId}`;
+          clientDiv.id = `peers-${clientId}`;
           clientDiv.textContent = `Client: ${clientId}`;
 
           if (!isSelf) {
@@ -59,7 +66,7 @@
           }
         },
         (clientId) => {
-          const client = document.getElementById(`client-${clientId}`);
+          const client = document.getElementById(`peers-${clientId}`);
           if (client) {
             client.style.transition = "opacity 0.3s";
             client.style.opacity = 0;
@@ -78,6 +85,8 @@
               socketClient.state
             ))
         );
+
+      displayUsers();
     </script>
   </body>
 </html>

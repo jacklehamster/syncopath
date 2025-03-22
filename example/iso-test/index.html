@@ -17,7 +17,7 @@
         cursor: pointer;
         background-color: aquamarine;
       }
-      .users {
+      .syncousers {
         position: absolute;
         right: 5px;
         bottom: 5px;
@@ -28,22 +28,20 @@
   </head>
   <body>
     <div class="container">
-      <div class="users"></div>
+      <div class="syncousers"></div>
     </div>
 
     <script type="module">
       import {
         socketClient,
         displayIsoUI,
-        introduceName,
         displayUsers,
         trackCursor,
       } from "../dist/index.js";
 
       window.socketClient = socketClient;
       displayIsoUI("random-iso.json");
-      introduceName();
-      displayUsers(document.querySelector(".users"));
+      displayUsers(document.querySelector(".syncousers"));
       trackCursor();
 
       //      socketClient.observe().onChange(() => console.log(socketClient.state));

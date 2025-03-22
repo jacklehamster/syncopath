@@ -4,6 +4,7 @@
 
 import prettyStringify from "json-stringify-pretty-compact";
 import { Observer, provideSocketClient } from "@dobuki/syncopath";
+import * as syncopath from "@dobuki/syncopath";
 import { SpriteSheet, loadSpriteSheet } from "aseprite-sheet";
 import { hookupDiv } from "./react/component";
 
@@ -53,7 +54,7 @@ export const socketClient = getSocketClient();
 
 function stringify(obj: any) {
   return prettyStringify(obj, {
-    maxLength: 80, replacer: (key, value) => {
+    maxLength: 60, replacer: (key, value) => {
       if (value instanceof Blob) {
         return `Blob(${value.size})`;
       }
@@ -72,44 +73,12 @@ export async function getSpriteSheet(path: string) {
 }
 
 export function introduceName() {
-  socketClient.observe("clients/~{self}").onChange(() => {
-    socketClient.self.setData("name", randomName());
-    socketClient.self.setData("emoji", randomEmoji());
-  });
+  syncopath.introduceName(socketClient);
 }
 
-export function displayUsers(userDiv: HTMLDivElement) {
-  handleUsersChanged((clientId, isSelf, observers) => {
-    observers.add(
-      socketClient
-        .observe([`clients/${clientId}/name`, `clients/${clientId}/emoji`])
-        .onChange((values) => {
-          const [name, emoji] = values;
-          client.textContent = `${emoji} ${name}`;
-        })
-    );
 
-    // new client
-    const client = document.createElement("div");
-    client.id = `div-${clientId}`;
-    client.textContent = clientId;
-    if (isSelf) {
-      client.style.fontWeight = "bold";
-      client.style.backgroundColor = "yellow";
-      userDiv.prepend(client);
-    } else {
-      userDiv.appendChild(client);
-    }
-  }, (clientId) => {
-    const client = document.querySelector(`#div-${clientId}`) as HTMLDivElement;
-    if (client) {
-      client.style.transition = "opacity 0.3s";
-      client.style.opacity = "0";
-      setTimeout(() => {
-        client.remove();
-      }, 300);
-    }
-  });
+export function displayUsers(userDiv?: HTMLDivElement) {
+  syncopath.displayUsers(socketClient, userDiv);
 }
 
 export function trackCursor({ exclude = [] }: { exclude?: string[] } = {}) {
@@ -125,26 +94,13 @@ export function trackCursor({ exclude = [] }: { exclude?: string[] } = {}) {
   });
 }
 
-export function handleUsersChanged(onUserAdded: (clientId: string, isSelf: boolean, observers: Set<Observer>) => void, onUserRemoved?: (clientId: string) => void) {
-  return socketClient
-    .observe("clients/~{keys}")
-    .onElementsAdded((clientIds: string[]) => {
-      clientIds?.forEach((clientId) => {
-        const isSelf = clientId === socketClient.clientId;
-        const observers = new Set<Observer>();
-        onUserAdded(clientId, isSelf, observers);
-        observers.add(
-          socketClient.observe(`clients/${clientId}`).onChange((client) => {
-            if (client === undefined) {
-              observers.forEach((observer) => observer.close());
-            }
-          })
-        );
-      });
-    })
-    .onElementsDeleted((clientIds: string[]) => {
-      clientIds?.forEach((clientId) => onUserRemoved?.(clientId));
-    });
+export function handleUsersChanged(
+  onUserAdded: (clientId: string, isSelf: boolean, observers: Set<Observer>) => void,
+  onUserRemoved?: (clientId: string) => void
+) {
+  syncopath.handleUsersChanged(socketClient)
+    .onUserAdded(onUserAdded)
+    .onUserRemoved(onUserRemoved);
 }
 
 export function trackCursorObserver(clientId: string, callback: (cursor?: [number, number], ...extra: any[]) => void, extraObservations: string[] = []) {

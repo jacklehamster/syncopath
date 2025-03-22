@@ -26,7 +26,7 @@ export class SyncRoom {
     const now = Date.now();
 
     //  initialize client state
-    const clientId = `client-${nextClientId++}`;
+    const clientId = `user-${nextClientId++}`;
     const clientPath = `clients/${clientId}`;
     const clientState: ClientState = {
       joined: now,
