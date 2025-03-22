@@ -11,7 +11,7 @@ export interface ISharedData {
   clientId: string;
   state: Record<string, any>;
   getData(path: string): any;
-  setData(path: string, value: any, options?: SetDataOptions): Promise<void>;
-  pushData(path: string, value: any, options?: UpdateOptions): Promise<void>
+  setData(path: string, value: any, options?: SetDataOptions): void;
+  pushData(path: string, value: any, options?: UpdateOptions): void;
   triggerObservers(updates: Record<string, any>): void;
 }

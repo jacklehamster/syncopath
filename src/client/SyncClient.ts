@@ -52,16 +52,16 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
     return getLeafObject(this.state, parts, 0, false, { self: this.#selfData.clientId }) as any;
   }
 
-  async pushData(path: string, value: any, options: UpdateOptions = {}) {
-    await this.#processDataUpdate({
+  pushData(path: string, value: any, options: UpdateOptions = {}) {
+    this.#processDataUpdate({
       path,
       value,
       append: true,
     }, options);
   }
 
-  async setData(path: string, value: any, options: SetDataOptions = {}) {
-    await this.#processDataUpdate({
+  setData(path: string, value: any, options: SetDataOptions = {}) {
+    this.#processDataUpdate({
       path,
       value,
       append: options.append,
@@ -69,12 +69,8 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
     }, options);
   }
 
-  async #processDataUpdate(update: Update, options: UpdateOptions = {}) {
-    const isPeerUpdate = this.#isPeerUpdate(update);
-    if (!isPeerUpdate) {
-      await this.#waitForConnection();
-    }
-    if (isPeerUpdate || (options.active ?? this.state.config?.activeUpdates ?? this.#socket?.serverless)) {
+  #processDataUpdate(update: Update, options: UpdateOptions = {}) {
+    if (options.active ?? this.state.config?.activeUpdates ?? this.#socket?.serverless) {
       markUpdateConfirmed(update, this.now);
     }
     this.#outgoingUpdates.push(update);
@@ -187,7 +183,7 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
     requestAnimationFrame(() => this.#processNextFrame());
   }
 
-  #processNextFrame() {
+  async #processNextFrame() {
     this.#nextFrameInProcess = false;
 
     this.#outgoingUpdates.forEach(async (update, index) => {
@@ -219,6 +215,7 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
     });
     this.#outgoingUpdates = this.#outgoingUpdates.filter(update => update !== undefined);
 
+    await this.#waitForConnection();
     const context: Context = {
       root: this.state,
       secret: this.#secret,
@@ -244,14 +241,5 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
     this.triggerObservers(updates);
     checkPeerConnections(this);
     this.#socket?.stateChanged?.(this.state);
-  }
-
-  #isPeerUpdate(update: Update) {
-    if (update.path?.startsWith("peer/")) {
-      const tag = update.path.split("/")[1];
-      const clientIds = tag.split(":");
-      return clientIds.length === 2 && (clientIds[0] === this.clientId || clientIds[1] === this.clientId);
-    }
-    return false;
   }
 }

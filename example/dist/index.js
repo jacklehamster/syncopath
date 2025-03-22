@@ -29255,27 +29255,23 @@ class SyncClient {
     const parts = path.split("/");
     return getLeafObject(this.state, parts, 0, false, { self: this.#selfData.clientId });
   }
-  async pushData(path, value, options = {}) {
-    await this.#processDataUpdate({
+  pushData(path, value, options = {}) {
+    this.#processDataUpdate({
       path,
       value,
       append: true
     }, options);
   }
-  async setData(path, value, options = {}) {
-    await this.#processDataUpdate({
+  setData(path, value, options = {}) {
+    this.#processDataUpdate({
       path,
       value,
       append: options.append,
       insert: options.insert
     }, options);
   }
-  async#processDataUpdate(update, options = {}) {
-    const isPeerUpdate = this.#isPeerUpdate(update);
-    if (!isPeerUpdate) {
-      await this.#waitForConnection();
-    }
-    if (isPeerUpdate || (options.active ?? this.state.config?.activeUpdates ?? this.#socket?.serverless)) {
+  #processDataUpdate(update, options = {}) {
+    if (options.active ?? this.state.config?.activeUpdates ?? this.#socket?.serverless) {
       markUpdateConfirmed(update, this.now);
     }
     this.#outgoingUpdates.push(update);
@@ -29372,7 +29368,7 @@ class SyncClient {
     this.#nextFrameInProcess = true;
     requestAnimationFrame(() => this.#processNextFrame());
   }
-  #processNextFrame() {
+  async#processNextFrame() {
     this.#nextFrameInProcess = false;
     this.#outgoingUpdates.forEach(async (update, index) => {
       if (update?.path.startsWith("peer/")) {
@@ -29400,6 +29396,7 @@ class SyncClient {
       }
     });
     this.#outgoingUpdates = this.#outgoingUpdates.filter((update) => update !== undefined);
+    await this.#waitForConnection();
     const context = {
       root: this.state,
       secret: this.#secret,
@@ -29424,14 +29421,6 @@ class SyncClient {
     this.triggerObservers(updates);
     checkPeerConnections(this);
     this.#socket?.stateChanged?.(this.state);
-  }
-  #isPeerUpdate(update) {
-    if (update.path?.startsWith("peer/")) {
-      const tag = update.path.split("/")[1];
-      const clientIds = tag.split(":");
-      return clientIds.length === 2 && (clientIds[0] === this.clientId || clientIds[1] === this.clientId);
-    }
-    return false;
   }
 }
 // ../src/client/provide-socket-client.ts
@@ -30334,4 +30323,4 @@ export {
   displayIsoUI
 };
 
-//# debugId=0D9A45820766EAEA64756E2164756E21
+//# debugId=DD2C49137B7DE5CC64756E2164756E21
