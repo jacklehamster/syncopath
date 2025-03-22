@@ -21,10 +21,10 @@
     "sha": "98387d623bcf6077316ad093fd89f762c23f9a4f"
   },
   "dist/index.js": {
-    "sha": "7cca104179f9793f5849a4367c55db5236aa91c9"
+    "sha": "60ab34677f727868c01fec2656dac6a6ef2453b9"
   },
   "dist/index.js.map": {
-    "sha": "b9a74fd5f44622fae80a057347870e10ed1d7758"
+    "sha": "65d2e7ee345b1e499f832d9d1a1110cb262a95fb"
   },
   "dist/styles-da87zv4s.css": {
     "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
@@ -86,9 +86,9 @@
   "json-test/index.html": {
     "sha": "9ec0f95dcdc56365093036252745434e014fdd8a"
   },
-  "md5": "b475570842a8b6c850f74f3e52061c30",
+  "md5": "977a63e82ddb4621a02d4c9c14f1df03",
   "mobile/index.html": {
-    "sha": "072a5a0ce4adb8cd6ebe1f19497c4a97016aabb7"
+    "sha": "58d5b72ba5221534a1bcbc0465ea2609a5403690"
   },
   "package.json": {
     "sha": "b02076a4e075ac42bb3c2d8188662e83573eaa53"
@@ -109,13 +109,13 @@
     "sha": "85e6747c327b0844e95797088ad126f9d7a42d37"
   },
   "src/index.ts": {
-    "sha": "299cbde241346cdcec21994539239f5f0517557a"
+    "sha": "91d270da6e6ad96b386dff156aa9d29c95dddb71"
   },
   "src/iso-test/iso-utils.ts": {
     "sha": "ba1336af22c4389a058e0cd900f415402187505d"
   },
   "src/react/component.tsx": {
-    "sha": "0d95e1913d7a168f70216b63ae71edbcaafe51d2"
+    "sha": "7c344471c4f366046b285c0265e495c2fe5d41c7"
   },
   "src/react/index.d.ts": {
     "sha": "7980ec238c4dd00704399f7d8fe89cf26f194398"
@@ -124,7 +124,7 @@
     "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
   },
   "src/react/sync-client.ts": {
-    "sha": "d0b4176313c7f5601bb60afd55851abfc6407b55"
+    "sha": "4fd191aca2a61a74810e7722757aa6f65332ce12"
   },
   "tsconfig.json": {
     "sha": "5d54bba5d6d02edc48c065729f8965af5541693d"

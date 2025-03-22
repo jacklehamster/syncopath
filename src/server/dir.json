@@ -1,19 +1,16 @@
 {
   "SocketEventHandler.ts": {
-    "sha": "aecf58955629f4178e2d85904d0c1121a1fc23dc"
-  },
-  "SocketPayload.ts": {
-    "sha": "eaa0e9700beedc385a9a30de81e8886f4ac6e28c"
+    "sha": "b9d65ffc54fcbd587501bdb29667925b8eba79cd"
   },
   "SyncRoom.ts": {
-    "sha": "dd26e4e8d0dca9780180b1cb9a9823ca78b74b94"
+    "sha": "b61f09f262a06de9992e927e1688d65223a2aea9"
   },
   "SyncSocket.ts": {
-    "sha": "14f756b15a966c79b97a1c50dd4c04a4420d40af"
+    "sha": "c016f3b830aba6757f17ebca866abc614ccc6995"
   },
-  "md5": "f0b417dac992ff4cae5511ed1d6f12e9",
+  "md5": "afc1f2be27c250cfcd17ba12c5ba6cbb",
   "path-utils.ts": {
-    "sha": "5895904b11307ff78f1ba09530efa40274864655"
+    "sha": "b56056f2fe7dbc44434cb9580d0a69027c9467db"
   },
   "peer-utils.ts": {
     "sha": "e0bccecfde9e824b45894fcbd0fabe2e38909450"

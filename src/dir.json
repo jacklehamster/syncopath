@@ -1,55 +1,55 @@
 {
   "client/ClientData.ts": {
-    "sha": "3173a51076bf7ba89930ccaa147c3924c60d16e4"
+    "sha": "fc9b9b4fb047ca3461a94c305f1305438d32dcbc"
   },
   "client/IObservable.ts": {
     "sha": "07d37b869fb7f461b5cf85032863395cc174cd06"
   },
   "client/ISharedData.ts": {
-    "sha": "590f72e32bcd702e095078e8566b55691c198707"
+    "sha": "b3841f13433a83124c5dba93afc0aee9f12262da"
   },
   "client/ISocket.ts": {
-    "sha": "8efb189940038b5c99d39ed3af04a6a23bbbfe08"
+    "sha": "8701cea8f7f53317cbfcd27efe0b9cc7fa36b543"
+  },
+  "client/ISyncClient.ts": {
+    "sha": "38edeb685296052443e355026676e81efe13422f"
   },
   "client/Observer.ts": {
     "sha": "6039a3a105c3f32491b60ea8d1cecdac422bbb17"
   },
   "client/ObserverManager.ts": {
-    "sha": "013b554b0ef86616f530370dc6234994206a656e"
+    "sha": "b5ed6d80ac7c37b3e8d81482a65a72d8b2c97786"
   },
   "client/SubData.ts": {
-    "sha": "2541761865a930ebeab06ce776dae3e5d19cb9e5"
+    "sha": "e1df848f936cc9d95028a990af5c59f6200dbfe5"
   },
   "client/SyncClient.ts": {
-    "sha": "0f6aed6c0ab058fb290afb50ff7c5748e93e7ce7"
+    "sha": "eaf173097c3ec2c569d8b4f59da7c6285e307948"
   },
   "client/peer/PeerManager.ts": {
-    "sha": "46ff2d909beeecf82bf901412ba5510175732248"
+    "sha": "597b16292e29726b2750d3bed612d8e50f3a8575"
   },
   "client/peer/check-peer.ts": {
-    "sha": "481d49c481c7d1b730cd9c6d8ebc275032d94eb6"
+    "sha": "326c4a47485ee5c05058b79cf109c0d2183d86d5"
   },
   "client/provide-socket-client.ts": {
-    "sha": "82b000635ca4727011db287289d04bb66f7de81f"
+    "sha": "734c7d28ca741caaf0bc72327b1b6f631ca47fe3"
   },
   "index.ts": {
-    "sha": "874da3fd3712043e45900b1fdf60bab8001a3d7f"
+    "sha": "0aac74d3b8d70dd884926cbdea8ea38af1011e43"
   },
-  "md5": "1fd1db155280402d907ef3a58656d520",
+  "md5": "3c7c5176a0626904e7d527b5e76073ea",
   "server/SocketEventHandler.ts": {
-    "sha": "aecf58955629f4178e2d85904d0c1121a1fc23dc"
-  },
-  "server/SocketPayload.ts": {
-    "sha": "eaa0e9700beedc385a9a30de81e8886f4ac6e28c"
+    "sha": "b9d65ffc54fcbd587501bdb29667925b8eba79cd"
   },
   "server/SyncRoom.ts": {
-    "sha": "dd26e4e8d0dca9780180b1cb9a9823ca78b74b94"
+    "sha": "b61f09f262a06de9992e927e1688d65223a2aea9"
   },
   "server/SyncSocket.ts": {
-    "sha": "14f756b15a966c79b97a1c50dd4c04a4420d40af"
+    "sha": "c016f3b830aba6757f17ebca866abc614ccc6995"
   },
   "server/path-utils.ts": {
-    "sha": "5895904b11307ff78f1ba09530efa40274864655"
+    "sha": "b56056f2fe7dbc44434cb9580d0a69027c9467db"
   },
   "server/peer-utils.ts": {
     "sha": "e0bccecfde9e824b45894fcbd0fabe2e38909450"
