@@ -13,9 +13,9 @@
   },
   "/example/chatroom/dir.json": {
     "index.html": {
-      "sha": "528b29eab5416b2a6ca7e9c4e332cba2f2adb66d"
+      "sha": "3a10ed2aff192d4f3a0ad4d2e6d31316e8ab7324"
     },
-    "md5": "af53e37ee13b12cfaa4c6b2f9d7d2d8e"
+    "md5": "af2220ce1135246fa0fedf38b2eb0cf5"
   },
   "/example/config.json": {
     "websocketHost": "api.dobuki.net",
@@ -56,16 +56,16 @@
       "sha": "a8f7b2aa31c69081e16f711724e1214506f46d9d"
     },
     "chatroom/index.html": {
-      "sha": "528b29eab5416b2a6ca7e9c4e332cba2f2adb66d"
+      "sha": "3a10ed2aff192d4f3a0ad4d2e6d31316e8ab7324"
     },
     "config.json": {
       "sha": "98387d623bcf6077316ad093fd89f762c23f9a4f"
     },
     "dist/index.js": {
-      "sha": "298e8b53203e67a9f10b7cf47571456f41478f04"
+      "sha": "a10f4f40fe3d9be4c6710ed41cea3c7c368aaf9e"
     },
     "dist/index.js.map": {
-      "sha": "41cdcaa595d20b6feb105d1fb5a8f031504b8e71"
+      "sha": "7c2c4be0b9174b1bf0ed12a5ab5bddc841b814e5"
     },
     "dist/styles-da87zv4s.css": {
       "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
@@ -127,7 +127,7 @@
     "json-test/index.html": {
       "sha": "e1e988ca0511c689742505deed09b09033a2516c"
     },
-    "md5": "505e7ef75d7797bf1f4fbce2ad387a72",
+    "md5": "20f88b8753a9a2d26e93c8f0f3196df0",
     "mobile/index.html": {
       "sha": "5e96026a8cb7830f5a87fea729f88e5b8585ce47"
     },
@@ -176,12 +176,12 @@
   },
   "/example/dist/dir.json": {
     "index.js": {
-      "sha": "298e8b53203e67a9f10b7cf47571456f41478f04"
+      "sha": "a10f4f40fe3d9be4c6710ed41cea3c7c368aaf9e"
     },
     "index.js.map": {
-      "sha": "41cdcaa595d20b6feb105d1fb5a8f031504b8e71"
+      "sha": "7c2c4be0b9174b1bf0ed12a5ab5bddc841b814e5"
     },
-    "md5": "d2761c778d9a0f003b91d7e5049f46c7",
+    "md5": "d7534faf79ab878e607e7a43bb582355",
     "styles-da87zv4s.css": {
       "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
     }
@@ -1196,7 +1196,7 @@
   },
   "/package.json": {
     "name": "@dobuki/syncopath",
-    "version": "1.0.19",
+    "version": "1.0.20",
     "module": "src/index.ts",
     "type": "module",
     "repository": {
@@ -1242,7 +1242,7 @@
     },
     "description": "Synchronize data across clients using WebSocket",
     "dependencies": {
-      "napl": "^1.0.49",
+      "napl": "^1.0.51",
       "playroomkit": "^0.0.87"
     },
     "keywords": []
@@ -1255,7 +1255,7 @@
       "sha": "07d37b869fb7f461b5cf85032863395cc174cd06"
     },
     "ISharedData.ts": {
-      "sha": "b3841f13433a83124c5dba93afc0aee9f12262da"
+      "sha": "71f7bc06f1f250029f371813cc68f188083b62ab"
     },
     "ISocket.ts": {
       "sha": "8701cea8f7f53317cbfcd27efe0b9cc7fa36b543"
@@ -1273,9 +1273,9 @@
       "sha": "e1df848f936cc9d95028a990af5c59f6200dbfe5"
     },
     "SyncClient.ts": {
-      "sha": "a77a48e25125cdf4f28c28d572562fc1b5ac18da"
+      "sha": "5bc642c442289a6aeaf337188842b74255e06d81"
     },
-    "md5": "c8cea508b63f0b74c9a04b5c945ac9a3",
+    "md5": "9f3ac473f77f4607e0cab3f8e9ba014c",
     "peer/PeerManager.ts": {
       "sha": "597b16292e29726b2750d3bed612d8e50f3a8575"
     },
@@ -1312,7 +1312,7 @@
       "sha": "07d37b869fb7f461b5cf85032863395cc174cd06"
     },
     "client/ISharedData.ts": {
-      "sha": "b3841f13433a83124c5dba93afc0aee9f12262da"
+      "sha": "71f7bc06f1f250029f371813cc68f188083b62ab"
     },
     "client/ISocket.ts": {
       "sha": "8701cea8f7f53317cbfcd27efe0b9cc7fa36b543"
@@ -1330,7 +1330,7 @@
       "sha": "e1df848f936cc9d95028a990af5c59f6200dbfe5"
     },
     "client/SyncClient.ts": {
-      "sha": "a77a48e25125cdf4f28c28d572562fc1b5ac18da"
+      "sha": "5bc642c442289a6aeaf337188842b74255e06d81"
     },
     "client/peer/PeerManager.ts": {
       "sha": "597b16292e29726b2750d3bed612d8e50f3a8575"
@@ -1347,7 +1347,7 @@
     "index.ts": {
       "sha": "819c255ec5ffd50e439f407f31e58c8c8a3fba03"
     },
-    "md5": "f96fa2124456f0e736a93233fe06bc5a",
+    "md5": "0c7d48487bfb6c480d7ef68530cdb53b",
     "server/SocketEventHandler.ts": {
       "sha": "b9d65ffc54fcbd587501bdb29667925b8eba79cd"
     },

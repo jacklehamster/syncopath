@@ -6,7 +6,7 @@
     "sha": "07d37b869fb7f461b5cf85032863395cc174cd06"
   },
   "client/ISharedData.ts": {
-    "sha": "b3841f13433a83124c5dba93afc0aee9f12262da"
+    "sha": "71f7bc06f1f250029f371813cc68f188083b62ab"
   },
   "client/ISocket.ts": {
     "sha": "8701cea8f7f53317cbfcd27efe0b9cc7fa36b543"
@@ -24,7 +24,7 @@
     "sha": "e1df848f936cc9d95028a990af5c59f6200dbfe5"
   },
   "client/SyncClient.ts": {
-    "sha": "a77a48e25125cdf4f28c28d572562fc1b5ac18da"
+    "sha": "5bc642c442289a6aeaf337188842b74255e06d81"
   },
   "client/peer/PeerManager.ts": {
     "sha": "597b16292e29726b2750d3bed612d8e50f3a8575"
@@ -41,7 +41,7 @@
   "index.ts": {
     "sha": "819c255ec5ffd50e439f407f31e58c8c8a3fba03"
   },
-  "md5": "f96fa2124456f0e736a93233fe06bc5a",
+  "md5": "0c7d48487bfb6c480d7ef68530cdb53b",
   "server/SocketEventHandler.ts": {
     "sha": "b9d65ffc54fcbd587501bdb29667925b8eba79cd"
   },
