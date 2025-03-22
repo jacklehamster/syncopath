@@ -26,7 +26,7 @@
   "SyncClient.ts": {
     "sha": "a77a48e25125cdf4f28c28d572562fc1b5ac18da"
   },
-  "md5": "66a87c8baa3b59dcbfd1976ae805be93",
+  "md5": "c8cea508b63f0b74c9a04b5c945ac9a3",
   "peer/PeerManager.ts": {
     "sha": "597b16292e29726b2750d3bed612d8e50f3a8575"
   },
@@ -35,5 +35,8 @@
   },
   "provide-socket-client.ts": {
     "sha": "734c7d28ca741caaf0bc72327b1b6f631ca47fe3"
+  },
+  "ui/users.ts": {
+    "sha": "c3d4113fae376e2316aec667fd8509d91677027c"
   }
 }
