@@ -155,6 +155,7 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
       skipValidation: skipValidation || this.state.config?.signPayloads === false,
     };
     await this.#processor.processBlob(blob, context);
+
     this.#localTimeOffset = context.localTimeOffset;
     this.#secret = context.secret;
     this.#selfData.clientId = context.clientId;
@@ -180,12 +181,13 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
       return;
     }
     this.#nextFrameInProcess = true;
-    requestAnimationFrame(() => this.#processNextFrame());
+    requestAnimationFrame(() => {
+      this.#nextFrameInProcess = false;
+      this.#processNextFrame();
+    });
   }
 
   async #processNextFrame() {
-    this.#nextFrameInProcess = false;
-
     this.#outgoingUpdates.forEach(async (update, index) => {
       // skip updates to peers if there's a peerManager ready
       if (update?.path.startsWith("peer/")) {
@@ -195,6 +197,8 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
           const peerId = clientIds[0] === this.clientId ? clientIds[1] : clientIds[0];
           if (this.peerManagers[peerId]?.ready) {
             this.#outgoingUpdates[index] = undefined;
+            //  Mark peer updates as confirmed
+            update.confirmed = this.now;
             //  Send through peer manager
             const context: Context = {
               root: this.state,
@@ -215,7 +219,9 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
     });
     this.#outgoingUpdates = this.#outgoingUpdates.filter(update => update !== undefined);
 
-    await this.#waitForConnection();
+    if (this.#outgoingUpdates.length > 0) {
+      await this.#waitForConnection();
+    }
     const context: Context = {
       root: this.state,
       secret: this.#secret,

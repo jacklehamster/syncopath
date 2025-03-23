@@ -14,6 +14,10 @@
         top: 5px;
         z-index: 100;
       }
+      .pre {
+        white-space: pre;
+        font-family: monospace;
+      }
     </style>
   </head>
   <body>
@@ -22,8 +26,6 @@
       <p>Shake your device to see the acceleration in the console.</p>
       <div id="status"></div>
       <img id="qrcode" alt="QR code" style="visibility: hidden" />
-      <div id="knobs-box"></div>
-      <div id="state-div" style="white-space: pre"></div>
       <script type="module">
         import QRCode from "https://cdn.skypack.dev/qrcode";
         const qrCode = document.getElementById("qrcode");
@@ -33,6 +35,9 @@
           qrCode.style.visibility = "";
         });
       </script>
+
+      <div id="knobs-box"></div>
+      <div id="state-div" class="pre"></div>
     </div>
     <script type="module">
       import {
@@ -108,7 +113,6 @@
 
           observers.add(
             peerData.observe("acceleration").onChange((acceleration) => {
-              console.log(acceleration);
               if (acceleration) {
                 clientDiv.style.display = "";
                 const { x, y, z } = acceleration;
@@ -142,12 +146,6 @@
             event.preventDefault();
             if (!peerData.state.tap) {
               peerData.setData("tap", "~{now}");
-            }
-            if (
-              document.documentElement.requestFullscreen &&
-              !document.fullscreenElement
-            ) {
-              document.documentElement.requestFullscreen();
             }
           });
           window.addEventListener("touchend", (event) => {

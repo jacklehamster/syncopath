@@ -39,11 +39,11 @@ export class SubData implements ISharedData, IObservable {
     this.#observerManager.triggerObservers(updates);
   }
 
-  async setData(path: string, value: any, options?: SetDataOptions): Promise<void> {
+  setData(path: string, value: any, options?: SetDataOptions): void {
     return this.syncClient.setData(this.#getAbsolutePath(path), value, options);
   }
 
-  async pushData(path: string, value: any, options?: SetDataOptions): Promise<void> {
+  pushData(path: string, value: any, options?: SetDataOptions): void {
     return this.syncClient.pushData(this.#getAbsolutePath(path), value, options);
   }
 

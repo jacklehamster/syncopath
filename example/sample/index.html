@@ -33,17 +33,6 @@
         font-size: 9px;
         width: auto;
       }
-      #client-list {
-        display: flex;
-        flex-direction: row;
-      }
-      .client-box {
-        border: 1px solid black;
-        margin: 5px;
-        padding: 5px;
-        height: 100px;
-        width: 150px;
-      }
       .cursor {
         position: absolute;
         width: 20px;
@@ -59,6 +48,12 @@
         height: 100%;
         overflow: auto;
       }
+      .syncousers {
+        position: absolute;
+        right: 5px;
+        bottom: 5px;
+        z-index: 100;
+      }
     </style>
   </head>
   <body>
@@ -73,7 +68,7 @@
         <input type="checkbox" id="active" checked="true" />
         <label
           title="
-          Active updates are immediate  while passive updates require response from server.
+          Active updates are immediate while passive updates require response from server.
         "
           for="active"
           >Active update</label
@@ -86,18 +81,17 @@
         <div id="state-div" contenteditable="true"></div>
       </div>
     </div>
-    <div id="client-list"></div>
     <script type="module">
       import {
-        randomName,
-        randomEmoji,
         stringify,
         socketClient,
-        introduceName,
         trackCursor,
         handleUsersChanged,
         trackCursorObserver,
+        displayUsers,
       } from "../dist/index.js";
+
+      displayUsers();
 
       window.socketClient = socketClient;
 
@@ -132,92 +126,12 @@
           } catch (e) {}
         });
 
-      introduceName();
-
-      function getOrCreateClientBox(clientId, isSelf) {
-        if (document.querySelector(`#client-${clientId}`)) {
-          return document.querySelector(`#client-${clientId}`);
-        }
-        const clientBox = document.createElement("div");
-        clientBox.id = `client-${clientId}`;
-        clientBox.classList.add("client-box");
-        clientBox.style.backgroundColor = isSelf ? "lightgreen" : "lightblue";
-
-        if (isSelf) {
-          document.querySelector("#client-list").prepend(clientBox);
-        } else {
-          document.querySelector("#client-list").appendChild(clientBox);
-        }
-        return clientBox;
-      }
-
-      handleUsersChanged(
-        (clientId, isSelf, observers) => {
-          // new client
-          const clientBox = getOrCreateClientBox(clientId, isSelf);
-
-          //  emoji / name observer
-          {
-            //  name and emoji
-            const emojiDiv = clientBox.appendChild(
-              document.createElement("span")
-            );
-            emojiDiv.style.marginRight = "5px";
-            if (isSelf) {
-              emojiDiv.style.cursor = "pointer";
-              emojiDiv.addEventListener("click", () => {
-                socketClient.setData(
-                  `clients/${clientId}/emoji`,
-                  randomEmoji(true)
-                );
-              });
-            }
-
-            const nameLabel = clientBox.appendChild(
-              document.createElement("label")
-            );
-            nameLabel.textContent = "Name:";
-            nameLabel.htmlFor = `name-${clientId}`;
-            const nameInput = clientBox.appendChild(
-              document.createElement("input")
-            );
-            nameInput.id = `name-${clientId}`;
-            nameInput.style.width = "calc(100% - 10px)";
-            nameInput.disabled = !isSelf;
-            nameInput.addEventListener("input", (event) => {
-              socketClient.setData(
-                `clients/${clientId}/name`,
-                event.target.value
-              );
-            });
-            observers.add(
-              socketClient
-                .observe([
-                  `clients/${clientId}/emoji`,
-                  `clients/${clientId}/name`,
-                ])
-                .onChange(([emoji, name]) => {
-                  emojiDiv.textContent = emoji;
-                  nameInput.value = name;
-                })
-            );
-          }
-        },
-        (clientId) => {
-          const client = document.querySelector(`#client-${clientId}`);
-          client.style.transition = "opacity 0.3s";
-          client.style.opacity = 0;
-          setTimeout(() => {
-            client.remove();
-          }, 300);
-        }
-      );
-
       //  Cursor
       handleUsersChanged((clientId, isSelf, observers) => {
-        const clientBox = getOrCreateClientBox(clientId, isSelf);
         //  cursor
-        const cursorDiv = clientBox.appendChild(document.createElement("div"));
+        const cursorDiv = document.body.appendChild(
+          document.createElement("div")
+        );
         cursorDiv.id = `cursor-${clientId}`;
         cursorDiv.classList.add("cursor");
 

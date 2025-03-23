@@ -8,10 +8,6 @@ import * as syncopath from "@dobuki/syncopath";
 import { SpriteSheet, loadSpriteSheet } from "aseprite-sheet";
 import { hookupDiv } from "./react/component";
 
-let name: string;
-export function randomName() {
-  return name ?? (name = "guest-" + Math.random().toString(36).substring(8));
-}
 
 const EMOJIS = [
   "🐵", "🐒", "🦍", "🦧", "🐶", "🐕", "🦮", "🐕‍🦺", "🐩", "🐺",

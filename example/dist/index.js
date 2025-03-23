@@ -29008,10 +29008,10 @@ class ClientData {
   triggerObservers(updates) {
     this.#observerManager.triggerObservers(updates);
   }
-  async setData(path, value, options) {
+  setData(path, value, options) {
     return this.syncClient.setData(this.#getAbsolutePath(path), value, options);
   }
-  async pushData(path, value, options) {
+  pushData(path, value, options) {
     return this.syncClient.pushData(this.#getAbsolutePath(path), value, options);
   }
   get state() {
@@ -29051,10 +29051,10 @@ class SubData {
   triggerObservers(updates) {
     this.#observerManager.triggerObservers(updates);
   }
-  async setData(path, value, options) {
+  setData(path, value, options) {
     return this.syncClient.setData(this.#getAbsolutePath(path), value, options);
   }
-  async pushData(path, value, options) {
+  pushData(path, value, options) {
     return this.syncClient.pushData(this.#getAbsolutePath(path), value, options);
   }
   get state() {
@@ -29366,10 +29366,12 @@ class SyncClient {
       return;
     }
     this.#nextFrameInProcess = true;
-    requestAnimationFrame(() => this.#processNextFrame());
+    requestAnimationFrame(() => {
+      this.#nextFrameInProcess = false;
+      this.#processNextFrame();
+    });
   }
   async#processNextFrame() {
-    this.#nextFrameInProcess = false;
     this.#outgoingUpdates.forEach(async (update, index) => {
       if (update?.path.startsWith("peer/")) {
         const tag = update.path.split("/")[1];
@@ -29378,6 +29380,7 @@ class SyncClient {
           const peerId = clientIds[0] === this.clientId ? clientIds[1] : clientIds[0];
           if (this.peerManagers[peerId]?.ready) {
             this.#outgoingUpdates[index] = undefined;
+            update.confirmed = this.now;
             const context2 = {
               root: this.state,
               secret: this.#secret,
@@ -29396,7 +29399,9 @@ class SyncClient {
       }
     });
     this.#outgoingUpdates = this.#outgoingUpdates.filter((update) => update !== undefined);
-    await this.#waitForConnection();
+    if (this.#outgoingUpdates.length > 0) {
+      await this.#waitForConnection();
+    }
     const context = {
       root: this.state,
       secret: this.#secret,
@@ -29619,15 +29624,13 @@ var EMOJIS = [
   "\uD83E\uDEB5"
 ];
 function handleUsersChanged(syncClient) {
-  let userAdded = (_clientId, _isSelf, _observers) => {
-  };
-  let userRemoved = (_clientId) => {
-  };
+  const userAddedSet = new Set;
+  const userRemovedSet = new Set;
   syncClient.observe("clients/~{keys}").onElementsAdded((clientIds) => {
     clientIds?.forEach((clientId) => {
       const isSelf = clientId === syncClient.clientId;
       const observers = new Set;
-      userAdded(clientId, isSelf, observers);
+      userAddedSet.forEach((userAdded) => userAdded(clientId, isSelf, observers));
       observers.add(syncClient.observe(`clients/${clientId}`).onChange((client) => {
         if (client === undefined) {
           observers.forEach((observer) => observer.close());
@@ -29635,15 +29638,15 @@ function handleUsersChanged(syncClient) {
       }));
     });
   }).onElementsDeleted((clientIds) => {
-    clientIds.forEach((clientId) => userRemoved(clientId));
+    clientIds.forEach((clientId) => userRemovedSet.forEach((userRemoved) => userRemoved(clientId)));
   });
   const returnValue = {
     onUserAdded: (callback) => {
-      userAdded = callback;
+      userAddedSet.add(callback);
       return returnValue;
     },
     onUserRemoved: (callback) => {
-      userRemoved = callback;
+      userRemovedSet.add(callback);
       return returnValue;
     }
   };
@@ -30069,10 +30072,6 @@ function insertInIsoWorld(type, x, y5) {
 }
 
 // src/index.ts
-var name2;
-function randomName2() {
-  return name2 ?? (name2 = "guest-" + Math.random().toString(36).substring(8));
-}
 var EMOJIS2 = [
   "\uD83D\uDC35",
   "\uD83D\uDC12",
@@ -30312,7 +30311,6 @@ export {
   trackCursor,
   stringify2 as stringify,
   socketClient,
-  randomName2 as randomName,
   randomEmoji2 as randomEmoji,
   introduceName2 as introduceName,
   insertInIsoWorld,
@@ -30323,4 +30321,4 @@ export {
   displayIsoUI
 };
 
-//# debugId=DD2C49137B7DE5CC64756E2164756E21
+//# debugId=5D31ECB89F856E2964756E2164756E21

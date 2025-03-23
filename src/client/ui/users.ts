@@ -23,8 +23,8 @@ const EMOJIS = [
 export function handleUsersChanged(
   syncClient: ISyncClient,
 ) {
-  let userAdded = (_clientId: string, _isSelf: boolean, _observers: Set<Observer>) => { };
-  let userRemoved = (_clientId: string) => { };
+  const userAddedSet = new Set<(_clientId: string, _isSelf: boolean, _observers: Set<Observer>) => void>();
+  const userRemovedSet = new Set<(_clientId: string) => void>();
 
   syncClient
     .observe("clients/~{keys}")
@@ -32,7 +32,7 @@ export function handleUsersChanged(
       clientIds?.forEach((clientId) => {
         const isSelf = clientId === syncClient.clientId;
         const observers = new Set<Observer>();
-        userAdded(clientId, isSelf, observers);
+        userAddedSet.forEach((userAdded) => userAdded(clientId, isSelf, observers));
         observers.add(
           syncClient.observe(`clients/${clientId}`).onChange((client) => {
             if (client === undefined) {
@@ -43,16 +43,16 @@ export function handleUsersChanged(
       });
     })
     .onElementsDeleted((clientIds: string[]) => {
-      clientIds.forEach((clientId) => userRemoved(clientId));
+      clientIds.forEach((clientId) => userRemovedSet.forEach((userRemoved) => userRemoved(clientId)));
     });
 
   const returnValue = {
     onUserAdded: (callback: (clientId: string, isSelf: boolean, observers: Set<Observer>) => void) => {
-      userAdded = callback;
+      userAddedSet.add(callback);
       return returnValue;
     },
     onUserRemoved: (callback: (clientId: string) => void) => {
-      userRemoved = callback;
+      userRemovedSet.add(callback);
       return returnValue;
     },
   };

@@ -63,12 +63,7 @@
     </div>
 
     <script type="module">
-      import {
-        socketClient,
-        randomEmoji,
-        randomName,
-        displayUsers,
-      } from "../dist/index.js";
+      import { socketClient, displayUsers } from "../dist/index.js";
 
       window.socketClient = socketClient;
 
@@ -139,7 +134,7 @@
 
       document.querySelector(".chat-box").focus();
 
-      //      socketClient.observe().onChange(() => console.log(socketClient.state));
+      //socketClient.observe().onChange(() => console.log(socketClient.state));
     </script>
   </body>
 </html>
