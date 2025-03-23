@@ -28820,13 +28820,15 @@ class SyncRoom {
         return;
       }
       const clientUpdates = removeRestrictedPeersFromUpdates(newUpdates, clientId);
-      const blobs = {};
-      for (let update of clientUpdates) {
-        update.value = await tt2(update.value, blobs);
+      if (clientUpdates?.length) {
+        const blobs = {};
+        for (let update of clientUpdates) {
+          update.value = await tt2(update.value, blobs);
+        }
+        const blob = packageUpdates(clientUpdates, blobs, this.#secret);
+        const buffer = await blob.arrayBuffer();
+        client.send(buffer);
       }
-      const blob = packageUpdates(clientUpdates, blobs, this.#secret);
-      const buffer = await blob.arrayBuffer();
-      client.send(buffer);
     });
   }
 }
@@ -30346,4 +30348,4 @@ export {
   displayIsoUI
 };
 
-//# debugId=C1823614EEE7375364756E2164756E21
+//# debugId=65B3D6ABB28D3BD664756E2164756E21

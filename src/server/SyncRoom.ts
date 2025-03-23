@@ -153,14 +153,16 @@ export class SyncRoom {
         return;
       }
       const clientUpdates = removeRestrictedPeersFromUpdates(newUpdates, clientId);
-      const blobs: Record<string, Blob> = {};
-      for (let update of clientUpdates) {
-        update.value = await extractBlobsFromPayload(update.value, blobs);
-      }
-      const blob = packageUpdates(clientUpdates, blobs, this.#secret);
-      const buffer = await blob.arrayBuffer();
+      if (clientUpdates?.length) {
+        const blobs: Record<string, Blob> = {};
+        for (let update of clientUpdates) {
+          update.value = await extractBlobsFromPayload(update.value, blobs);
+        }
+        const blob = packageUpdates(clientUpdates, blobs, this.#secret);
+        const buffer = await blob.arrayBuffer();
 
-      client.send(buffer);
+        client.send(buffer);
+      }
     });
   }
 }
