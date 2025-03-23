@@ -50,6 +50,7 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
 
   onClose(listener: () => void) {
     this.#closeListener = listener;
+    return this;
   }
 
   getData(path: string) {
