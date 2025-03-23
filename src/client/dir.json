@@ -24,14 +24,14 @@
     "sha": "38313e037715d77040d12abb2c30630e16c86844"
   },
   "SyncClient.ts": {
-    "sha": "f38d2a3df6d4b1012c69efb7ad2f7ebc0526f724"
+    "sha": "be0d9b2ce014e33007692d3cf18d3126112d5e98"
   },
-  "md5": "069a4eaf1ad13606a4e5ba12ff438cf2",
+  "md5": "df5b6286f4fa381e5bcd1408e206d98a",
   "peer/PeerManager.ts": {
     "sha": "e3f0ccf251fdb7fe66fe46e93c5bddd8a96c84f6"
   },
   "peer/check-peer.ts": {
-    "sha": "5a6c7e77b8fa6cd748b0f643f4a2b7d1f4dcbf11"
+    "sha": "37f8a05357d1bb4c258064391d3a323966edd986"
   },
   "provide-socket-client.ts": {
     "sha": "734c7d28ca741caaf0bc72327b1b6f631ca47fe3"
