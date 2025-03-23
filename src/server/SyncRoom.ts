@@ -6,6 +6,7 @@ import { RoomState } from "@/types/RoomState";
 import { BlobBuilder, checkPayload, extractBlobsFromPayload, includeBlobsInPayload } from "@dobuki/data-blob";
 import { removeRestrictedData, removeRestrictedPeersFromUpdates } from "./peer-utils";
 import { restrictedPath } from "./path-utils";
+import { configureRoom } from "./room-config";
 
 let nextClientId = 1;
 
@@ -16,6 +17,7 @@ export class SyncRoom {
   readonly #secret = crypto.randomUUID();
 
   constructor(private room: string) {
+    configureRoom(room, this.state);
   }
 
   addRoomChangeListener(callback: (roomState: RoomState) => void) {

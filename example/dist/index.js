@@ -28697,6 +28697,18 @@ function restrictedPath(path, clientId) {
   return false;
 }
 
+// ../src/server/room-config.ts
+var CODEPEN_ROOM = /^codepen/i;
+function configureRoom(room, state) {
+  if (CODEPEN_ROOM.test(room)) {
+    state.config = {
+      ...state.config,
+      autoReconnect: true,
+      signPayloads: false
+    };
+  }
+}
+
 // ../src/server/SyncRoom.ts
 var nextClientId = 1;
 
@@ -28708,6 +28720,7 @@ class SyncRoom {
   #secret = crypto.randomUUID();
   constructor(room) {
     this.room = room;
+    configureRoom(room, this.state);
   }
   addRoomChangeListener(callback) {
     this.#onRoomChange.add(callback);
@@ -30348,4 +30361,4 @@ export {
   displayIsoUI
 };
 
-//# debugId=769A7A78A4D1364B64756E2164756E21
+//# debugId=01D3B59B78111B1464756E2164756E21
