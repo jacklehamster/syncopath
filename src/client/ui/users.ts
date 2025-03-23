@@ -47,12 +47,16 @@ export function handleUsersChanged(
     });
 
   const returnValue = {
-    onUserAdded: (callback: (clientId: string, isSelf: boolean, observers: Set<Observer>) => void) => {
-      userAddedSet.add(callback);
+    onUserAdded: (callback?: (clientId: string, isSelf: boolean, observers: Set<Observer>) => void) => {
+      if (callback) {
+        userAddedSet.add(callback);
+      }
       return returnValue;
     },
-    onUserRemoved: (callback: (clientId: string) => void) => {
-      userRemovedSet.add(callback);
+    onUserRemoved: (callback?: (clientId: string) => void) => {
+      if (callback) {
+        userRemovedSet.add(callback);
+      }
       return returnValue;
     },
   };

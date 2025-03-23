@@ -18,6 +18,9 @@
         white-space: pre;
         font-family: monospace;
       }
+      .hidden {
+        visibility: hidden;
+      }
     </style>
   </head>
   <body>
@@ -25,14 +28,14 @@
       <h1>Mobile Room</h1>
       <p>Shake your device to see the acceleration in the console.</p>
       <div id="status"></div>
-      <img id="qrcode" alt="QR code" style="visibility: hidden" />
+      <img id="qrcode" class="hidden" alt="QR code" />
       <script type="module">
         import QRCode from "https://cdn.skypack.dev/qrcode";
         const qrCode = document.getElementById("qrcode");
         const url = new URL(location.href);
         const code = QRCode.toDataURL(url.href, function (err, url) {
           qrCode.src = url;
-          qrCode.style.visibility = "";
+          qrCode.classList.remove("hidden");
         });
       </script>
 
@@ -116,29 +119,27 @@
               if (acceleration) {
                 clientDiv.style.display = "";
                 const { x, y, z } = acceleration;
-                const xVal = Math.round((x ?? 0) * 100) / 100;
-                const yVal = Math.round((y ?? 0) * 100) / 100;
-                const zVal = Math.round((z ?? 0) * 100) / 100;
-                xKnob.value = xVal;
-                yKnob.value = yVal;
-                zKnob.value = zVal;
-                xValue.textContent = `x: ${xVal.toFixed(2) ?? 0}`;
-                yValue.textContent = `y: ${yVal.toFixed(2) ?? 0}`;
-                zValue.textContent = `z: ${zVal.toFixed(2) ?? 0}`;
+                xKnob.value = x;
+                yKnob.value = y;
+                zKnob.value = z;
+                xValue.textContent = `x: ${x.toFixed(2) ?? 0}`;
+                yValue.textContent = `y: ${y.toFixed(2) ?? 0}`;
+                zValue.textContent = `z: ${z.toFixed(2) ?? 0}`;
               } else {
                 clientDiv.style.display = "none";
               }
             })
           );
 
+          const PRECISION = 100;
           window.addEventListener("deviceorientation", (event) => {
             if (event.alpha === null) {
               return;
             }
             peerData.setData("acceleration", {
-              x: event.alpha,
-              y: event.beta,
-              z: event.gamma,
+              x: Math.round(event.alpha * PRECISION) / PRECISION,
+              y: Math.round(event.beta * PRECISION) / PRECISION,
+              z: Math.round(event.gamma * PRECISION) / PRECISION,
             });
           });
           //  detect tap

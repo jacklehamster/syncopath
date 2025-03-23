@@ -73,8 +73,15 @@ function createPeerManager(syncClient: SyncClient, tag: string, peerId: string) 
       syncClient.setData(`peer/${tag}:${WEB_RTC}/${syncClient.clientId}/ice/${candidate}`, ice, PEER_OPTIONS);
     },
     onClose() {
+      syncClient.peerManagers[peerId]?.close();
       delete syncClient.peerManagers[peerId];
-      console.log("Peer closed");
+      for (let key in syncClient.state.peer) {
+        const clients = key.split(":");
+        if (clients.includes(peerId)) {
+          syncClient.setData(`peer/${key}`, undefined, PEER_OPTIONS);
+        }
+      }
+      console.log("Peer closed: ", syncClient.clientId, peerId);
     },
     onReady() {
       if (syncClient.state.config?.peerOnly) {

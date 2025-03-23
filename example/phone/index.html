@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Phone Rotation</title>
+    <style>
+      body {
+        margin: 0;
+      }
+      canvas {
+        display: block;
+      }
+      .controls {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(255, 255, 255, 0.8);
+        padding: 10px;
+      }
+      .syncousers {
+        position: absolute;
+        right: 5px;
+        top: 5px;
+        color: red;
+      }
+      #qrcode {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        width: 100px;
+        height: 100px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="controls">
+      <label
+        >X Rotation:
+        <input type="range" id="xRot" min="-180" max="180" value="0" /></label
+      ><br />
+      <label
+        >Y Rotation:
+        <input type="range" id="yRot" min="-180" max="180" value="0" /></label
+      ><br />
+      <label
+        >Z Rotation:
+        <input type="range" id="zRot" min="-180" max="180" value="0"
+      /></label>
+    </div>
+
+    <img id="qrcode" class="hidden" alt="QR code" />
+    <script type="module">
+      import QRCode from "https://cdn.skypack.dev/qrcode";
+      const qrCode = document.getElementById("qrcode");
+      const url = new URL(location.href);
+      const code = QRCode.toDataURL(url.href, function (err, url) {
+        qrCode.src = url;
+        qrCode.classList.remove("hidden");
+      });
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script type="module">
+      import {
+        socketClient,
+        displayUsers,
+        handleUsersChanged,
+      } from "../dist/index.js";
+
+      displayUsers();
+
+      // Scene setup
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+      const renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      // Create a simple phone-like geometry
+      const phoneGeometry = new THREE.BoxGeometry(0.7, 1.5, 0.1);
+      const phoneMaterial = new THREE.MeshPhongMaterial({ color: 0x333333 });
+      const phone = new THREE.Mesh(phoneGeometry, phoneMaterial);
+      scene.add(phone);
+
+      // Add screen (simplified)
+      const screenGeometry = new THREE.PlaneGeometry(0.6, 1.2);
+      const screenMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+      const screen = new THREE.Mesh(screenGeometry, screenMaterial);
+      screen.position.z = 0.06;
+      phone.add(screen);
+
+      // Lighting
+      const ambientLight = new THREE.AmbientLight(0x404040);
+      scene.add(ambientLight);
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+      directionalLight.position.set(0, 1, 1);
+      scene.add(directionalLight);
+
+      // Camera position
+      camera.position.z = 2;
+
+      // Rotation controls
+      const controls = {
+        x: 0,
+        y: 0,
+        z: 0,
+      };
+
+      // Get slider elements
+      const xSlider = document.getElementById("xRot");
+      const ySlider = document.getElementById("yRot");
+      const zSlider = document.getElementById("zRot");
+
+      // Update rotation from sliders
+      xSlider.addEventListener("input", () => {
+        controls.x = THREE.MathUtils.degToRad(parseInt(xSlider.value));
+      });
+      ySlider.addEventListener("input", () => {
+        controls.y = THREE.MathUtils.degToRad(parseInt(ySlider.value));
+      });
+      zSlider.addEventListener("input", () => {
+        controls.z = THREE.MathUtils.degToRad(parseInt(zSlider.value));
+      });
+
+      // Function to set rotation programmatically (in degrees)
+      window.setPhoneRotation = function (x, y, z) {
+        controls.x = THREE.MathUtils.degToRad(x);
+        controls.y = THREE.MathUtils.degToRad(y);
+        controls.z = THREE.MathUtils.degToRad(z);
+        // Update sliders to match
+        xSlider.value = x;
+        ySlider.value = y;
+        zSlider.value = z;
+      };
+
+      // Animation loop
+      function animate() {
+        requestAnimationFrame(animate);
+
+        // Apply rotations
+        phone.rotation.x = controls.x;
+        phone.rotation.y = controls.y;
+        phone.rotation.z = controls.z;
+
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      // Handle window resize
+      window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      handleUsersChanged((clientId, isSelf, observers) => {
+        if (isSelf) {
+          return;
+        }
+
+        const peerData = socketClient.peerData(clientId);
+        observers.add(
+          peerData.observe("acceleration").onChange((acceleration) => {
+            if (acceleration) {
+              const { x, y, z } = acceleration;
+              setPhoneRotation(y - 90, z, x);
+            }
+          })
+        );
+        observers.add(
+          peerData.observe("tap").onChange((tap) => {
+            if (tap) {
+              screenMaterial.color.set(0xff0000);
+            } else {
+              screenMaterial.color.set(0x0000ff);
+            }
+          })
+        );
+
+        const PRECISION = 100;
+        window.addEventListener("deviceorientation", (event) => {
+          if (event.alpha === null) {
+            return;
+          }
+          peerData.setData("acceleration", {
+            x: Math.round(event.alpha * PRECISION) / PRECISION,
+            y: Math.round(event.beta * PRECISION) / PRECISION,
+            z: Math.round(event.gamma * PRECISION) / PRECISION,
+          });
+        });
+        window.addEventListener("touchstart", (event) => {
+          event.preventDefault();
+          if (!peerData.state.tap) {
+            peerData.setData("tap", "~{now}");
+          }
+        });
+        window.addEventListener("touchend", (event) => {
+          event.preventDefault();
+          if (peerData.state.tap) {
+            peerData.setData("tap", 0);
+          }
+        });
+        document.addEventListener(
+          "touchmove",
+          (event) => {
+            event.preventDefault();
+          },
+          { passive: false }
+        );
+      });
+    </script>
+  </body>
+</html>

@@ -188,7 +188,7 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
   }
 
   async #processNextFrame() {
-    this.#outgoingUpdates.forEach(async (update, index) => {
+    this.#outgoingUpdates.forEach((update, index) => {
       // skip updates to peers if there's a peerManager ready
       if (update?.path.startsWith("peer/")) {
         const tag = update.path.split("/")[1];

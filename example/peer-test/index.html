@@ -53,11 +53,9 @@
             button.textContent = "Add peer data";
             button.style.marginLeft = "10px";
 
-            socketClient.setData(`peer/${PEER_TAG}`, []);
-
             button.onclick = () =>
               socketClient.pushData(
-                `peer/${PEER_TAG}`,
+                `peer/${PEER_TAG}/data`,
                 `${socketClient.clientId}->${clientId}`
               );
           } else {

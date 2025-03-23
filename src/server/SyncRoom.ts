@@ -69,6 +69,17 @@ export class SyncRoom {
         value: undefined,
         confirmed: Date.now(),
       }]);
+      //  cleanup peers
+      for (let key in this.state.peer) {
+        const clientIds = key.split(":");
+        if (clientIds.includes(clientId)) {
+          this.#shareUpdates([{
+            path: `peer/${key}`,
+            value: undefined,
+            confirmed: Date.now(),
+          }]);
+        }
+      }
 
       console.log(`client ${clientId} disconnected from room ${this.room}`);
       this.#onRoomChange.forEach((callback) => callback(this.state));

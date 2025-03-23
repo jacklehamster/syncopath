@@ -26995,7 +26995,7 @@ class Processor {
     const secret = context.secret ?? payload.secret;
     if (secret) {
       if (!context.skipValidation && !x5(payload, { secret })) {
-        console.error("Invalid signature");
+        console.error("Invalid signature", payload);
         return;
       }
       context.secret = secret;
@@ -28747,6 +28747,16 @@ class SyncRoom {
         value: undefined,
         confirmed: Date.now()
       }]);
+      for (let key in this.state.peer) {
+        const clientIds = key.split(":");
+        if (clientIds.includes(clientId)) {
+          this.#shareUpdates([{
+            path: `peer/${key}`,
+            value: undefined,
+            confirmed: Date.now()
+          }]);
+        }
+      }
       console.log(`client ${clientId} disconnected from room ${this.room}`);
       this.#onRoomChange.forEach((callback) => callback(this.state));
     });
@@ -29140,6 +29150,10 @@ class PeerManager {
     };
     this.#dataChannel.onclose = this.#onClose;
   }
+  close() {
+    this.#dataChannel?.close();
+    this.#peerConnection.close();
+  }
 }
 
 // ../src/client/peer/check-peer.ts
@@ -29209,8 +29223,15 @@ function createPeerManager(syncClient, tag, peerId) {
       syncClient.setData(`peer/${tag}:${WEB_RTC}/${syncClient.clientId}/ice/${candidate}`, ice, PEER_OPTIONS);
     },
     onClose() {
+      syncClient.peerManagers[peerId]?.close();
       delete syncClient.peerManagers[peerId];
-      console.log("Peer closed");
+      for (let key in syncClient.state.peer) {
+        const clients = key.split(":");
+        if (clients.includes(peerId)) {
+          syncClient.setData(`peer/${key}`, undefined, PEER_OPTIONS);
+        }
+      }
+      console.log("Peer closed: ", syncClient.clientId, peerId);
     },
     onReady() {
       if (syncClient.state.config?.peerOnly) {
@@ -29372,7 +29393,7 @@ class SyncClient {
     });
   }
   async#processNextFrame() {
-    this.#outgoingUpdates.forEach(async (update, index) => {
+    this.#outgoingUpdates.forEach((update, index) => {
       if (update?.path.startsWith("peer/")) {
         const tag = update.path.split("/")[1];
         const clientIds = tag.split(":");
@@ -29642,11 +29663,15 @@ function handleUsersChanged(syncClient) {
   });
   const returnValue = {
     onUserAdded: (callback) => {
-      userAddedSet.add(callback);
+      if (callback) {
+        userAddedSet.add(callback);
+      }
       return returnValue;
     },
     onUserRemoved: (callback) => {
-      userRemovedSet.add(callback);
+      if (callback) {
+        userRemovedSet.add(callback);
+      }
       return returnValue;
     }
   };
@@ -30321,4 +30346,4 @@ export {
   displayIsoUI
 };
 
-//# debugId=5D31ECB89F856E2964756E2164756E21
+//# debugId=C1823614EEE7375364756E2164756E21

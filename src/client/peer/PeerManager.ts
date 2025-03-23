@@ -94,4 +94,9 @@ export class PeerManager {
 
     this.#dataChannel.onclose = this.#onClose;
   }
+
+  close() {
+    this.#dataChannel?.close();
+    this.#peerConnection.close();
+  }
 }
