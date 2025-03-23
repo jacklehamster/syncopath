@@ -41,12 +41,12 @@
   "index.ts": {
     "sha": "819c255ec5ffd50e439f407f31e58c8c8a3fba03"
   },
-  "md5": "bdddbba563003a60e483964b0f8d53a0",
+  "md5": "ae0850da346acb47904a7aaab9f13767",
   "server/SocketEventHandler.ts": {
     "sha": "b9d65ffc54fcbd587501bdb29667925b8eba79cd"
   },
   "server/SyncRoom.ts": {
-    "sha": "7324b342da4cb06cf56eec37b2f14fffb7e21bbc"
+    "sha": "9c351bbd61b546e4cb674f7468e343d538b381dc"
   },
   "server/SyncSocket.ts": {
     "sha": "c016f3b830aba6757f17ebca866abc614ccc6995"
@@ -56,6 +56,9 @@
   },
   "server/peer-utils.ts": {
     "sha": "e0bccecfde9e824b45894fcbd0fabe2e38909450"
+  },
+  "server/room-config.ts": {
+    "sha": "8437774f6b82ded19811960b86cfb4ea613a757a"
   },
   "types/ClientState.ts": {
     "sha": "9e6c1fdea2ce7724f9f2488ee9036e8a44129228"
