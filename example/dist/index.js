@@ -29291,6 +29291,7 @@ class SyncClient {
   }
   onClose(listener) {
     this.#closeListener = listener;
+    return this;
   }
   getData(path) {
     const parts = path.split("/");
@@ -30367,4 +30368,4 @@ export {
   displayIsoUI
 };
 
-//# debugId=5792B079844F969964756E2164756E21
+//# debugId=3F0C799D1D26655164756E2164756E21
