@@ -46,7 +46,7 @@
   },
   "description": "Synchronize data across clients using WebSocket",
   "dependencies": {
-    "napl": "^1.0.51",
+    "napl": "^1.0.52",
     "playroomkit": "^0.0.87"
   },
   "keywords": []
