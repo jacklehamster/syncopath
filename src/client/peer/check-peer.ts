@@ -26,7 +26,7 @@ export function checkPeerConnections(syncClient: SyncClient) {
       if (syncClient.state.peer[`${clientTag}:${WEB_RTC}`]?.[clients[1]]?.answer) {
         if (!syncClient.peerManagers[clients[1]].connected) {
           syncClient.peerManagers[clients[1]].acceptAnswer(syncClient.state.peer[`${clientTag}:${WEB_RTC}`]?.[clients[1]]?.answer).then(() => {
-            console.log("Peer connected");
+            console.log("Peer connected", clientTag);
           });
           syncClient.observe(`peer/${clientTag}:${WEB_RTC}/${clients[1]}/ice/~{keys}`).onElementsAdded((candidates: string[]) => {
             candidates?.forEach(candidateName => {
@@ -81,7 +81,7 @@ function createPeerManager(syncClient: SyncClient, tag: string, peerId: string) 
           syncClient.setData(`peer/${key}`, undefined, PEER_OPTIONS);
         }
       }
-      console.log("Peer closed: ", syncClient.clientId, peerId);
+      console.log("Peer closed: ", `${syncClient.clientId}↔️${peerId}`);
     },
     onReady() {
       if (syncClient.state.config?.peerOnly) {

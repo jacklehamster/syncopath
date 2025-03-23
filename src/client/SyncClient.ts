@@ -30,6 +30,7 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
   #secret?: string;
   readonly #processor: Processor = new Processor((blob) => this.#socket?.send(blob));
   #outgoingUpdates: (Update | undefined)[] = [];
+  #closeListener = () => { };
 
   constructor(private socketProvider: SocketProvider, initialState: RoomState = {}) {
     this.state = initialState;
@@ -45,6 +46,10 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
       }
     });
     this.#children.set(`clients/~{self}`, this.#selfData);
+  }
+
+  onClose(listener: () => void) {
+    this.#closeListener = listener;
   }
 
   getData(path: string) {
@@ -134,6 +139,7 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
       socket.onClose(() => {
         console.log(this.clientId, "disconnected from SyncClient");
         this.#socket = undefined;
+        this.#closeListener();
       });
     });
   }

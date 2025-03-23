@@ -29193,7 +29193,7 @@ function checkPeerConnections(syncClient) {
       if (syncClient.state.peer[`${clientTag}:${WEB_RTC}`]?.[clients[1]]?.answer) {
         if (!syncClient.peerManagers[clients[1]].connected) {
           syncClient.peerManagers[clients[1]].acceptAnswer(syncClient.state.peer[`${clientTag}:${WEB_RTC}`]?.[clients[1]]?.answer).then(() => {
-            console.log("Peer connected");
+            console.log("Peer connected", clientTag);
           });
           syncClient.observe(`peer/${clientTag}:${WEB_RTC}/${clients[1]}/ice/~{keys}`).onElementsAdded((candidates) => {
             candidates?.forEach((candidateName) => {
@@ -29246,7 +29246,7 @@ function createPeerManager(syncClient, tag, peerId) {
           syncClient.setData(`peer/${key}`, undefined, PEER_OPTIONS);
         }
       }
-      console.log("Peer closed: ", syncClient.clientId, peerId);
+      console.log("Peer closed: ", `${syncClient.clientId}↔️${peerId}`);
     },
     onReady() {
       if (syncClient.state.config?.peerOnly) {
@@ -29271,6 +29271,8 @@ class SyncClient {
   #secret;
   #processor = new Processor((blob) => this.#socket?.send(blob));
   #outgoingUpdates = [];
+  #closeListener = () => {
+  };
   constructor(socketProvider, initialState = {}) {
     this.socketProvider = socketProvider;
     this.state = initialState;
@@ -29286,6 +29288,9 @@ class SyncClient {
       }
     });
     this.#children.set(`clients/~{self}`, this.#selfData);
+  }
+  onClose(listener) {
+    this.#closeListener = listener;
   }
   getData(path) {
     const parts = path.split("/");
@@ -29363,6 +29368,7 @@ class SyncClient {
       socket.onClose(() => {
         console.log(this.clientId, "disconnected from SyncClient");
         this.#socket = undefined;
+        this.#closeListener();
       });
     });
   }
@@ -30361,4 +30367,4 @@ export {
   displayIsoUI
 };
 
-//# debugId=01D3B59B78111B1464756E2164756E21
+//# debugId=5792B079844F969964756E2164756E21
