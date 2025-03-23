@@ -188,6 +188,9 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
   }
 
   async #processNextFrame() {
+    if (this.#outgoingUpdates.some(update => !update?.path.startsWith("peer/"))) {
+      await this.#waitForConnection();
+    }
     this.#outgoingUpdates.forEach((update, index) => {
       // skip updates to peers if there's a peerManager ready
       if (update?.path.startsWith("peer/")) {
@@ -219,9 +222,6 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
     });
     this.#outgoingUpdates = this.#outgoingUpdates.filter(update => update !== undefined);
 
-    if (this.#outgoingUpdates.length > 0) {
-      await this.#waitForConnection();
-    }
     const context: Context = {
       root: this.state,
       secret: this.#secret,

@@ -29395,6 +29395,9 @@ class SyncClient {
     });
   }
   async#processNextFrame() {
+    if (this.#outgoingUpdates.some((update) => !update?.path.startsWith("peer/"))) {
+      await this.#waitForConnection();
+    }
     this.#outgoingUpdates.forEach((update, index) => {
       if (update?.path.startsWith("peer/")) {
         const tag = update.path.split("/")[1];
@@ -29422,9 +29425,6 @@ class SyncClient {
       }
     });
     this.#outgoingUpdates = this.#outgoingUpdates.filter((update) => update !== undefined);
-    if (this.#outgoingUpdates.length > 0) {
-      await this.#waitForConnection();
-    }
     const context = {
       root: this.state,
       secret: this.#secret,
@@ -30348,4 +30348,4 @@ export {
   displayIsoUI
 };
 
-//# debugId=65B3D6ABB28D3BD664756E2164756E21
+//# debugId=769A7A78A4D1364B64756E2164756E21
