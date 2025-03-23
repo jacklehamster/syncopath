@@ -15,16 +15,16 @@
     "sha": "a8f7b2aa31c69081e16f711724e1214506f46d9d"
   },
   "chatroom/index.html": {
-    "sha": "3a10ed2aff192d4f3a0ad4d2e6d31316e8ab7324"
+    "sha": "718c856c421562216e251a26bb667a81757d3fca"
   },
   "config.json": {
     "sha": "98387d623bcf6077316ad093fd89f762c23f9a4f"
   },
   "dist/index.js": {
-    "sha": "a10f4f40fe3d9be4c6710ed41cea3c7c368aaf9e"
+    "sha": "3fc4c2e1fa46442ded5d209973f2b7e1def92ef2"
   },
   "dist/index.js.map": {
-    "sha": "7c2c4be0b9174b1bf0ed12a5ab5bddc841b814e5"
+    "sha": "cb909cffff07b65d5a2da86d7f9f737d7f6b12c8"
   },
   "dist/styles-da87zv4s.css": {
     "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
@@ -86,15 +86,18 @@
   "json-test/index.html": {
     "sha": "e1e988ca0511c689742505deed09b09033a2516c"
   },
-  "md5": "20f88b8753a9a2d26e93c8f0f3196df0",
+  "md5": "92eb7561ff6b0bc1e669fb20ec4ce2de",
   "mobile/index.html": {
-    "sha": "5e96026a8cb7830f5a87fea729f88e5b8585ce47"
+    "sha": "9ca863b9b062b19b9cb614dff78c554e1eeef6e8"
   },
   "package.json": {
     "sha": "b02076a4e075ac42bb3c2d8188662e83573eaa53"
   },
   "peer-test/index.html": {
-    "sha": "def6579c7bcffda3a2b8104e88875674758ab261"
+    "sha": "4324aa7c35bb5e73cc2748afe5bfa41506de85d5"
+  },
+  "phone/index.html": {
+    "sha": "33df01e88bd8eb9b8e737d67953a3b30ec15b4fc"
   },
   "random-iso.json": {
     "sha": "d05d34fb92c02b85a64a01f43775b5a71ce58912"
@@ -106,11 +109,10 @@
     "sha": "9b6e7bba8d54bea344f2cb6449da762aa0c16368"
   },
   "sample/index.html": {
-    "sha": "85e6747c327b0844e95797088ad126f9d7a42d37"
+    "sha": "2259c9b2a16478dd33d22440483ad4b6b04a284e"
   },
-  "phone/index.html": {},
   "src/index.ts": {
-    "sha": "d5e6fbbe59aeb463a980491d854210b5664cf032"
+    "sha": "6c3c2fa46b69772aeeabb389d9d71054272dd758"
   },
   "src/iso-test/iso-utils.ts": {
     "sha": "ba1336af22c4389a058e0cd900f415402187505d"

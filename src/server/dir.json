@@ -3,12 +3,12 @@
     "sha": "b9d65ffc54fcbd587501bdb29667925b8eba79cd"
   },
   "SyncRoom.ts": {
-    "sha": "573714b08070472687da569a83ed175b279851ea"
+    "sha": "f60196777a8991482d9e5225c37c4ee2634d7ee3"
   },
   "SyncSocket.ts": {
     "sha": "c016f3b830aba6757f17ebca866abc614ccc6995"
   },
-  "md5": "5958981189aa19970fc28ef621ce4eba",
+  "md5": "fb5ac55c04ae1dfe682a312b3bc7a01c",
   "path-utils.ts": {
     "sha": "b56056f2fe7dbc44434cb9580d0a69027c9467db"
   },
