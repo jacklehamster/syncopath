@@ -28,7 +28,13 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
   #localTimeOffset = 0;
   #nextFrameInProcess = false;
   #secret?: string;
-  readonly #processor: Processor = new Processor((blob) => this.#socket?.send(blob));
+  readonly #processor: Processor = new Processor((blob) => {
+    if (blob.size > 1024 * 1024 * 10) {
+      console.error(`Blob too large: ${blob.size / 1024 / 1024} MB`,);
+      return;
+    }
+    this.#socket?.send(blob);
+  });
   #outgoingUpdates: (Update | undefined)[] = [];
   #closeListener = () => { };
 

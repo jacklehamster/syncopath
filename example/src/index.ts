@@ -42,7 +42,6 @@ function getSocketClient() {
   const urlVars = new URLSearchParams(location.search);
   const room = urlVars.get("room") ?? undefined;
   return provideSocketClient({ host: config.websocketHost ?? location.host, room });
-  // return providePlayroomClient({ room });
 }
 
 export const socketClient = getSocketClient();

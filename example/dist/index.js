@@ -987,19 +987,19 @@ Your code should look like:
         }
         return dispatcher;
       }
-      function useContext(Context2) {
+      function useContext(Context3) {
         var dispatcher = resolveDispatcher();
         {
-          if (Context2._context !== undefined) {
-            var realContext = Context2._context;
-            if (realContext.Consumer === Context2) {
+          if (Context3._context !== undefined) {
+            var realContext = Context3._context;
+            if (realContext.Consumer === Context3) {
               error("Calling useContext(Context.Consumer) is not supported, may cause bugs, and will be " + "removed in a future major release. Did you mean to call useContext(Context) instead?");
-            } else if (realContext.Provider === Context2) {
+            } else if (realContext.Provider === Context3) {
               error("Calling useContext(Context.Provider) is not supported. " + "Did you mean to call useContext(Context) instead?");
             }
           }
         }
-        return dispatcher.useContext(Context2);
+        return dispatcher.useContext(Context3);
       }
       function useState(initialState) {
         var dispatcher = resolveDispatcher();
@@ -5379,7 +5379,7 @@ Check the render method of \`` + ownerName + "`.";
       var NoFlags = 0;
       var PerformedWork = 1;
       var Placement = 2;
-      var Update3 = 4;
+      var Update4 = 4;
       var ChildDeletion = 16;
       var ContentReset = 32;
       var Callback = 64;
@@ -5391,7 +5391,7 @@ Check the render method of \`` + ownerName + "`.";
       var Hydrating = 4096;
       var Visibility = 8192;
       var StoreConsistency = 16384;
-      var LifecycleEffectMask = Passive | Update3 | Callback | Ref | Snapshot | StoreConsistency;
+      var LifecycleEffectMask = Passive | Update4 | Callback | Ref | Snapshot | StoreConsistency;
       var HostEffectMask = 32767;
       var Incomplete = 32768;
       var ShouldCapture = 65536;
@@ -5402,9 +5402,9 @@ Check the render method of \`` + ownerName + "`.";
       var PassiveStatic = 8388608;
       var MountLayoutDev = 16777216;
       var MountPassiveDev = 33554432;
-      var BeforeMutationMask = Update3 | Snapshot | 0;
-      var MutationMask = Placement | Update3 | ChildDeletion | ContentReset | Ref | Hydrating | Visibility;
-      var LayoutMask = Update3 | Callback | Ref | Visibility;
+      var BeforeMutationMask = Update4 | Snapshot | 0;
+      var MutationMask = Placement | Update4 | ChildDeletion | ContentReset | Ref | Hydrating | Visibility;
+      var LayoutMask = Update4 | Callback | Ref | Visibility;
       var PassiveMask = Passive | ChildDeletion;
       var StaticMask = LayoutStatic | PassiveStatic | RefStatic;
       var ReactCurrentOwner = ReactSharedInternals.ReactCurrentOwner;
@@ -12937,9 +12937,9 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
       function bailoutHooks(current2, workInProgress2, lanes) {
         workInProgress2.updateQueue = current2.updateQueue;
         if ((workInProgress2.mode & StrictEffectsMode) !== NoMode) {
-          workInProgress2.flags &= ~(MountPassiveDev | MountLayoutDev | Passive | Update3);
+          workInProgress2.flags &= ~(MountPassiveDev | MountLayoutDev | Passive | Update4);
         } else {
-          workInProgress2.flags &= ~(Passive | Update3);
+          workInProgress2.flags &= ~(Passive | Update4);
         }
         current2.lanes = removeLanes(current2.lanes, lanes);
       }
@@ -13426,13 +13426,13 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
         return updateEffectImpl(Passive, Passive$1, create, deps);
       }
       function mountInsertionEffect(create, deps) {
-        return mountEffectImpl(Update3, Insertion, create, deps);
+        return mountEffectImpl(Update4, Insertion, create, deps);
       }
       function updateInsertionEffect(create, deps) {
-        return updateEffectImpl(Update3, Insertion, create, deps);
+        return updateEffectImpl(Update4, Insertion, create, deps);
       }
       function mountLayoutEffect(create, deps) {
-        var fiberFlags = Update3;
+        var fiberFlags = Update4;
         {
           fiberFlags |= LayoutStatic;
         }
@@ -13442,7 +13442,7 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
         return mountEffectImpl(fiberFlags, Layout, create, deps);
       }
       function updateLayoutEffect(create, deps) {
-        return updateEffectImpl(Update3, Layout, create, deps);
+        return updateEffectImpl(Update4, Layout, create, deps);
       }
       function imperativeHandleEffect(create, ref) {
         if (typeof ref === "function") {
@@ -13473,7 +13473,7 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
           }
         }
         var effectDeps = deps !== null && deps !== undefined ? deps.concat([ref]) : null;
-        var fiberFlags = Update3;
+        var fiberFlags = Update4;
         {
           fiberFlags |= LayoutStatic;
         }
@@ -13489,7 +13489,7 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
           }
         }
         var effectDeps = deps !== null && deps !== undefined ? deps.concat([ref]) : null;
-        return updateEffectImpl(Update3, Layout, imperativeHandleEffect.bind(null, create, ref), effectDeps);
+        return updateEffectImpl(Update4, Layout, imperativeHandleEffect.bind(null, create, ref), effectDeps);
       }
       function mountDebugValue(value, formatterFn) {
       }
@@ -15140,7 +15140,7 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
           instance.state = workInProgress2.memoizedState;
         }
         if (typeof instance.componentDidMount === "function") {
-          var fiberFlags = Update3;
+          var fiberFlags = Update4;
           {
             fiberFlags |= LayoutStatic;
           }
@@ -15177,7 +15177,7 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
         newState = workInProgress2.memoizedState;
         if (oldProps === newProps && oldState === newState && !hasContextChanged() && !checkHasForceUpdateAfterProcessing()) {
           if (typeof instance.componentDidMount === "function") {
-            var fiberFlags = Update3;
+            var fiberFlags = Update4;
             {
               fiberFlags |= LayoutStatic;
             }
@@ -15203,7 +15203,7 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
             }
           }
           if (typeof instance.componentDidMount === "function") {
-            var _fiberFlags = Update3;
+            var _fiberFlags = Update4;
             {
               _fiberFlags |= LayoutStatic;
             }
@@ -15214,7 +15214,7 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
           }
         } else {
           if (typeof instance.componentDidMount === "function") {
-            var _fiberFlags2 = Update3;
+            var _fiberFlags2 = Update4;
             {
               _fiberFlags2 |= LayoutStatic;
             }
@@ -15262,7 +15262,7 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
         if (unresolvedOldProps === unresolvedNewProps && oldState === newState && !hasContextChanged() && !checkHasForceUpdateAfterProcessing() && !enableLazyContextPropagation) {
           if (typeof instance.componentDidUpdate === "function") {
             if (unresolvedOldProps !== current2.memoizedProps || oldState !== current2.memoizedState) {
-              workInProgress2.flags |= Update3;
+              workInProgress2.flags |= Update4;
             }
           }
           if (typeof instance.getSnapshotBeforeUpdate === "function") {
@@ -15287,7 +15287,7 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
             }
           }
           if (typeof instance.componentDidUpdate === "function") {
-            workInProgress2.flags |= Update3;
+            workInProgress2.flags |= Update4;
           }
           if (typeof instance.getSnapshotBeforeUpdate === "function") {
             workInProgress2.flags |= Snapshot;
@@ -15295,7 +15295,7 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
         } else {
           if (typeof instance.componentDidUpdate === "function") {
             if (unresolvedOldProps !== current2.memoizedProps || oldState !== current2.memoizedState) {
-              workInProgress2.flags |= Update3;
+              workInProgress2.flags |= Update4;
             }
           }
           if (typeof instance.getSnapshotBeforeUpdate === "function") {
@@ -15834,7 +15834,7 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
       }
       function updateProfiler(current2, workInProgress2, renderLanes2) {
         {
-          workInProgress2.flags |= Update3;
+          workInProgress2.flags |= Update4;
           {
             var stateNode = workInProgress2.stateNode;
             stateNode.effectDuration = 0;
@@ -17045,7 +17045,7 @@ Check the render method of \`` + ownerName + "`.";
             {
               var hasChildWork = includesSomeLane(renderLanes2, workInProgress2.childLanes);
               if (hasChildWork) {
-                workInProgress2.flags |= Update3;
+                workInProgress2.flags |= Update4;
               }
               {
                 var stateNode = workInProgress2.stateNode;
@@ -17225,7 +17225,7 @@ Check the render method of \`` + ownerName + "`.";
         throw new Error("Unknown unit of work tag (" + workInProgress2.tag + "). This error is likely caused by a bug in " + "React. Please file an issue.");
       }
       function markUpdate(workInProgress2) {
-        workInProgress2.flags |= Update3;
+        workInProgress2.flags |= Update4;
       }
       function markRef$1(workInProgress2) {
         workInProgress2.flags |= Ref;
@@ -17416,7 +17416,7 @@ Check the render method of \`` + ownerName + "`.";
             if ((workInProgress2.flags & DidCapture) === NoFlags) {
               workInProgress2.memoizedState = null;
             }
-            workInProgress2.flags |= Update3;
+            workInProgress2.flags |= Update4;
             bubbleProperties(workInProgress2);
             {
               if ((workInProgress2.mode & ProfileMode) !== NoMode) {
@@ -17588,7 +17588,7 @@ Check the render method of \`` + ownerName + "`.";
             }
             var wakeables = workInProgress2.updateQueue;
             if (wakeables !== null) {
-              workInProgress2.flags |= Update3;
+              workInProgress2.flags |= Update4;
             }
             bubbleProperties(workInProgress2);
             {
@@ -17647,7 +17647,7 @@ Check the render method of \`` + ownerName + "`.";
                       var newThenables = suspended.updateQueue;
                       if (newThenables !== null) {
                         workInProgress2.updateQueue = newThenables;
-                        workInProgress2.flags |= Update3;
+                        workInProgress2.flags |= Update4;
                       }
                       workInProgress2.subtreeFlags = NoFlags;
                       resetChildFibers(workInProgress2, renderLanes2);
@@ -17675,7 +17675,7 @@ Check the render method of \`` + ownerName + "`.";
                   var _newThenables = _suspended.updateQueue;
                   if (_newThenables !== null) {
                     workInProgress2.updateQueue = _newThenables;
-                    workInProgress2.flags |= Update3;
+                    workInProgress2.flags |= Update4;
                   }
                   cutOffTailIfNeeded(renderState, true);
                   if (renderState.tail === null && renderState.tailMode === "hidden" && !renderedTail.alternate && !getIsHydrating()) {
@@ -17741,7 +17741,7 @@ Check the render method of \`` + ownerName + "`.";
               if (includesSomeLane(subtreeRenderLanes, OffscreenLane)) {
                 bubbleProperties(workInProgress2);
                 {
-                  if (workInProgress2.subtreeFlags & (Placement | Update3)) {
+                  if (workInProgress2.subtreeFlags & (Placement | Update4)) {
                     workInProgress2.flags |= Visibility;
                   }
                 }
@@ -18185,7 +18185,7 @@ It looks like you wrote ` + hookName + "(async () => ...) or returned a Promise.
       }
       function commitPassiveEffectDurations(finishedRoot, finishedWork) {
         {
-          if ((finishedWork.flags & Update3) !== NoFlags) {
+          if ((finishedWork.flags & Update4) !== NoFlags) {
             switch (finishedWork.tag) {
               case Profiler: {
                 var passiveEffectDuration = finishedWork.stateNode.passiveEffectDuration;
@@ -18243,7 +18243,7 @@ It looks like you wrote ` + hookName + "(async () => ...) or returned a Promise.
             }
             case ClassComponent: {
               var instance = finishedWork.stateNode;
-              if (finishedWork.flags & Update3) {
+              if (finishedWork.flags & Update4) {
                 if (!offscreenSubtreeWasHidden) {
                   if (current2 === null) {
                     {
@@ -18328,7 +18328,7 @@ It looks like you wrote ` + hookName + "(async () => ...) or returned a Promise.
             }
             case HostComponent: {
               var _instance2 = finishedWork.stateNode;
-              if (current2 === null && finishedWork.flags & Update3) {
+              if (current2 === null && finishedWork.flags & Update4) {
                 var type = finishedWork.type;
                 var props = finishedWork.memoizedProps;
                 commitMount(_instance2, type, props);
@@ -18933,7 +18933,7 @@ It looks like you wrote ` + hookName + "(async () => ...) or returned a Promise.
           case SimpleMemoComponent: {
             recursivelyTraverseMutationEffects(root2, finishedWork);
             commitReconciliationEffects(finishedWork);
-            if (flags & Update3) {
+            if (flags & Update4) {
               try {
                 commitHookEffectListUnmount(Insertion | HasEffect, finishedWork, finishedWork.return);
                 commitHookEffectListMount(Insertion | HasEffect, finishedWork);
@@ -18985,7 +18985,7 @@ It looks like you wrote ` + hookName + "(async () => ...) or returned a Promise.
                   captureCommitPhaseError(finishedWork, finishedWork.return, error2);
                 }
               }
-              if (flags & Update3) {
+              if (flags & Update4) {
                 var _instance4 = finishedWork.stateNode;
                 if (_instance4 != null) {
                   var newProps = finishedWork.memoizedProps;
@@ -19008,7 +19008,7 @@ It looks like you wrote ` + hookName + "(async () => ...) or returned a Promise.
           case HostText: {
             recursivelyTraverseMutationEffects(root2, finishedWork);
             commitReconciliationEffects(finishedWork);
-            if (flags & Update3) {
+            if (flags & Update4) {
               {
                 if (finishedWork.stateNode === null) {
                   throw new Error("This should have a text node initialized. This error is likely " + "caused by a bug in React. Please file an issue.");
@@ -19028,7 +19028,7 @@ It looks like you wrote ` + hookName + "(async () => ...) or returned a Promise.
           case HostRoot: {
             recursivelyTraverseMutationEffects(root2, finishedWork);
             commitReconciliationEffects(finishedWork);
-            if (flags & Update3) {
+            if (flags & Update4) {
               {
                 if (current2 !== null) {
                   var prevRootState = current2.memoizedState;
@@ -19065,7 +19065,7 @@ It looks like you wrote ` + hookName + "(async () => ...) or returned a Promise.
                 }
               }
             }
-            if (flags & Update3) {
+            if (flags & Update4) {
               try {
                 commitSuspenseCallback(finishedWork);
               } catch (error2) {
@@ -19116,7 +19116,7 @@ It looks like you wrote ` + hookName + "(async () => ...) or returned a Promise.
           case SuspenseListComponent: {
             recursivelyTraverseMutationEffects(root2, finishedWork);
             commitReconciliationEffects(finishedWork);
-            if (flags & Update3) {
+            if (flags & Update4) {
               attachSuspenseRetryListeners(finishedWork);
             }
             return;
@@ -23746,7 +23746,7 @@ ${currentIndent}`);
   }(passedObj, "", 0);
 }
 
-// ../node_modules/napl/dist/index.js
+// ../../NAPL/src/cycles/data-update/data-update.ts
 var KEYS = "~{keys}";
 var VALUES = "~{values}";
 var REGEX = /~\{([^}]+)\}/;
@@ -23866,6 +23866,7 @@ function markUpdateConfirmed(update, now) {
     update.confirmed = now;
   }
 }
+// ../../NAPL/node_modules/@dobuki/data-blob/dist/index.js
 var gt = Object.create;
 var { defineProperty: Rn, getPrototypeOf: Yt, getOwnPropertyNames: wt } = Object;
 var Et = Object.prototype.hasOwnProperty;
@@ -25462,6 +25463,8 @@ function ht(t, n) {
     });
   return t;
 }
+
+// ../../NAPL/src/cycles/data-update/blob-utils.ts
 function packageUpdates(updates, blobs, secret) {
   const blobBuilder = un.payload("payload", { updates }, secret);
   const addedBlob = new Set;
@@ -25477,6 +25480,8 @@ async function receiveBlob(blob) {
   const { payload, ...blobs } = await I8(blob);
   return { payload, blobs };
 }
+
+// ../../NAPL/node_modules/@dobuki/payload-validator/dist/index.js
 var zJ = Object.create;
 var { defineProperty: Q0, getPrototypeOf: QJ, getOwnPropertyNames: ZJ } = Object;
 var UJ = Object.prototype.hasOwnProperty;
@@ -26960,6 +26965,7 @@ function x5(J2, q2) {
 }
 var JJ = 5000;
 
+// ../../NAPL/src/core/Processor.ts
 class Processor {
   sendUpdate;
   constructor(sendUpdate) {
@@ -27027,7 +27033,6 @@ class Processor {
     })).join("/");
   }
 }
-
 // ../node_modules/@dobuki/data-blob/dist/index.js
 var gt2 = Object.create;
 var { defineProperty: Rn2, getPrototypeOf: Yt2, getOwnPropertyNames: wt2 } = Object;
@@ -29269,7 +29274,13 @@ class SyncClient {
   #localTimeOffset = 0;
   #nextFrameInProcess = false;
   #secret;
-  #processor = new Processor((blob) => this.#socket?.send(blob));
+  #processor = new Processor((blob) => {
+    if (blob.size > 1024 * 1024 * 10) {
+      console.error(`Blob too large: ${blob.size / 1024 / 1024} MB`);
+      return;
+    }
+    this.#socket?.send(blob);
+  });
   #outgoingUpdates = [];
   #closeListener = () => {
   };
@@ -30368,4 +30379,4 @@ export {
   displayIsoUI
 };
 
-//# debugId=3F0C799D1D26655164756E2164756E21
+//# debugId=E10CE7339856815A64756E2164756E21
