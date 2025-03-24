@@ -1,0 +1,657 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SyncoSpace</title>
+    <style>
+      body {
+        margin: 0;
+      }
+      canvas {
+        display: block;
+      }
+      .controls {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(255, 255, 255, 0.8);
+        padding: 10px;
+      }
+      .syncousers {
+        position: absolute;
+        right: 5px;
+        top: 5px;
+        color: red;
+      }
+      #qrcode {
+        width: 100px;
+        height: 100px;
+      }
+      .center {
+        position: absolute;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        width: 100%;
+      }
+      .top-right {
+        position: absolute;
+        right: 5px;
+        top: 25px;
+      }
+      .score {
+        color: white;
+        position: absolute;
+        white-space: pre;
+      }
+      .hidden {
+        display: none;
+      }
+      #mute {
+        cursor: pointer;
+        position: absolute;
+        right: 5px;
+        bottom: 5px;
+      }
+      #zzfx {
+        position: absolute;
+        left: 5px;
+        bottom: 5px;
+        display: none;
+        font-family: monospace;
+      }
+      a {
+        color: gray;
+      }
+      a:hover {
+        color: silver;
+      }
+      .cover {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        z-index: 1000;
+        background-color: #000000bb;
+        color: white;
+      }
+      #title {
+        color: white;
+        font-size: 50pt;
+        font-family: Tahoma;
+        font-style: italic;
+        opacity: 0;
+        transition: 1s opacity;
+      }
+      .info {
+        position: absolute;
+        bottom: 40px;
+        z-index: 1000;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="score">score:</div>
+    <div class="cover center hidden">click to resume</div>
+    <div id="title" class="center">
+      SyncoSpace
+      <div class="info">
+        <a
+          rel="noopener"
+          target="_blank"
+          href="https://github.com/jacklehamster/syncopath"
+          ><img
+            title="JackLeHamster"
+            src="https://avatars.githubusercontent.com/u/5171849"
+            style="width: 50px; height: 50px"
+        /></a>
+      </div>
+    </div>
+    <div id="qr" class="center">
+      <img id="qrcode" class="hidden top-right" alt="QR code" />
+    </div>
+    <div id="mute">🔇</div>
+    <div id="zzfx" class="hidden">
+      <a rel="noopener" href="https://zzfx.3d2k.com/" target="_blank"
+        >Sound produced with ZZFX</a
+      >
+    </div>
+    <script type="module">
+      import * as THREE from "https://esm.sh/three";
+      import {
+        provideSocketClient,
+        handleUsersChanged,
+      } from "https://esm.sh/@dobuki/syncopath";
+      import { zzfx } from "https://esm.sh/zzfx";
+
+      const params = new URLSearchParams(location.href);
+      const room =
+        params.get("room") ??
+        localStorage.getItem("syncoroom") ??
+        "codepen-" + Math.random().toString().split(".").pop().substring(0, 4);
+      localStorage.setItem("syncoroom", room);
+
+      // SYNCOPATH
+      const socketClient = provideSocketClient({
+        host: "wss://demo.dobuki.net",
+        room,
+      });
+
+      const phones = {};
+      let boxes = [];
+      let particles = [];
+      let grids = []; // Array for two grids
+      let bullets = [];
+      let score = 0;
+      let best = 0;
+      let globalSpeed = 1;
+
+      handleUsersChanged(socketClient)
+        .onUserAdded(async (clientId, isSelf, observers) => {
+          if (isSelf) return;
+          const phone = createPhone();
+          phones[clientId] = phone;
+          phone.disabledUntil = 0;
+          phone.gameOver = false;
+
+          const peerData = socketClient.peerData(clientId);
+          const PRECISION = 100;
+
+          const handleOrientationEvent = (event) => {
+            if (event.alpha === null) return;
+            peerData.setData(`acceleration`, {
+              x: Math.round(event.alpha * PRECISION) / PRECISION,
+              y: Math.round(event.beta * PRECISION) / PRECISION,
+              z: Math.round(event.gamma * PRECISION) / PRECISION,
+            });
+          };
+
+          window.addEventListener(
+            "MozOrientation",
+            handleOrientationEvent,
+            true
+          );
+          window.addEventListener(
+            "deviceorientation",
+            handleOrientationEvent,
+            true
+          );
+
+          window.addEventListener("touchstart", (event) => {
+            event.preventDefault();
+            if (!peerData.state.tap) peerData.setData(`tap`, "~{now}");
+          });
+          window.addEventListener("touchend", (event) => {
+            event.preventDefault();
+            if (peerData.state.tap) peerData.setData(`tap`, 0);
+          });
+
+          observers.add(
+            peerData.observe(`acceleration`).onChange((acceleration) => {
+              if (acceleration) {
+                const { x, y, z } = acceleration;
+                setPhoneRotation(phone, y - 90, z, x);
+                phone.dx = z;
+                phone.dy = y;
+                document.querySelector("#mute").classList.remove("hidden");
+                document.querySelector(".cover").classList.add("hidden");
+                refreshZzfx();
+              }
+            })
+          );
+
+          function move() {
+            if (phones[clientId]) {
+              requestAnimationFrame(move);
+              const now = Date.now();
+
+              // Move phone if not disabled
+              if (now >= phone.disabledUntil && !phone.gameOver) {
+                phone.position.x += (phone.dx ?? 0) / 1000;
+                phone.position.y += (phone.dy ?? 0) / 1000;
+                phone.position.x *= 0.99;
+                phone.position.y *= 0.99;
+                if (!phone.visible) {
+                  phone.visible = true;
+                  score = 0;
+                  globalSpeed = 1;
+                  document.querySelector(".score").textContent =
+                    `score: ${score}`;
+                  document.querySelector("#title").style.opacity = 0;
+                }
+              }
+
+              // Move bullets
+              bullets.forEach((b) => {
+                const bulletDir = new THREE.Vector3(0, 1, 0);
+                bulletDir.applyQuaternion(b.quaternion);
+                b.position.addScaledVector(bulletDir, 0.5);
+                b.time = (b.time ?? 0) + 1;
+                if (b.time > 50) scene.remove(b);
+                // Fade bullets based on distance
+                b.material.opacity = Math.max(
+                  0,
+                  1 - (b.position.z - phone.position.z) / 10
+                );
+              });
+              bullets = bullets.filter((b) => b.time <= 50);
+
+              // Move boxes
+              boxes.forEach((box) => {
+                box.position.z += 0.1 * globalSpeed;
+                if (box.position.z > 5) {
+                  scene.remove(box);
+                  boxes = boxes.filter((b) => b !== box);
+                }
+                // Fade boxes based on distance
+                box.material.opacity = Math.max(
+                  0,
+                  1 - (box.position.z - phone.position.z) / 10
+                );
+                // Check collision with phone
+                if (
+                  !phone.gameOver &&
+                  now >= phone.disabledUntil &&
+                  box.position.distanceTo(phone.position) < 0.8 * box.size
+                ) {
+                  particles.push(createParticles(phone.position, 0x3388ff));
+                  phone.visible = false;
+                  phone.disabledUntil = now + 3000;
+                  phone.gameOver = true;
+                  if (!mute)
+                    zzfx(
+                      ...[
+                        1,
+                        ,
+                        100,
+                        0.05,
+                        0.2,
+                        0.3,
+                        2,
+                        1.5,
+                        ,
+                        ,
+                        50,
+                        0.1,
+                        ,
+                        ,
+                        ,
+                        ,
+                        ,
+                        0.8,
+                        ,
+                        0.2,
+                      ]
+                    );
+
+                  document.querySelector(".score").textContent =
+                    `score: ${score}\nbest: ${best}`;
+                  document.querySelector("#title").style.opacity = 1;
+                }
+              });
+
+              // Collision detection (bullet vs box)
+              bullets.forEach((bullet) => {
+                boxes.forEach((box) => {
+                  if (bullet.position.distanceTo(box.position) < box.size) {
+                    particles.push(createParticles(box.position));
+                    scene.remove(bullet);
+                    score += Math.ceil((1.5 - box.size) * 5);
+                    if (box.size > 0.5) {
+                      box.size *= Math.random();
+                      box.scale.set(box.size, box.size, box.size);
+                    } else {
+                      score += 20;
+                      scene.remove(box);
+                      boxes = boxes.filter((b) => b !== box);
+                    }
+                    best = Math.max(score, best);
+                    globalSpeed = 1 + score / 100;
+                    document.querySelector(".score").textContent =
+                      `score: ${score}`;
+
+                    bullets = bullets.filter((b) => b !== bullet);
+                    if (!mute)
+                      zzfx(
+                        ...[
+                          1.5,
+                          ,
+                          200,
+                          0.02,
+                          0.1,
+                          0.2,
+                          1,
+                          2,
+                          ,
+                          ,
+                          50,
+                          0.05,
+                          ,
+                          ,
+                          ,
+                          ,
+                          ,
+                          0.9,
+                          ,
+                          0.1,
+                        ]
+                      );
+                  }
+                });
+              });
+
+              // Update particles
+              particles.forEach((p) => {
+                p.time += 1;
+                p.children.forEach((particle) => {
+                  particle.position.add(particle.velocity);
+                  particle.material.opacity -= 0.03;
+                });
+                if (p.time > 30) scene.remove(p);
+              });
+              particles = particles.filter((p) => p.time <= 30);
+
+              // Move grids
+              grids.forEach((grid) => {
+                grid.position.z += 0.1 * globalSpeed;
+                if (grid.position.z > 10) grid.position.z = -10; // Loop back
+                // Fade grid based on distance
+                grid.material.opacity = Math.max(
+                  0.2,
+                  1 - (grid.position.z - camera.position.z) / 15
+                );
+              });
+
+              // Spawn new boxes
+              if (Math.random() < 0.05 && now >= phone.disabledUntil) {
+                boxes.push(createBox());
+              }
+
+              render();
+            }
+          }
+          move();
+
+          observers.add(
+            peerData.observe(`tap`).onChange((tap) => {
+              if (tap && Date.now() >= phone.disabledUntil) {
+                if (phone.gameOver) {
+                  phone.gameOver = false;
+                }
+                if (!mute)
+                  zzfx(
+                    ...[
+                      5,
+                      ,
+                      133,
+                      0.01,
+                      0.06,
+                      0.08,
+                      1,
+                      0.9,
+                      ,
+                      17,
+                      ,
+                      ,
+                      ,
+                      ,
+                      ,
+                      ,
+                      ,
+                      0.69,
+                      ,
+                      ,
+                      251,
+                    ]
+                  );
+                phone.screenMaterial.color.set(0xff0000);
+                bullets.push(createBullet(phone));
+              } else {
+                phone.screenMaterial.color.set(0x0000ff);
+              }
+            })
+          );
+        })
+        .onUserRemoved((user) => {
+          if (phones[user]?.mesh) scene.remove(phones[user]);
+          delete phones[user];
+          document.querySelector("#title").style.opacity = 1;
+        });
+
+      // Scene setup
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+      const renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      // Create phone
+      function createPhone() {
+        const phoneGeometry = new THREE.BoxGeometry(0.3, 0.7, 0.1);
+        const phoneMaterial = new THREE.MeshPhongMaterial({ color: 0x3388ff });
+        const phone = new THREE.Mesh(phoneGeometry, phoneMaterial);
+        scene.add(phone);
+
+        const screenGeometry = new THREE.PlaneGeometry(0.2, 0.5);
+        const screenMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+        const screen = new THREE.Mesh(screenGeometry, screenMaterial);
+        screen.position.z = 0.06;
+        phone.add(screen);
+        phone.screen = screen;
+        phone.screenMaterial = screenMaterial;
+        phone.visible = false;
+        return phone;
+      }
+
+      // Create bullet
+      function createBullet(phone) {
+        const bulletGeometry = new THREE.BoxGeometry(0.2, 1, 0.2);
+        const bulletMaterial = new THREE.MeshPhongMaterial({
+          color: 0xffffff,
+          emissive: 0xffffff,
+          emissiveIntensity: 0.5,
+          transparent: true, // Enable transparency
+          opacity: 1,
+        });
+        const bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
+        scene.add(bullet);
+        bullet.rotation.x = phone.rotation.x;
+        bullet.rotation.y = phone.rotation.y;
+        bullet.rotation.z = phone.rotation.z;
+        bullet.position.x = phone.position.x;
+        bullet.position.y = phone.position.y;
+        bullet.position.z = phone.position.z;
+        return bullet;
+      }
+
+      // Create approaching box
+      function createBox() {
+        const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
+        const boxMaterial = new THREE.MeshPhongMaterial({
+          color: 0xff0000,
+          emissive: 0xff6666,
+          emissiveIntensity: 0.2,
+          transparent: true, // Enable transparency
+          opacity: 1,
+        });
+        const box = new THREE.Mesh(boxGeometry, boxMaterial);
+        scene.add(box);
+        box.position.set(
+          (Math.random() - 0.5) * 5,
+          (Math.random() - 0.5) * 5,
+          -5
+        );
+        box.boxGeometry = boxGeometry;
+        box.size = 1;
+        return box;
+      }
+
+      // Create particles for explosion
+      function createParticles(position, color = 0xffaa00) {
+        const particleGroup = new THREE.Group();
+        const particleCount = 20;
+        const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+        const material = new THREE.MeshBasicMaterial({
+          color,
+          transparent: true,
+          opacity: 1,
+        });
+
+        for (let i = 0; i < particleCount; i++) {
+          const particle = new THREE.Mesh(geometry, material.clone());
+          particle.position.copy(position);
+          particle.velocity = new THREE.Vector3(
+            (Math.random() - 0.5) * 0.2,
+            (Math.random() - 0.5) * 0.2,
+            (Math.random() - 0.5) * 0.2
+          );
+          particleGroup.add(particle);
+        }
+
+        particleGroup.time = 0;
+        scene.add(particleGroup);
+        return particleGroup;
+      }
+
+      // Create two alternating grids
+      function createGrids() {
+        const size = 20;
+        const divisions = 20;
+        const grid1 = new THREE.GridHelper(size, divisions, 0x00ff00, 0x00ff00);
+        grid1.position.set(0, -2, -10); // Start far
+        grid1.material.opacity = 0.5;
+        grid1.material.transparent = true;
+        scene.add(grid1);
+
+        const grid2 = new THREE.GridHelper(size, divisions, 0x00ff00, 0x00ff00);
+        grid2.position.set(0, -2, 0); // Offset by half the distance
+        grid2.material.opacity = 0.5;
+        grid2.material.transparent = true;
+        scene.add(grid2);
+
+        grids = [grid1, grid2];
+      }
+
+      // Lighting
+      const ambientLight = new THREE.AmbientLight(0x404040);
+      scene.add(ambientLight);
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+      directionalLight.position.set(0, 1, 1);
+      scene.add(directionalLight);
+
+      // Camera position
+      camera.position.z = 2;
+      camera.position.y = 1;
+
+      // Initialize grids
+      createGrids();
+
+      // Set rotation
+      function setPhoneRotation(phone, x, y, z) {
+        phone.rotation.x = THREE.MathUtils.degToRad(x);
+        phone.rotation.y = THREE.MathUtils.degToRad(y);
+        phone.rotation.z = THREE.MathUtils.degToRad(z);
+        render();
+      }
+
+      function render() {
+        renderer.render(scene, camera);
+      }
+      render();
+
+      // Handle window resize
+      window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        render();
+      });
+
+      document.addEventListener(
+        "touchmove",
+        (event) => event.preventDefault(),
+        { passive: false }
+      );
+
+      // QR Code
+      import QRCode from "https://cdn.skypack.dev/qrcode";
+      const qrCode = document.getElementById("qrcode");
+
+      function setQrCode() {
+        qrCode.classList.add("hidden");
+        const url = `https://codepen.io/Vincent-Le-Quang-Dobuki/full/ZYEROqY?room=${room}`;
+        QRCode.toDataURL(url, function (err, url) {
+          qrCode.src = url;
+          qrCode.classList.remove("hidden");
+        });
+      }
+      setQrCode();
+
+      // Sound
+      function refreshZzfx() {
+        document.querySelector("#zzfx").style.display =
+          mute || document.querySelector("#mute").classList.contains("hidden")
+            ? "none"
+            : "block";
+      }
+
+      let mute = true;
+      document.querySelector("#mute").addEventListener("click", () => {
+        mute = !mute;
+        document.querySelector("#mute").textContent = mute ? "🔇" : "🔊";
+        refreshZzfx();
+        if (!mute)
+          zzfx(
+            ...[
+              ,
+              ,
+              479,
+              0.03,
+              0.12,
+              0.31,
+              1,
+              1.7,
+              ,
+              ,
+              225,
+              0.05,
+              0.03,
+              ,
+              ,
+              ,
+              ,
+              0.92,
+              0.17,
+              0.17,
+            ]
+          );
+      });
+
+      const div = document.body.appendChild(document.createElement("div"));
+      div.textContent = room;
+      div.style.position = "absolute";
+      div.style.right = "5px";
+      div.style.top = "5px";
+      div.style.color = "#333";
+      div.style.zIndex = "100";
+
+      socketClient.onClose(() => {
+        document.querySelector(".cover").classList.remove("hidden");
+        window.addEventListener(
+          "focus",
+          () => {
+            document.querySelector(".cover").classList.add("hidden");
+          },
+          { once: true }
+        );
+      });
+      document.querySelector("#title").style.opacity = 1;
+    </script>
+  </body>
+</html>
