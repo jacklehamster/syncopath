@@ -7,8 +7,11 @@ SyncoPath is a library that facilitates the use of WebSocket and WebRTC.
 
 The SyncoPath library wraps that around a protocol where you simply share data between two entities. So rather than sending messages around, you have this big chunk of common data, and anything you change on one device will be updated on the other device. You can also observe the data and act accordingly when it gets modified.
 
-For more details on usage, check out this blog post:
-[Turn your phone into a wireless Joy-Con with SyncoPath](https://dev.to/jacklehamster/turn-your-phone-into-a-joystick-with-syncopath-1l78-temp-slug-904305)
+## Blog post
+
+Read more details in this blog post:
+
+[![blog-post-image](https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Fukbusif4uozl1kv1qo99.png) Turn your phone into a wireless Joy-Con with SyncoPath](https://dev.to/jacklehamster/turn-your-phone-into-a-wireless-joy-con-with-syncopath-cbb)
 
 ## Server setup
 
@@ -53,6 +56,8 @@ socketClient.observe().onChange(() => {
   console.log("Global state:", socketClient.state);
 });
 ```
+
+
 
 ## Demo
 
