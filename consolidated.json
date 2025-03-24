@@ -127,7 +127,7 @@
     "json-test/index.html": {
       "sha": "e1e988ca0511c689742505deed09b09033a2516c"
     },
-    "md5": "58b66efcad889bc8ff56a81a5aa6e9d2",
+    "md5": "10eb7f8ad7498adae397605b188487c3",
     "mobile/index.html": {
       "sha": "9ca863b9b062b19b9cb614dff78c554e1eeef6e8"
     },
@@ -169,6 +169,9 @@
     },
     "src/react/sync-client.ts": {
       "sha": "4fd191aca2a61a74810e7722757aa6f65332ce12"
+    },
+    "syncospace/index.html": {
+      "sha": "777be240acc5e612178a8910b59880c91cd68aa1"
     },
     "tsconfig.json": {
       "sha": "5d54bba5d6d02edc48c065729f8965af5541693d"
@@ -1166,6 +1169,12 @@
       "sha": "4fd191aca2a61a74810e7722757aa6f65332ce12"
     }
   },
+  "/example/syncospace/dir.json": {
+    "index.html": {
+      "sha": "777be240acc5e612178a8910b59880c91cd68aa1"
+    },
+    "md5": "011506d51be591abefb38dbf684eb2a3"
+  },
   "/example/tsconfig.json": {
     "compilerOptions": {
       "outDir": "dist",
@@ -1205,7 +1214,7 @@
   },
   "/package.json": {
     "name": "@dobuki/syncopath",
-    "version": "1.0.24",
+    "version": "1.0.25",
     "module": "src/index.ts",
     "type": "module",
     "repository": {
