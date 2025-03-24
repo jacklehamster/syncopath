@@ -24,9 +24,9 @@
     "sha": "38313e037715d77040d12abb2c30630e16c86844"
   },
   "SyncClient.ts": {
-    "sha": "be0d9b2ce014e33007692d3cf18d3126112d5e98"
+    "sha": "9a01e4deb15ec026b39d148e087431f6e8e5db1b"
   },
-  "md5": "df5b6286f4fa381e5bcd1408e206d98a",
+  "md5": "9540fa28e065476623f32a7cecff285f",
   "peer/PeerManager.ts": {
     "sha": "e3f0ccf251fdb7fe66fe46e93c5bddd8a96c84f6"
   },
