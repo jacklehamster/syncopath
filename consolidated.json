@@ -1214,7 +1214,7 @@
   },
   "/package.json": {
     "name": "@dobuki/syncopath",
-    "version": "1.0.25",
+    "version": "1.0.26",
     "module": "src/index.ts",
     "type": "module",
     "repository": {
