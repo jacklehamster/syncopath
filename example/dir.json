@@ -86,7 +86,7 @@
   "json-test/index.html": {
     "sha": "e1e988ca0511c689742505deed09b09033a2516c"
   },
-  "md5": "c86f1e1aff704a308b9f1f51adcedf4c",
+  "md5": "75bd97a47b334e76247a26c14df6be09",
   "mobile/index.html": {
     "sha": "9ca863b9b062b19b9cb614dff78c554e1eeef6e8"
   },
@@ -112,7 +112,7 @@
     "sha": "2259c9b2a16478dd33d22440483ad4b6b04a284e"
   },
   "src/index.ts": {
-    "sha": "efbce85b4f21a780bd9ca43cb62658e9bd113bfd"
+    "sha": "80e9909f7b58357e6d43ca7497fe4d1093c044ea"
   },
   "src/iso-test/iso-utils.ts": {
     "sha": "ba1336af22c4389a058e0cd900f415402187505d"

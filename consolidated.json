@@ -127,7 +127,7 @@
     "json-test/index.html": {
       "sha": "e1e988ca0511c689742505deed09b09033a2516c"
     },
-    "md5": "c86f1e1aff704a308b9f1f51adcedf4c",
+    "md5": "75bd97a47b334e76247a26c14df6be09",
     "mobile/index.html": {
       "sha": "9ca863b9b062b19b9cb614dff78c554e1eeef6e8"
     },
@@ -153,7 +153,7 @@
       "sha": "2259c9b2a16478dd33d22440483ad4b6b04a284e"
     },
     "src/index.ts": {
-      "sha": "efbce85b4f21a780bd9ca43cb62658e9bd113bfd"
+      "sha": "80e9909f7b58357e6d43ca7497fe4d1093c044ea"
     },
     "src/iso-test/iso-utils.ts": {
       "sha": "ba1336af22c4389a058e0cd900f415402187505d"
@@ -1129,12 +1129,12 @@
   },
   "/example/src/dir.json": {
     "index.ts": {
-      "sha": "efbce85b4f21a780bd9ca43cb62658e9bd113bfd"
+      "sha": "80e9909f7b58357e6d43ca7497fe4d1093c044ea"
     },
     "iso-test/iso-utils.ts": {
       "sha": "ba1336af22c4389a058e0cd900f415402187505d"
     },
-    "md5": "fefeb92a8ee97d571d7ef1b6b85f34c8",
+    "md5": "de9eaa7e12aadc875f428c561da61d18",
     "react/component.tsx": {
       "sha": "7c344471c4f366046b285c0265e495c2fe5d41c7"
     },
@@ -1214,7 +1214,7 @@
   },
   "/package.json": {
     "name": "@dobuki/syncopath",
-    "version": "1.0.27",
+    "version": "1.0.28",
     "module": "src/index.ts",
     "type": "module",
     "repository": {
@@ -1260,7 +1260,7 @@
     },
     "description": "Synchronize data across clients using WebSocket",
     "dependencies": {
-      "napl": "^1.0.53"
+      "napl": "^1.0.55"
     },
     "keywords": []
   },
@@ -1275,7 +1275,7 @@
       "sha": "71f7bc06f1f250029f371813cc68f188083b62ab"
     },
     "ISocket.ts": {
-      "sha": "8701cea8f7f53317cbfcd27efe0b9cc7fa36b543"
+      "sha": "938e449833c58d63bafb64b530f5662b58c6ae38"
     },
     "ISyncClient.ts": {
       "sha": "38edeb685296052443e355026676e81efe13422f"
@@ -1290,9 +1290,9 @@
       "sha": "38313e037715d77040d12abb2c30630e16c86844"
     },
     "SyncClient.ts": {
-      "sha": "9a01e4deb15ec026b39d148e087431f6e8e5db1b"
+      "sha": "f78b8daca5bf5c7e27f7a6aa769510fc4ae9777b"
     },
-    "md5": "9540fa28e065476623f32a7cecff285f",
+    "md5": "3a13f857e4469fe154b00eaba55eeb82",
     "peer/PeerManager.ts": {
       "sha": "e3f0ccf251fdb7fe66fe46e93c5bddd8a96c84f6"
     },
@@ -1332,7 +1332,7 @@
       "sha": "71f7bc06f1f250029f371813cc68f188083b62ab"
     },
     "client/ISocket.ts": {
-      "sha": "8701cea8f7f53317cbfcd27efe0b9cc7fa36b543"
+      "sha": "938e449833c58d63bafb64b530f5662b58c6ae38"
     },
     "client/ISyncClient.ts": {
       "sha": "38edeb685296052443e355026676e81efe13422f"
@@ -1347,7 +1347,7 @@
       "sha": "38313e037715d77040d12abb2c30630e16c86844"
     },
     "client/SyncClient.ts": {
-      "sha": "9a01e4deb15ec026b39d148e087431f6e8e5db1b"
+      "sha": "f78b8daca5bf5c7e27f7a6aa769510fc4ae9777b"
     },
     "client/peer/PeerManager.ts": {
       "sha": "e3f0ccf251fdb7fe66fe46e93c5bddd8a96c84f6"
@@ -1364,7 +1364,7 @@
     "index.ts": {
       "sha": "819c255ec5ffd50e439f407f31e58c8c8a3fba03"
     },
-    "md5": "f6b982aa3438b2447dbb9b93df4afa76",
+    "md5": "9ba361f634ffbe502598119452030553",
     "server/SocketEventHandler.ts": {
       "sha": "b9d65ffc54fcbd587501bdb29667925b8eba79cd"
     },

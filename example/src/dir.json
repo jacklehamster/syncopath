@@ -1,11 +1,11 @@
 {
   "index.ts": {
-    "sha": "efbce85b4f21a780bd9ca43cb62658e9bd113bfd"
+    "sha": "80e9909f7b58357e6d43ca7497fe4d1093c044ea"
   },
   "iso-test/iso-utils.ts": {
     "sha": "ba1336af22c4389a058e0cd900f415402187505d"
   },
-  "md5": "fefeb92a8ee97d571d7ef1b6b85f34c8",
+  "md5": "de9eaa7e12aadc875f428c561da61d18",
   "react/component.tsx": {
     "sha": "7c344471c4f366046b285c0265e495c2fe5d41c7"
   },
