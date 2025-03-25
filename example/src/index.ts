@@ -9,30 +9,6 @@ import { SpriteSheet, loadSpriteSheet } from "aseprite-sheet";
 import { hookupDiv } from "./react/component";
 
 
-const EMOJIS = [
-  "🐵", "🐒", "🦍", "🦧", "🐶", "🐕", "🦮", "🐕‍🦺", "🐩", "🐺",
-  "🦊", "🦝", "🐱", "🐈", "🐈‍⬛", "🦁", "🐯", "🐅", "🐆", "🐴",
-  "🫎", "🫏", "🐎", "🦄", "🦓", "🦌", "🦬", "🐮", "🐂", "🐃",
-  "🐄", "🐷", "🐖", "🐗", "🐽", "🐏", "🐑", "🐐", "🐪", "🐫",
-  "🦙", "🦒", "🐘", "🦣", "🦏", "🦛", "🐭", "🐁", "🐀", "🐹",
-  "🐰", "🐇", "🐿️", "🦫", "🦔", "🦇", "🐻", "🐻‍❄️", "🐨", "🐼",
-  "🦥", "🦦", "🦨", "🦘", "🦡", "🐾", "🦃", "🐔", "🐓", "🐣",
-  "🐤", "🐥", "🐦", "🐧", "🕊️", "🦅", "🦆", "🦢", "🦉", "🦤",
-  "🪶", "🦩", "🦚", "🦜", "🪽", "🐦‍⬛", "🪿", "🐦‍🔥", "🪹", "🪺",
-  "🐸", "🐊", "🐢", "🦎", "🐍", "🐲", "🐉", "🦕", "🦖", "🐳",
-  "🐋", "🐬", "🦭", "🐟", "🐠", "🐡", "🦈", "🐙", "🐚", "🪸",
-  "🪼", "🦀", "🦞", "🦐", "🦑", "🦪", "🐌", "🦋", "🐛", "🐜",
-  "🐝", "🪲", "🐞", "🦗", "🪳", "🕷️", "🕸️", "🦂", "🦟", "🪰",
-  "🪱", "🦠", "💐", "🌸", "💮", "🪷", "🏵️", "🌹", "🥀", "🌺",
-  "🌻", "🌼", "🌷", "🪻", "🌱", "🪴", "🌲", "🌳", "🌴", "🌵",
-  "🌾", "🌿", "☘️", "🍀", "🍁", "🍂", "🍃", "🍄", "🪨", "🪵"
-];
-
-let emoji: string;
-export function randomEmoji(forceRandom?: boolean) {
-  return (forceRandom ? null : emoji) ?? (emoji = EMOJIS[Math.floor(Math.random() * EMOJIS.length)]);
-}
-
 
 const config = await fetch("../config.json").then((response) =>
   response.json()
@@ -47,7 +23,7 @@ function getSocketClient() {
 export const socketClient = getSocketClient();
 (window as any).socketClient = socketClient;
 
-function stringify(obj: any) {
+export function stringify(obj: any) {
   return prettyStringify(obj, {
     maxLength: 60, replacer: (key, value) => {
       if (value instanceof Blob) {
@@ -57,10 +33,6 @@ function stringify(obj: any) {
     }
   });
 }
-
-export {
-  stringify,
-};
 
 export async function getSpriteSheet(path: string) {
   const spritesheetDefinition = await loadSpriteSheet(path);

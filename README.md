@@ -57,8 +57,6 @@ socketClient.observe().onChange(() => {
 });
 ```
 
-
-
 ## Demo
 
 Various usage for SyncoPath:

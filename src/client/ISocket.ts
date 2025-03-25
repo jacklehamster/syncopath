@@ -8,5 +8,4 @@ export interface ISocket {
   close(): void;
   stateChanged?(state: RoomState): void;
   supportBlob?: boolean;
-  serverless?: boolean;
 }

@@ -10,7 +10,7 @@ import { IObservable } from "./IObservable";
 import { ObserverManager } from "./ObserverManager";
 import { PeerManager } from "./peer/PeerManager";
 import { RoomState } from "@/types/RoomState";
-import { Context, getLeafObject, markUpdateConfirmed, Processor, Update } from "napl";
+import { Context, getLeafObject, markUpdateConfirmed, Processor, Update, setData, pushData } from "napl";
 import { ISocket } from "./ISocket";
 import { ISyncClient } from "./ISyncClient";
 import { checkPeerConnections } from "./peer/check-peer";
@@ -65,27 +65,12 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
   }
 
   pushData(path: string, value: any, options: UpdateOptions = {}) {
-    this.#processDataUpdate({
-      path,
-      value,
-      append: true,
-    }, options);
+    pushData(this.state, this.now, this.#outgoingUpdates, path, value, options);
+    this.#prepareNextFrame();
   }
 
   setData(path: string, value: any, options: SetDataOptions = {}) {
-    this.#processDataUpdate({
-      path,
-      value,
-      append: options.append,
-      insert: options.insert,
-    }, options);
-  }
-
-  #processDataUpdate(update: Update, options: UpdateOptions = {}) {
-    if (options.active ?? this.state.config?.activeUpdates ?? this.#socket?.serverless) {
-      markUpdateConfirmed(update, this.now);
-    }
-    this.#outgoingUpdates.push(update);
+    setData(this.state, this.now, this.#outgoingUpdates, path, value, options);
     this.#prepareNextFrame();
   }
 
@@ -167,7 +152,7 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
       },
       skipValidation: skipValidation || this.state.config?.signPayloads === false,
     };
-    await this.#processor.processBlob(blob, context);
+    await this.#processor.receivedBlob(blob, context);
 
     this.#localTimeOffset = context.localTimeOffset;
     this.#secret = context.secret;
