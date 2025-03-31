@@ -1,19 +1,15 @@
 import { ISharedData, SetDataOptions } from "./ISharedData";
-import { Observer } from "./Observer";
-import { IObservable } from "./IObservable";
-import { ObserverManager } from "./ObserverManager";
-import { getLeafObject } from "napl";
+import { getLeafObject, IObservable, Observer } from "napl";
 import { ISyncClient } from "./ISyncClient";
 
 export class SubData implements ISharedData, IObservable {
   readonly #parts: (string | number)[] = [];
-  readonly #observerManager;
+  readonly #observers = new Set<Observer>();
 
   constructor(readonly path: string, readonly syncClient: ISyncClient) {
     this.#parts = path.split("/").map(v => {
       return isNaN(Number(v)) ? v : Number(v);
     });
-    this.#observerManager = new ObserverManager(syncClient);
   }
 
   getData(path: string) {
@@ -29,14 +25,17 @@ export class SubData implements ISharedData, IObservable {
   }
 
   observe(paths?: (string[] | string)): Observer {
-    const multi = Array.isArray(paths);
-    const pathArray = paths === undefined ? [] : multi ? paths : [paths];
-    const updatedPaths = pathArray.map(path => this.#getAbsolutePath(path));
-    return this.#observerManager.observe(updatedPaths, multi);
+    const observer = this.syncClient.observe(
+      paths === undefined ? undefined
+        : Array.isArray(paths) ? paths.map(p => this.#getAbsolutePath(p))
+          : this.#getAbsolutePath(paths));
+    this.#observers.add(observer);
+    return observer;
   }
 
-  triggerObservers(updates: Record<string, any>): void {
-    this.#observerManager.triggerObservers(updates);
+  removeObserver(observer: Observer): void {
+    this.#observers.delete(observer);
+    this.syncClient.removeObserver(observer);
   }
 
   setData(path: string, value: any, options?: SetDataOptions): void {
@@ -54,7 +53,7 @@ export class SubData implements ISharedData, IObservable {
   }
 
   close() {
-    this.#observerManager.close();
+    this.#observers.forEach(o => this.removeObserver(o));
     this.syncClient.removeChildData(this.path);
   }
 }

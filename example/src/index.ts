@@ -3,10 +3,11 @@
 /// <reference lib="dom.iterable" />
 
 import prettyStringify from "json-stringify-pretty-compact";
-import { Observer, provideSocketClient } from "@dobuki/syncopath";
+import { provideSocketClient } from "@dobuki/syncopath";
 import * as syncopath from "@dobuki/syncopath";
 import { SpriteSheet, loadSpriteSheet } from "aseprite-sheet";
 import { hookupDiv } from "./react/component";
+import { Observer } from "napl";
 
 
 

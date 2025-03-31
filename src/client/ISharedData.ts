@@ -13,5 +13,4 @@ export interface ISharedData {
   getData(path: string): any;
   setData(path: string, value: any, options?: SetDataOptions): void;
   pushData(path: string, value: any, options?: UpdateOptions): void;
-  triggerObservers(updates: Record<string, any>): void;
 }

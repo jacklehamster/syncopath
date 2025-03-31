@@ -5,25 +5,21 @@
 import { ISharedData, SetDataOptions, UpdateOptions } from "./ISharedData";
 import { ClientData } from "./ClientData";
 import { SubData } from "./SubData";
-import { Observer } from "./Observer";
-import { IObservable } from "./IObservable";
-import { ObserverManager } from "./ObserverManager";
 import { PeerManager } from "./peer/PeerManager";
 import { RoomState } from "@/types/RoomState";
-import { Context, getLeafObject, markUpdateConfirmed, Processor, Update, setData, pushData } from "napl";
+import { Context, Processor, Update, setData, pushData, getData, Observer, IObservable } from "napl";
 import { ISocket } from "./ISocket";
 import { ISyncClient } from "./ISyncClient";
 import { checkPeerConnections } from "./peer/check-peer";
 
 export type SocketProvider = () => Promise<ISocket>;
 
-export class SyncClient implements ISharedData, IObservable, ISyncClient {
+export class SyncClient implements ISharedData, ISyncClient, IObservable {
   readonly state: RoomState;
   readonly #children: Map<string, ISharedData> = new Map();
   #socket: ISocket | undefined;
   #connectionPromise: Promise<void> | undefined;
   readonly #selfData: ClientData = new ClientData(this);
-  readonly #observerManager = new ObserverManager(this);
   readonly peerManagers: Record<string, PeerManager> = {};
   #localTimeOffset = 0;
   #nextFrameInProcess = false;
@@ -35,7 +31,7 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
     }
     this.#socket?.send(blob);
   });
-  #outgoingUpdates: (Update | undefined)[] = [];
+  readonly #outgoingUpdates: (Update | undefined)[] = [];
   #closeListener = () => { };
 
   constructor(private socketProvider: SocketProvider, initialState: RoomState = {}) {
@@ -60,8 +56,17 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
   }
 
   getData(path: string) {
-    const parts = path.split("/");
-    return getLeafObject(this.state, parts, 0, false, { self: this.#selfData.clientId }) as any;
+    const context = {
+      root: this.state,
+      secret: this.#secret,
+      clientId: this.clientId,
+      localTimeOffset: this.#localTimeOffset,
+      properties: {
+        self: this.clientId,
+        now: this.now,
+      },
+    };
+    return getData(context, path);
   }
 
   pushData(path: string, value: any, options: UpdateOptions = {}) {
@@ -102,9 +107,11 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
   }
 
   observe(paths?: (string[] | string)): Observer {
-    const multi = Array.isArray(paths);
-    const pathArray = paths === undefined ? [] : multi ? paths : [paths];
-    return this.#observerManager.observe(pathArray, multi);
+    return this.#processor.observe(paths);
+  }
+
+  removeObserver(observer: Observer): void {
+    this.#processor.removeObserver(observer);
   }
 
   async #waitForConnection() {
@@ -129,7 +136,6 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
         }
       });
       socket.onClose(() => {
-        console.log(this.clientId, "disconnected from SyncClient");
         this.#socket = undefined;
         this.#closeListener();
       });
@@ -159,15 +165,6 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
     this.#selfData.clientId = context.clientId;
 
     this.#prepareNextFrame();
-  }
-
-  triggerObservers(updates: Record<string, any>): void {
-    this.#observerManager.triggerObservers(updates);
-    this.#children.forEach(child => child.triggerObservers(updates));
-  }
-
-  removeObserver(observer: Observer) {
-    this.#observerManager.removeObserver(observer);
   }
 
   get now() {
@@ -218,7 +215,15 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
         }
       }
     });
-    this.#outgoingUpdates = this.#outgoingUpdates.filter(update => update !== undefined);
+
+    let j = 0;
+    for (let i = 0; i < this.#outgoingUpdates.length; i++) {
+      this.#outgoingUpdates[j] = this.#outgoingUpdates[i];
+      if (this.#outgoingUpdates[j]) {
+        j++;
+      }
+    }
+    this.#outgoingUpdates.length = j;
 
     const context: Context = {
       root: this.state,
@@ -232,18 +237,16 @@ export class SyncClient implements ISharedData, IObservable, ISyncClient {
       outgoingUpdates: this.#outgoingUpdates,
       skipValidation: this.state.config?.signPayloads === false,
     };
-    const updates = this.#processor.performCycle(context);
+
+    this.#processor.performCycle(context);
     if (context.clientId) {
       this.#selfData.clientId = context.clientId;
     }
     if (context.localTimeOffset) {
       this.#localTimeOffset = context.localTimeOffset;
     }
-    this.#outgoingUpdates = context.outgoingUpdates;
     this.#secret = context.secret;
 
-    this.triggerObservers(updates);
     checkPeerConnections(this);
-    this.#socket?.stateChanged?.(this.state);
   }
 }

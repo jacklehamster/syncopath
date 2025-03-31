@@ -1,5 +1,5 @@
+import { Observer } from "napl";
 import { ISyncClient } from "../ISyncClient";
-import { Observer } from "../Observer";
 
 const EMOJIS = [
   "🐵", "🐒", "🦍", "🦧", "🐶", "🐕", "🦮", "🐕‍🦺", "🐩", "🐺",
@@ -68,10 +68,12 @@ export function displayUsers(syncClient: ISyncClient, userDiv?: HTMLDivElement) 
   userDiv.classList.add("syncousers");
   handleUsersChanged(syncClient)
     .onUserAdded?.((clientId, isSelf, observers) => {
+      console.log("added", clientId);
       // new client
       getOrCreateClientBox(syncClient, userDiv, observers, clientId, isSelf);
     })
     .onUserRemoved?.((clientId) => {
+      console.log("removed", clientId);
       const client = document.querySelector(`#div-${clientId}`) as HTMLDivElement;
       if (client) {
         client.style.transition = "opacity 0.3s";

@@ -49,6 +49,7 @@ export function checkPeerConnections(syncClient: SyncClient) {
               candidates?.forEach(candidateName => {
                 const candidate = syncClient.state.peer?.[`${clientTag}:${WEB_RTC}`]?.[clients[0]]?.ice?.[candidateName];
                 syncClient.peerManagers[clients[0]].addIceCandidate(candidate);
+                console.log("~=>> delete", `peer/${clientTag}:${WEB_RTC}/${clients[0]}/ice/${candidateName}`);
                 syncClient.setData(`peer/${clientTag}:${WEB_RTC}/${clients[0]}/ice/${candidateName}`, undefined, PEER_OPTIONS);
               });
             });

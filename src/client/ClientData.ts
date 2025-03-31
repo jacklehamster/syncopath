@@ -1,14 +1,11 @@
+import { IObservable, Observer } from "napl";
 import { ISharedData, SetDataOptions, UpdateOptions } from "./ISharedData";
 import { ISyncClient } from "./ISyncClient";
-import { Observer } from "./Observer";
-import { ObserverManager } from "./ObserverManager";
 
-export class ClientData implements ISharedData {
+export class ClientData implements ISharedData, IObservable {
   clientId: string = "";
-  readonly #observerManager;
 
   constructor(readonly syncClient: ISyncClient) {
-    this.#observerManager = new ObserverManager(syncClient);
   }
 
   #getAbsolutePath(path: string): string {
@@ -20,14 +17,14 @@ export class ClientData implements ISharedData {
   }
 
   observe(paths?: (string[] | string)): Observer {
-    const multi = Array.isArray(paths);
-    const pathArray = paths === undefined ? [] : multi ? paths : [paths];
-    const updatedPaths = pathArray.map(path => this.#getAbsolutePath(path));
-    return this.#observerManager.observe(updatedPaths, multi);
+    return this.syncClient.observe(
+      paths === undefined ? undefined
+        : Array.isArray(paths) ? paths.map(p => this.#getAbsolutePath(p))
+          : this.#getAbsolutePath(paths));
   }
 
-  triggerObservers(updates: Record<string, any>): void {
-    this.#observerManager.triggerObservers(updates);
+  removeObserver(observer: Observer): void {
+    this.syncClient.removeObserver(observer);
   }
 
   setData(path: string, value: any, options?: SetDataOptions): void {

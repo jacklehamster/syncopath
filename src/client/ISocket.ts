@@ -6,6 +6,5 @@ export interface ISocket {
   onError(listener: (event: Event) => void): void;
   onClose(listener: () => void): void;
   close(): void;
-  stateChanged?(state: RoomState): void;
   supportBlob?: boolean;
 }

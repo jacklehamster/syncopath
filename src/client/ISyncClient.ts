@@ -1,6 +1,5 @@
-import { IObservable } from "./IObservable";
+import { IObservable } from "napl";
 import { ISharedData } from "./ISharedData";
-import { Observer } from "./Observer";
 
 export interface ISyncClient extends ISharedData, IObservable {
   readonly self: ISharedData;
@@ -12,7 +11,5 @@ export interface ISyncClient extends ISharedData, IObservable {
   close(): void;
 
   onMessageBlob(blob: Blob, skipValidation?: boolean): Promise<void>
-  triggerObservers(updates: Record<string, any>): void;
-  removeObserver(observer: Observer): void;
   readonly now: number;
 }
