@@ -60,38 +60,19 @@
         trackCursor,
         trackCursorObserver,
         handleUsersChanged,
-        introduceName,
         socketClient,
         stringify,
       } from "../dist/index.js";
       window.socketClient = socketClient;
 
-      introduceName();
-
-      function getOrCreateClientBox(clientId, isSelf) {
-        if (document.querySelector(`#video-${clientId}`)) {
-          return document.querySelector(`#video-${clientId}`);
-        }
-        const clientBox = document.createElement("div");
-        clientBox.id = `client-${clientId}`;
-        clientBox.classList.add("client-box");
-        clientBox.style.backgroundColor = isSelf ? "lightgreen" : "lightblue";
-
-        if (isSelf) {
-          document.querySelector("#client-list").prepend(clientBox);
-        } else {
-          document.querySelector("#client-list").appendChild(clientBox);
-        }
-        return clientBox;
-      }
-
       trackCursor();
 
       //  Cursor
       handleUsersChanged((clientId, isSelf, observers) => {
-        const clientBox = getOrCreateClientBox(clientId, isSelf);
         //  cursor
-        const cursorDiv = clientBox.appendChild(document.createElement("div"));
+        const cursorDiv = document.body.appendChild(
+          document.createElement("div")
+        );
         cursorDiv.id = `cursor-${clientId}`;
         cursorDiv.classList.add("cursor");
 

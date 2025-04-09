@@ -987,19 +987,19 @@ Your code should look like:
         }
         return dispatcher;
       }
-      function useContext(Context4) {
+      function useContext(Context5) {
         var dispatcher = resolveDispatcher();
         {
-          if (Context4._context !== undefined) {
-            var realContext = Context4._context;
-            if (realContext.Consumer === Context4) {
+          if (Context5._context !== undefined) {
+            var realContext = Context5._context;
+            if (realContext.Consumer === Context5) {
               error("Calling useContext(Context.Consumer) is not supported, may cause bugs, and will be " + "removed in a future major release. Did you mean to call useContext(Context) instead?");
-            } else if (realContext.Provider === Context4) {
+            } else if (realContext.Provider === Context5) {
               error("Calling useContext(Context.Provider) is not supported. " + "Did you mean to call useContext(Context) instead?");
             }
           }
         }
-        return dispatcher.useContext(Context4);
+        return dispatcher.useContext(Context5);
       }
       function useState(initialState) {
         var dispatcher = resolveDispatcher();
@@ -33486,9 +33486,6 @@ async function getSpriteSheet(path) {
   const spritesheetDefinition = await y6(path);
   return new u(spritesheetDefinition);
 }
-function introduceName2() {
-  introduceName(socketClient);
-}
 function displayUsers2(userDiv) {
   displayUsers(socketClient, userDiv);
 }
@@ -33536,7 +33533,6 @@ export {
   trackCursor,
   stringify2 as stringify,
   socketClient,
-  introduceName2 as introduceName,
   insertInIsoWorld,
   hookDiv,
   handleUsersChanged2 as handleUsersChanged,
@@ -33545,4 +33541,4 @@ export {
   displayIsoUI
 };
 
-//# debugId=D9DF62A9AD5A77F764756E2164756E21
+//# debugId=102146303F1063DB64756E2164756E21

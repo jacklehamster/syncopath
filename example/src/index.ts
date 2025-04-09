@@ -40,10 +40,6 @@ export async function getSpriteSheet(path: string) {
   return new SpriteSheet(spritesheetDefinition!);
 }
 
-export function introduceName() {
-  syncopath.introduceName(socketClient);
-}
-
 
 export function displayUsers(userDiv?: HTMLDivElement) {
   syncopath.displayUsers(socketClient, userDiv);
