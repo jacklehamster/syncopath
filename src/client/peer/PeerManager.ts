@@ -23,7 +23,15 @@ export class PeerManager {
     this.#onData = onData;
     this.#onClose = onClose;
     this.#onReady = onReady;
-    this.#peerConnection = new RTCPeerConnection();
+    this.#peerConnection = new RTCPeerConnection({
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' },
+        { urls: 'stun:stun3.l.google.com:19302' },
+        { urls: 'stun:stun4.l.google.com:19302' },
+      ]
+    });
     this.#peerConnection.ondatachannel = (event) => {
       this.#dataChannel = event.channel;
       this.#setupDataChannel();
