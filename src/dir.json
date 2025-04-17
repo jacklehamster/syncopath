@@ -18,7 +18,7 @@
     "sha": "6e152a943351462515ee5a02f22ed0658e613da6"
   },
   "client/peer/PeerManager.ts": {
-    "sha": "e3f0ccf251fdb7fe66fe46e93c5bddd8a96c84f6"
+    "sha": "4a3e4f78f464a98701344a25ab9e52700679dd79"
   },
   "client/peer/check-peer.ts": {
     "sha": "dd0421f5ea62286527777682d9626f304d556e73"
@@ -32,7 +32,7 @@
   "index.ts": {
     "sha": "f54b82510adbcb46a552dcb675aebc90c4c52b7b"
   },
-  "md5": "3d6b27e5caa739451076d54b0229ca60",
+  "md5": "5062adc4ff7d46216fa597c354141276",
   "server/SocketEventHandler.ts": {
     "sha": "b9d65ffc54fcbd587501bdb29667925b8eba79cd"
   },
