@@ -1214,7 +1214,7 @@
   },
   "/package.json": {
     "name": "@dobuki/syncopath",
-    "version": "1.0.30",
+    "version": "1.0.31",
     "module": "src/index.ts",
     "type": "module",
     "repository": {
@@ -1260,7 +1260,7 @@
     },
     "description": "Synchronize data across clients using WebSocket",
     "dependencies": {
-      "napl": "^1.0.61"
+      "napl": "^1.0.63"
     },
     "keywords": []
   },
@@ -1281,9 +1281,9 @@
       "sha": "712376f97c9de6b34b793d82fa27d6f8a23cc09a"
     },
     "SyncClient.ts": {
-      "sha": "6e152a943351462515ee5a02f22ed0658e613da6"
+      "sha": "f3630f123a4f3447fa25512ebd9d82b0010fef71"
     },
-    "md5": "8bdd136c3d7a041aeef38e1fda3892b3",
+    "md5": "5aa1ff75d8217dde86e1b7afccb4387a",
     "peer/PeerManager.ts": {
       "sha": "4a3e4f78f464a98701344a25ab9e52700679dd79"
     },
@@ -1329,7 +1329,7 @@
       "sha": "712376f97c9de6b34b793d82fa27d6f8a23cc09a"
     },
     "client/SyncClient.ts": {
-      "sha": "6e152a943351462515ee5a02f22ed0658e613da6"
+      "sha": "f3630f123a4f3447fa25512ebd9d82b0010fef71"
     },
     "client/peer/PeerManager.ts": {
       "sha": "4a3e4f78f464a98701344a25ab9e52700679dd79"
@@ -1346,7 +1346,7 @@
     "index.ts": {
       "sha": "f54b82510adbcb46a552dcb675aebc90c4c52b7b"
     },
-    "md5": "5062adc4ff7d46216fa597c354141276",
+    "md5": "5d555038041e2115304bc55ea6fdf788",
     "server/SocketEventHandler.ts": {
       "sha": "b9d65ffc54fcbd587501bdb29667925b8eba79cd"
     },
