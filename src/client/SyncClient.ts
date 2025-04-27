@@ -56,17 +56,11 @@ export class SyncClient implements ISharedData, ISyncClient, IObservable {
   }
 
   getData(path: string) {
-    const context = {
-      root: this.state,
-      secret: this.#secret,
-      clientId: this.clientId,
-      localTimeOffset: this.#localTimeOffset,
-      properties: {
-        self: this.clientId,
-        now: this.now,
-      },
+    const properties = {
+      self: this.clientId,
+      now: this.now,
     };
-    return getData(context, path);
+    return getData(this.state, path, properties);
   }
 
   pushData(path: string, value: any, options: UpdateOptions = {}) {
