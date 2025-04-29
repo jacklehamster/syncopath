@@ -1,15 +1,15 @@
 {
   "component.tsx": {
-    "sha": "7c344471c4f366046b285c0265e495c2fe5d41c7"
+    "sha": "c9c79e832a013d4efaad29c7e0783f6df5e24e55"
   },
   "index.d.ts": {
     "sha": "7980ec238c4dd00704399f7d8fe89cf26f194398"
   },
-  "md5": "f151ba88cfbe5c149f8ac11d5e95456d",
+  "md5": "cab799b7f6495f1a2c0a83bb5bbe1c16",
   "style.module.css": {
     "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
   },
   "sync-client.ts": {
-    "sha": "4fd191aca2a61a74810e7722757aa6f65332ce12"
+    "sha": "0b0d1fa2e3b97b8ab2415782a7e686b25f5a8403"
   }
 }

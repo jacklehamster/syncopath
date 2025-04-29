@@ -1,33 +1,18 @@
 {
-  "ClientData.ts": {
-    "sha": "9c6c038d900e017e44857f44d9e23dba3015f7ce"
+  "CommInterface.ts": {
+    "sha": "5933ac2e959c7abde5a28666d1a31c1e3093ce06"
   },
-  "ISharedData.ts": {
-    "sha": "977104c57a4b865ad9acc03440f0c62c72e33db4"
+  "PeerSyncClient.ts": {
+    "sha": "b470bce12fadbc8451f24f60e6a211a9d74ad859"
   },
-  "ISocket.ts": {
-    "sha": "6a6c706dde6d41d30e73fc9393c51d48ee10f906"
-  },
-  "ISyncClient.ts": {
-    "sha": "98337449d1b732ae68107e4534b20b7dc42dc7d1"
-  },
-  "SubData.ts": {
-    "sha": "712376f97c9de6b34b793d82fa27d6f8a23cc09a"
-  },
-  "SyncClient.ts": {
-    "sha": "f3630f123a4f3447fa25512ebd9d82b0010fef71"
-  },
-  "md5": "5aa1ff75d8217dde86e1b7afccb4387a",
+  "md5": "1d653df5bd0c854284e45c192344ad80",
   "peer/PeerManager.ts": {
     "sha": "4a3e4f78f464a98701344a25ab9e52700679dd79"
   },
   "peer/check-peer.ts": {
-    "sha": "dd0421f5ea62286527777682d9626f304d556e73"
+    "sha": "ea981235c8ba21951e382e3cf0fe8f09ac9ff12b"
   },
   "provide-socket-client.ts": {
-    "sha": "734c7d28ca741caaf0bc72327b1b6f631ca47fe3"
-  },
-  "ui/users.ts": {
-    "sha": "ee1e387524f70697cac22d5d32a66f661a25b3dd"
+    "sha": "2cfc44ae34bb416a32ceaf27731e07de9f91ce47"
   }
 }
