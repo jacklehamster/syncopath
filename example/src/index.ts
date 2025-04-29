@@ -4,11 +4,10 @@
 
 import prettyStringify from "json-stringify-pretty-compact";
 import { provideSocketClient } from "@dobuki/syncopath";
-import * as syncopath from "@dobuki/syncopath";
 import { SpriteSheet, loadSpriteSheet } from "aseprite-sheet";
 import { hookupDiv } from "./react/component";
 import { Observer } from "napl";
-
+import * as napl from "napl";
 
 
 const config = await fetch("../config.json").then((response) =>
@@ -42,7 +41,7 @@ export async function getSpriteSheet(path: string) {
 
 
 export function displayUsers(userDiv?: HTMLDivElement) {
-  syncopath.displayUsers(socketClient, userDiv);
+  napl.displayUsers(socketClient, userDiv);
 }
 
 export function trackCursor({ exclude = [] }: { exclude?: string[] } = {}) {
@@ -62,7 +61,7 @@ export function handleUsersChanged(
   onUserAdded: (clientId: string, isSelf: boolean, observers: Set<Observer>) => void,
   onUserRemoved?: (clientId: string) => void
 ) {
-  syncopath.handleUsersChanged(socketClient)
+  napl.handleUsersChanged(socketClient)
     .onUserAdded(onUserAdded)
     .onUserRemoved(onUserRemoved);
 }

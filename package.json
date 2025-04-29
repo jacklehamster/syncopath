@@ -46,7 +46,7 @@
   },
   "description": "Synchronize data across clients using WebSocket",
   "dependencies": {
-    "napl": "^1.0.63"
+    "napl": "^1.0.69"
   },
   "keywords": []
 }

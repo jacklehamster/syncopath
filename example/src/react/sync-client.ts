@@ -1,6 +1,6 @@
 import { provideSocketClient } from "@dobuki/syncopath";
+import { ISyncClient } from "napl";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ISyncClient } from "../../../dist/client/ISyncClient";
 
 interface SyncClientProps {
   room?: string;

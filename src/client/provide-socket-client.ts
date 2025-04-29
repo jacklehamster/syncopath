@@ -1,6 +1,6 @@
-import { RoomState } from "@/types/RoomState";
-import { SocketProvider, SyncClient } from "./SyncClient";
-import { ISyncClient } from "./ISyncClient";
+import { ISyncClient } from "napl";
+import { RoomState } from "../types/RoomState";
+import { CommProvider, PeerSyncClient } from "./PeerSyncClient";
 
 interface Props {
   host: string;
@@ -10,7 +10,7 @@ interface Props {
 export function provideSocketClient({ host, room }: Props, state: RoomState = {}): ISyncClient {
   const prefix = host.startsWith("ws://") || host.startsWith("wss://") ? "" : globalThis.location.protocol === "https:" ? "wss://" : "ws://";
   const connectionUrl = `${prefix}${host}${room ? `?room=${room}` : ""}`;
-  const socketProvider: SocketProvider = async () => {
+  const socketProvider: CommProvider = async () => {
     const websocket = new WebSocket(connectionUrl);
     websocket.addEventListener("open", () => {
       console.log("SyncClient connection opened");
@@ -36,5 +36,5 @@ export function provideSocketClient({ host, room }: Props, state: RoomState = {}
       supportBlob: true,
     };
   }
-  return new SyncClient(socketProvider, state);
+  return new PeerSyncClient(socketProvider, state);
 }

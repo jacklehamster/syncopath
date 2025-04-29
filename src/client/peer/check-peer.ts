@@ -1,14 +1,13 @@
-import { SetDataOptions } from "../ISharedData";
-import { SyncClient } from "../SyncClient";
+import { PeerSyncClient } from "../PeerSyncClient";
 import { PeerManager } from "./PeerManager";
 
 const WEB_RTC = "webRTC";
 const DELAY_TO_DISCONNECT_WEBSOCKET_AFTER_PEER = 3000;
-const PEER_OPTIONS: SetDataOptions = {
+const PEER_OPTIONS = {
   active: true,
 };
 
-export function checkPeerConnections(syncClient: SyncClient) {
+export function checkPeerConnections(syncClient: PeerSyncClient) {
   for (const k in syncClient.state.peer) {
     const clients = k.split(":");
     const clientTag = `${clients[0]}:${clients[1]}`;
@@ -61,7 +60,7 @@ export function checkPeerConnections(syncClient: SyncClient) {
   }
 }
 
-function createPeerManager(syncClient: SyncClient, tag: string, peerId: string) {
+function createPeerManager(syncClient: PeerSyncClient, tag: string, peerId: string) {
   console.log("Creating peer manager");
   syncClient.peerManagers[peerId] = new PeerManager({
     onData(data: any) {

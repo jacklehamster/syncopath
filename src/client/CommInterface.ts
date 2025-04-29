@@ -1,6 +1,5 @@
-import { RoomState } from "@/types/RoomState";
 
-export interface ISocket {
+export interface CommInterface {
   send(data: string | ArrayBufferLike | Blob | ArrayBufferView): void;
   onMessage(listener: (data: any) => void): void;
   onError(listener: (event: Event) => void): void;

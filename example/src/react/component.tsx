@@ -1,7 +1,7 @@
+import { ISyncClient } from "napl";
 import styles from "./style.module.css";
 import { useSyncClient } from "./sync-client";
 import ReactDOM from 'react-dom/client';
-import { ISyncClient } from "../../../dist/client/ISyncClient";
 
 interface Props {
   syncClient: ISyncClient;
