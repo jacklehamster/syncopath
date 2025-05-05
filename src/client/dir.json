@@ -3,14 +3,14 @@
     "sha": "5933ac2e959c7abde5a28666d1a31c1e3093ce06"
   },
   "PeerSyncClient.ts": {
-    "sha": "b470bce12fadbc8451f24f60e6a211a9d74ad859"
+    "sha": "d3107483f548eb30c17b39d1a6aaf3d688300d3b"
   },
-  "md5": "1d653df5bd0c854284e45c192344ad80",
+  "md5": "73b5baa025e4ef00d9d08cc9cbb0ef5a",
   "peer/PeerManager.ts": {
     "sha": "4a3e4f78f464a98701344a25ab9e52700679dd79"
   },
   "peer/check-peer.ts": {
-    "sha": "ea981235c8ba21951e382e3cf0fe8f09ac9ff12b"
+    "sha": "765e6e4f98c5e55f74d1f96f13377ef4870a00fb"
   },
   "provide-socket-client.ts": {
     "sha": "2cfc44ae34bb416a32ceaf27731e07de9f91ce47"

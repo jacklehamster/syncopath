@@ -3,13 +3,13 @@
     "sha": "5933ac2e959c7abde5a28666d1a31c1e3093ce06"
   },
   "client/PeerSyncClient.ts": {
-    "sha": "b470bce12fadbc8451f24f60e6a211a9d74ad859"
+    "sha": "d3107483f548eb30c17b39d1a6aaf3d688300d3b"
   },
   "client/peer/PeerManager.ts": {
     "sha": "4a3e4f78f464a98701344a25ab9e52700679dd79"
   },
   "client/peer/check-peer.ts": {
-    "sha": "ea981235c8ba21951e382e3cf0fe8f09ac9ff12b"
+    "sha": "765e6e4f98c5e55f74d1f96f13377ef4870a00fb"
   },
   "client/provide-socket-client.ts": {
     "sha": "2cfc44ae34bb416a32ceaf27731e07de9f91ce47"
@@ -17,12 +17,12 @@
   "index.ts": {
     "sha": "22363d57f32a8345315fde3c7ee8334dbe1279b4"
   },
-  "md5": "ee9893bd87a4ec93e8d4b6139791601c",
+  "md5": "772564f149f02ba4a595ae32d163ec2d",
   "server/SocketEventHandler.ts": {
     "sha": "b9d65ffc54fcbd587501bdb29667925b8eba79cd"
   },
   "server/SyncRoom.ts": {
-    "sha": "9c351bbd61b546e4cb674f7468e343d538b381dc"
+    "sha": "673b64508e6b93654096815dacda1564f1f4bbc1"
   },
   "server/SyncSocket.ts": {
     "sha": "c016f3b830aba6757f17ebca866abc614ccc6995"
