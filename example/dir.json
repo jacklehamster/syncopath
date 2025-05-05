@@ -21,10 +21,10 @@
     "sha": "98387d623bcf6077316ad093fd89f762c23f9a4f"
   },
   "dist/index.js": {
-    "sha": "cc0c4437f7679e228c26732b63b222b03a2c26f7"
+    "sha": "ad125b1d5c246c503b4580d685e295894f3737fd"
   },
   "dist/index.js.map": {
-    "sha": "bbaa5a37acf0df9bac8187d59fac9f6a991e0c31"
+    "sha": "0409ce2b2e2124b4613188439b24341e0e3e597b"
   },
   "dist/styles-da87zv4s.css": {
     "sha": "07ee8884738c76639f510b99559b8f69798f8a26"
@@ -86,7 +86,7 @@
   "json-test/index.html": {
     "sha": "e1e988ca0511c689742505deed09b09033a2516c"
   },
-  "md5": "0cc89f4574c14e34f5664d096a6a3595",
+  "md5": "b0f0d4fc81c12567c77543a6c6716af0",
   "mobile/index.html": {
     "sha": "9ca863b9b062b19b9cb614dff78c554e1eeef6e8"
   },
