@@ -3,10 +3,8 @@
 /// <reference lib="dom.iterable" />
 
 import { PeerManager } from "./peer/PeerManager";
-import { CommInterface, Context, SyncClient } from "napl";
+import { Context, SyncClient } from "napl";
 import { checkPeerConnections } from "./peer/check-peer";
-
-export type CommProvider = () => Promise<CommInterface>;
 
 export class PeerSyncClient extends SyncClient {
   readonly peerManagers: Record<string, PeerManager> = {};
