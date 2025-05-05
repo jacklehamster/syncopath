@@ -1,6 +1,6 @@
 {
   "client/PeerSyncClient.ts": {
-    "sha": "d58a26c87ff9313c8e68282b4be125af4e490b0b"
+    "sha": "1d2cab89719d1d47a6dd4ddc0d16a0609d748d2b"
   },
   "client/peer/PeerManager.ts": {
     "sha": "4a3e4f78f464a98701344a25ab9e52700679dd79"
@@ -9,12 +9,12 @@
     "sha": "765e6e4f98c5e55f74d1f96f13377ef4870a00fb"
   },
   "client/provide-socket-client.ts": {
-    "sha": "9c4a4f715bd2d1278039afd2a923b1d54f55b61f"
+    "sha": "0bb29d8f405de39e4d8781221b02caa64fa5ca54"
   },
   "index.ts": {
     "sha": "22363d57f32a8345315fde3c7ee8334dbe1279b4"
   },
-  "md5": "3bf682f7f30648b1fae7f6bf8913be9f",
+  "md5": "0eaca20e55a47764bf536facc7b9084e",
   "server/SocketEventHandler.ts": {
     "sha": "b9d65ffc54fcbd587501bdb29667925b8eba79cd"
   },
