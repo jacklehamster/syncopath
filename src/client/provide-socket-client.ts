@@ -33,7 +33,6 @@ export function provideSocketClient({ host, room }: Props, state: RoomState = {}
       close() {
         websocket.close();
       },
-      supportBlob: true,
     };
   }
   return new PeerSyncClient(socketProvider, state);

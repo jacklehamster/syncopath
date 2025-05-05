@@ -3,8 +3,7 @@
 /// <reference lib="dom.iterable" />
 
 import { PeerManager } from "./peer/PeerManager";
-import { Context, Update, SyncClient } from "napl";
-import { CommInterface } from "./CommInterface";
+import { CommInterface, Context, SyncClient } from "napl";
 import { checkPeerConnections } from "./peer/check-peer";
 
 export type CommProvider = () => Promise<CommInterface>;
@@ -14,7 +13,7 @@ export class PeerSyncClient extends SyncClient {
 
   protected async processNextFrame() {
     let len = 0;
-    this.outgoingUpdates.forEach((update, index) => {
+    this.outgoingUpdates.forEach((update) => {
       // skip updates to peers if there's a peerManager ready
       let del = false;
       if (update?.path.startsWith("peer/")) {

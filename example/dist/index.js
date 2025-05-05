@@ -5379,7 +5379,7 @@ Check the render method of \`` + ownerName + "`.";
       var NoFlags = 0;
       var PerformedWork = 1;
       var Placement = 2;
-      var Update3 = 4;
+      var Update2 = 4;
       var ChildDeletion = 16;
       var ContentReset = 32;
       var Callback = 64;
@@ -5391,7 +5391,7 @@ Check the render method of \`` + ownerName + "`.";
       var Hydrating = 4096;
       var Visibility = 8192;
       var StoreConsistency = 16384;
-      var LifecycleEffectMask = Passive | Update3 | Callback | Ref | Snapshot | StoreConsistency;
+      var LifecycleEffectMask = Passive | Update2 | Callback | Ref | Snapshot | StoreConsistency;
       var HostEffectMask = 32767;
       var Incomplete = 32768;
       var ShouldCapture = 65536;
@@ -5402,9 +5402,9 @@ Check the render method of \`` + ownerName + "`.";
       var PassiveStatic = 8388608;
       var MountLayoutDev = 16777216;
       var MountPassiveDev = 33554432;
-      var BeforeMutationMask = Update3 | Snapshot | 0;
-      var MutationMask = Placement | Update3 | ChildDeletion | ContentReset | Ref | Hydrating | Visibility;
-      var LayoutMask = Update3 | Callback | Ref | Visibility;
+      var BeforeMutationMask = Update2 | Snapshot | 0;
+      var MutationMask = Placement | Update2 | ChildDeletion | ContentReset | Ref | Hydrating | Visibility;
+      var LayoutMask = Update2 | Callback | Ref | Visibility;
       var PassiveMask = Passive | ChildDeletion;
       var StaticMask = LayoutStatic | PassiveStatic | RefStatic;
       var ReactCurrentOwner = ReactSharedInternals.ReactCurrentOwner;
@@ -12937,9 +12937,9 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
       function bailoutHooks(current2, workInProgress2, lanes) {
         workInProgress2.updateQueue = current2.updateQueue;
         if ((workInProgress2.mode & StrictEffectsMode) !== NoMode) {
-          workInProgress2.flags &= ~(MountPassiveDev | MountLayoutDev | Passive | Update3);
+          workInProgress2.flags &= ~(MountPassiveDev | MountLayoutDev | Passive | Update2);
         } else {
-          workInProgress2.flags &= ~(Passive | Update3);
+          workInProgress2.flags &= ~(Passive | Update2);
         }
         current2.lanes = removeLanes(current2.lanes, lanes);
       }
@@ -13426,13 +13426,13 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
         return updateEffectImpl(Passive, Passive$1, create, deps);
       }
       function mountInsertionEffect(create, deps) {
-        return mountEffectImpl(Update3, Insertion, create, deps);
+        return mountEffectImpl(Update2, Insertion, create, deps);
       }
       function updateInsertionEffect(create, deps) {
-        return updateEffectImpl(Update3, Insertion, create, deps);
+        return updateEffectImpl(Update2, Insertion, create, deps);
       }
       function mountLayoutEffect(create, deps) {
-        var fiberFlags = Update3;
+        var fiberFlags = Update2;
         {
           fiberFlags |= LayoutStatic;
         }
@@ -13442,7 +13442,7 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
         return mountEffectImpl(fiberFlags, Layout, create, deps);
       }
       function updateLayoutEffect(create, deps) {
-        return updateEffectImpl(Update3, Layout, create, deps);
+        return updateEffectImpl(Update2, Layout, create, deps);
       }
       function imperativeHandleEffect(create, ref) {
         if (typeof ref === "function") {
@@ -13473,7 +13473,7 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
           }
         }
         var effectDeps = deps !== null && deps !== undefined ? deps.concat([ref]) : null;
-        var fiberFlags = Update3;
+        var fiberFlags = Update2;
         {
           fiberFlags |= LayoutStatic;
         }
@@ -13489,7 +13489,7 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
           }
         }
         var effectDeps = deps !== null && deps !== undefined ? deps.concat([ref]) : null;
-        return updateEffectImpl(Update3, Layout, imperativeHandleEffect.bind(null, create, ref), effectDeps);
+        return updateEffectImpl(Update2, Layout, imperativeHandleEffect.bind(null, create, ref), effectDeps);
       }
       function mountDebugValue(value, formatterFn) {
       }
@@ -15140,7 +15140,7 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
           instance.state = workInProgress2.memoizedState;
         }
         if (typeof instance.componentDidMount === "function") {
-          var fiberFlags = Update3;
+          var fiberFlags = Update2;
           {
             fiberFlags |= LayoutStatic;
           }
@@ -15177,7 +15177,7 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
         newState = workInProgress2.memoizedState;
         if (oldProps === newProps && oldState === newState && !hasContextChanged() && !checkHasForceUpdateAfterProcessing()) {
           if (typeof instance.componentDidMount === "function") {
-            var fiberFlags = Update3;
+            var fiberFlags = Update2;
             {
               fiberFlags |= LayoutStatic;
             }
@@ -15203,7 +15203,7 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
             }
           }
           if (typeof instance.componentDidMount === "function") {
-            var _fiberFlags = Update3;
+            var _fiberFlags = Update2;
             {
               _fiberFlags |= LayoutStatic;
             }
@@ -15214,7 +15214,7 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
           }
         } else {
           if (typeof instance.componentDidMount === "function") {
-            var _fiberFlags2 = Update3;
+            var _fiberFlags2 = Update2;
             {
               _fiberFlags2 |= LayoutStatic;
             }
@@ -15262,7 +15262,7 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
         if (unresolvedOldProps === unresolvedNewProps && oldState === newState && !hasContextChanged() && !checkHasForceUpdateAfterProcessing() && !enableLazyContextPropagation) {
           if (typeof instance.componentDidUpdate === "function") {
             if (unresolvedOldProps !== current2.memoizedProps || oldState !== current2.memoizedState) {
-              workInProgress2.flags |= Update3;
+              workInProgress2.flags |= Update2;
             }
           }
           if (typeof instance.getSnapshotBeforeUpdate === "function") {
@@ -15287,7 +15287,7 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
             }
           }
           if (typeof instance.componentDidUpdate === "function") {
-            workInProgress2.flags |= Update3;
+            workInProgress2.flags |= Update2;
           }
           if (typeof instance.getSnapshotBeforeUpdate === "function") {
             workInProgress2.flags |= Snapshot;
@@ -15295,7 +15295,7 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
         } else {
           if (typeof instance.componentDidUpdate === "function") {
             if (unresolvedOldProps !== current2.memoizedProps || oldState !== current2.memoizedState) {
-              workInProgress2.flags |= Update3;
+              workInProgress2.flags |= Update2;
             }
           }
           if (typeof instance.getSnapshotBeforeUpdate === "function") {
@@ -15834,7 +15834,7 @@ Learn more about this warning here: https://reactjs.org/link/legacy-context`, so
       }
       function updateProfiler(current2, workInProgress2, renderLanes2) {
         {
-          workInProgress2.flags |= Update3;
+          workInProgress2.flags |= Update2;
           {
             var stateNode = workInProgress2.stateNode;
             stateNode.effectDuration = 0;
@@ -17045,7 +17045,7 @@ Check the render method of \`` + ownerName + "`.";
             {
               var hasChildWork = includesSomeLane(renderLanes2, workInProgress2.childLanes);
               if (hasChildWork) {
-                workInProgress2.flags |= Update3;
+                workInProgress2.flags |= Update2;
               }
               {
                 var stateNode = workInProgress2.stateNode;
@@ -17225,7 +17225,7 @@ Check the render method of \`` + ownerName + "`.";
         throw new Error("Unknown unit of work tag (" + workInProgress2.tag + "). This error is likely caused by a bug in " + "React. Please file an issue.");
       }
       function markUpdate(workInProgress2) {
-        workInProgress2.flags |= Update3;
+        workInProgress2.flags |= Update2;
       }
       function markRef$1(workInProgress2) {
         workInProgress2.flags |= Ref;
@@ -17416,7 +17416,7 @@ Check the render method of \`` + ownerName + "`.";
             if ((workInProgress2.flags & DidCapture) === NoFlags) {
               workInProgress2.memoizedState = null;
             }
-            workInProgress2.flags |= Update3;
+            workInProgress2.flags |= Update2;
             bubbleProperties(workInProgress2);
             {
               if ((workInProgress2.mode & ProfileMode) !== NoMode) {
@@ -17588,7 +17588,7 @@ Check the render method of \`` + ownerName + "`.";
             }
             var wakeables = workInProgress2.updateQueue;
             if (wakeables !== null) {
-              workInProgress2.flags |= Update3;
+              workInProgress2.flags |= Update2;
             }
             bubbleProperties(workInProgress2);
             {
@@ -17647,7 +17647,7 @@ Check the render method of \`` + ownerName + "`.";
                       var newThenables = suspended.updateQueue;
                       if (newThenables !== null) {
                         workInProgress2.updateQueue = newThenables;
-                        workInProgress2.flags |= Update3;
+                        workInProgress2.flags |= Update2;
                       }
                       workInProgress2.subtreeFlags = NoFlags;
                       resetChildFibers(workInProgress2, renderLanes2);
@@ -17675,7 +17675,7 @@ Check the render method of \`` + ownerName + "`.";
                   var _newThenables = _suspended.updateQueue;
                   if (_newThenables !== null) {
                     workInProgress2.updateQueue = _newThenables;
-                    workInProgress2.flags |= Update3;
+                    workInProgress2.flags |= Update2;
                   }
                   cutOffTailIfNeeded(renderState, true);
                   if (renderState.tail === null && renderState.tailMode === "hidden" && !renderedTail.alternate && !getIsHydrating()) {
@@ -17741,7 +17741,7 @@ Check the render method of \`` + ownerName + "`.";
               if (includesSomeLane(subtreeRenderLanes, OffscreenLane)) {
                 bubbleProperties(workInProgress2);
                 {
-                  if (workInProgress2.subtreeFlags & (Placement | Update3)) {
+                  if (workInProgress2.subtreeFlags & (Placement | Update2)) {
                     workInProgress2.flags |= Visibility;
                   }
                 }
@@ -18185,7 +18185,7 @@ It looks like you wrote ` + hookName + "(async () => ...) or returned a Promise.
       }
       function commitPassiveEffectDurations(finishedRoot, finishedWork) {
         {
-          if ((finishedWork.flags & Update3) !== NoFlags) {
+          if ((finishedWork.flags & Update2) !== NoFlags) {
             switch (finishedWork.tag) {
               case Profiler: {
                 var passiveEffectDuration = finishedWork.stateNode.passiveEffectDuration;
@@ -18243,7 +18243,7 @@ It looks like you wrote ` + hookName + "(async () => ...) or returned a Promise.
             }
             case ClassComponent: {
               var instance = finishedWork.stateNode;
-              if (finishedWork.flags & Update3) {
+              if (finishedWork.flags & Update2) {
                 if (!offscreenSubtreeWasHidden) {
                   if (current2 === null) {
                     {
@@ -18328,7 +18328,7 @@ It looks like you wrote ` + hookName + "(async () => ...) or returned a Promise.
             }
             case HostComponent: {
               var _instance2 = finishedWork.stateNode;
-              if (current2 === null && finishedWork.flags & Update3) {
+              if (current2 === null && finishedWork.flags & Update2) {
                 var type = finishedWork.type;
                 var props = finishedWork.memoizedProps;
                 commitMount(_instance2, type, props);
@@ -18933,7 +18933,7 @@ It looks like you wrote ` + hookName + "(async () => ...) or returned a Promise.
           case SimpleMemoComponent: {
             recursivelyTraverseMutationEffects(root2, finishedWork);
             commitReconciliationEffects(finishedWork);
-            if (flags & Update3) {
+            if (flags & Update2) {
               try {
                 commitHookEffectListUnmount(Insertion | HasEffect, finishedWork, finishedWork.return);
                 commitHookEffectListMount(Insertion | HasEffect, finishedWork);
@@ -18985,7 +18985,7 @@ It looks like you wrote ` + hookName + "(async () => ...) or returned a Promise.
                   captureCommitPhaseError(finishedWork, finishedWork.return, error2);
                 }
               }
-              if (flags & Update3) {
+              if (flags & Update2) {
                 var _instance4 = finishedWork.stateNode;
                 if (_instance4 != null) {
                   var newProps = finishedWork.memoizedProps;
@@ -19008,7 +19008,7 @@ It looks like you wrote ` + hookName + "(async () => ...) or returned a Promise.
           case HostText: {
             recursivelyTraverseMutationEffects(root2, finishedWork);
             commitReconciliationEffects(finishedWork);
-            if (flags & Update3) {
+            if (flags & Update2) {
               {
                 if (finishedWork.stateNode === null) {
                   throw new Error("This should have a text node initialized. This error is likely " + "caused by a bug in React. Please file an issue.");
@@ -19028,7 +19028,7 @@ It looks like you wrote ` + hookName + "(async () => ...) or returned a Promise.
           case HostRoot: {
             recursivelyTraverseMutationEffects(root2, finishedWork);
             commitReconciliationEffects(finishedWork);
-            if (flags & Update3) {
+            if (flags & Update2) {
               {
                 if (current2 !== null) {
                   var prevRootState = current2.memoizedState;
@@ -19065,7 +19065,7 @@ It looks like you wrote ` + hookName + "(async () => ...) or returned a Promise.
                 }
               }
             }
-            if (flags & Update3) {
+            if (flags & Update2) {
               try {
                 commitSuspenseCallback(finishedWork);
               } catch (error2) {
@@ -19116,7 +19116,7 @@ It looks like you wrote ` + hookName + "(async () => ...) or returned a Promise.
           case SuspenseListComponent: {
             recursivelyTraverseMutationEffects(root2, finishedWork);
             commitReconciliationEffects(finishedWork);
-            if (flags & Update3) {
+            if (flags & Update2) {
               attachSuspenseRetryListeners(finishedWork);
             }
             return;
@@ -25886,9 +25886,6 @@ class SyncClient {
   }
   async#connect() {
     const comm = this.#comm = await this.commProvider();
-    if (comm.clientId) {
-      this.#selfData.clientId = comm.clientId;
-    }
     return this.#connectionPromise = new Promise((resolve, reject) => {
       comm.onError((event) => {
         console.error("SyncClient connection error", event);
@@ -28266,7 +28263,7 @@ class PeerSyncClient extends SyncClient {
   peerManagers = {};
   async processNextFrame() {
     let len = 0;
-    this.outgoingUpdates.forEach((update, index) => {
+    this.outgoingUpdates.forEach((update) => {
       let del = false;
       if (update?.path.startsWith("peer/")) {
         const tag = update.path.split("/")[1];
@@ -28325,8 +28322,7 @@ function provideSocketClient({ host, room }, state = {}) {
       },
       close() {
         websocket.close();
-      },
-      supportBlob: true
+      }
     };
   };
   return new PeerSyncClient(socketProvider, state);
@@ -28763,4 +28759,4 @@ export {
   displayIsoUI
 };
 
-//# debugId=8B1C83DF76FC0FB564756E2164756E21
+//# debugId=14456440BC184BA664756E2164756E21
