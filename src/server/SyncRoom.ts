@@ -3,7 +3,7 @@ import { commitUpdates, markUpdateConfirmed, packageUpdates, Payload, Update } f
 import { addMessageReceiver } from "./SocketEventHandler";
 import { ClientState } from "@/types/ClientState";
 import { RoomState } from "@/types/RoomState";
-import { BlobBuilder, checkPayload, extractBlobsFromPayload, includeBlobsInPayload } from "@dobuki/data-blob";
+import { BlobBuilder, extractBlobsFromPayload, includeBlobsInPayload } from "@dobuki/data-blob";
 import { removeRestrictedData, removeRestrictedPeersFromUpdates } from "./peer-utils";
 import { restrictedPath } from "./path-utils";
 import { configureRoom } from "./room-config";
@@ -14,7 +14,6 @@ export class SyncRoom {
   readonly #sockets: Map<WebSocket, string> = new Map();
   readonly state: RoomState = {};
   readonly #onRoomChange = new Set<(roomState: RoomState) => void>();
-  readonly #secret = crypto.randomUUID();
 
   constructor(private room: string) {
     configureRoom(room, this.state);
@@ -45,11 +44,6 @@ export class SyncRoom {
 
     //  setup events
     addMessageReceiver(client, (payload: Payload, blobs) => {
-      if (this.#secret && this.state.config?.signPayloads !== false && !checkPayload(payload, this.#secret)) {
-        console.error("Invalid payload received", payload);
-        return;
-      }
-
       payload.updates?.forEach(update => {
         const newValue = includeBlobsInPayload(update.value, blobs);
         if (newValue !== undefined) {
@@ -107,9 +101,7 @@ export class SyncRoom {
     const welcomeBlobBuilder = BlobBuilder.payload<Payload>("payload", {
       myClientId: clientId,
       updates,
-      globalTime: now,
-      secret: this.#secret,
-    }, this.#secret);
+    });
     Object.entries(blobs).forEach(([key, blob]) => welcomeBlobBuilder.blob(key, blob));
 
     client.send(await welcomeBlobBuilder.build().arrayBuffer());
@@ -160,7 +152,7 @@ export class SyncRoom {
         for (let update of clientUpdates) {
           update.value = await extractBlobsFromPayload(update.value, blobs);
         }
-        const blob = packageUpdates(clientUpdates, blobs, this.#secret);
+        const blob = packageUpdates(clientUpdates, blobs);
         const buffer = await blob.arrayBuffer();
 
         client.send(buffer);

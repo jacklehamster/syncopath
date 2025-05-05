@@ -29,15 +29,12 @@ export class PeerSyncClient extends SyncClient {
             //  Send through peer manager
             const context: Context = {
               root: this.state,
-              secret: this.secret,
               clientId: this.clientId,
-              localTimeOffset: this.localTimeOffset,
               properties: {
                 self: this.clientId,
                 now: this.now,
               },
               outgoingUpdates: [update],
-              skipValidation: true,
             };
             this.peerManagers[peerId].processor.sendUpdateBlob(context);
           }

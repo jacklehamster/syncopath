@@ -65,7 +65,7 @@ function createPeerManager(syncClient: PeerSyncClient, tag: string, peerId: stri
   syncClient.peerManagers[peerId] = new PeerManager({
     onData(data: any) {
       if (data instanceof Blob) {
-        syncClient.onMessageBlob(data, true);
+        syncClient.onMessageBlob(data);
       }
     },
     onIce(ice: RTCIceCandidate) {
