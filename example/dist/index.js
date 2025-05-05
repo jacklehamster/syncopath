@@ -25642,7 +25642,7 @@ class Processor {
       this.#addIncomingUpdates(confirmedUpdates, context);
       const blobs = {};
       context.outgoingUpdates.forEach((update) => update.value = gn(update.value, blobs));
-      this.sendUpdate(packageUpdates(context.outgoingUpdates, blobs), context);
+      this.sendUpdate(packageUpdates(context.outgoingUpdates, blobs));
     }
     context.outgoingUpdates.length = 0;
   }
@@ -25885,16 +25885,16 @@ class SyncClient {
     return this.#connectionPromise;
   }
   async#connect() {
-    const comm = this.#comm = await this.commProvider();
+    const comm = this.#comm = this.commProvider();
     return this.#connectionPromise = new Promise((resolve, reject) => {
       comm.onError((event) => {
         console.error("SyncClient connection error", event);
         reject(event);
       });
       comm.onMessage(async (data) => {
-        const preClientId = this.clientId;
         await this.onMessageBlob(data);
-        if (!preClientId && this.clientId) {
+        if (this.#connectionPromise) {
+          this.#connectionPromise = undefined;
           resolve();
         }
       });
@@ -25906,9 +25906,6 @@ class SyncClient {
           flush: true
         });
       });
-      if (this.clientId) {
-        resolve();
-      }
     });
   }
   close() {
@@ -26166,13 +26163,13 @@ function displayUsers(syncClient, userDiv) {
   });
   introduceName(syncClient);
 }
-function introduceName(syncClient) {
-  syncClient.self.setData("name", randomName());
-  syncClient.self.setData("emoji", randomEmoji());
+function introduceName(syncClient, name, emoji) {
+  syncClient.self.setData("name", name ?? randomName());
+  syncClient.self.setData("emoji", emoji ?? randomEmoji());
 }
 var name;
 function randomName() {
-  return name ?? (name = "guest-" + Math.random().toString(36).substring(8));
+  return name ?? (name = "user-" + Math.random().toString(36).substring(8));
 }
 var emoji;
 function randomEmoji(forceRandom) {
@@ -28300,7 +28297,7 @@ class PeerSyncClient extends SyncClient {
 function provideSocketClient({ host, room }, state = {}) {
   const prefix = host.startsWith("ws://") || host.startsWith("wss://") ? "" : globalThis.location.protocol === "https:" ? "wss://" : "ws://";
   const connectionUrl = `${prefix}${host}${room ? `?room=${room}` : ""}`;
-  const socketProvider = async () => {
+  const socketProvider = () => {
     const websocket = new WebSocket(connectionUrl);
     websocket.addEventListener("open", () => {
       console.log("SyncClient connection opened");
@@ -28759,4 +28756,4 @@ export {
   displayIsoUI
 };
 
-//# debugId=14456440BC184BA664756E2164756E21
+//# debugId=B79670253E71F46964756E2164756E21
