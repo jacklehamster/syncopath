@@ -1,6 +1,6 @@
 {
   "name": "@dobuki/syncopath",
-  "version": "1.0.32",
+  "version": "1.0.33",
   "module": "src/index.ts",
   "type": "module",
   "repository": {
